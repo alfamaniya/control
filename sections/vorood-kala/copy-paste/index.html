@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ورود با کپی و پیست</title>
+  <meta name="theme-color" content="#14243d">
+  <title>ورود کالا با کپی و پیست</title>
   <link rel="stylesheet" href="../../../assets/css/style.css">
   <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="style.css">
@@ -13,20 +14,18 @@
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <button class="menu-toggle" id="sidebarToggle" type="button" aria-label="باز و بسته کردن منو" aria-controls="sidebar" aria-expanded="true">
-        <span></span><span></span><span></span>
-      </button>
+      <button class="menu-toggle" id="sidebarToggle" type="button" aria-label="باز و بسته کردن منو" aria-controls="sidebar" aria-expanded="true"><span></span><span></span><span></span></button>
       <a class="brand" href="../../../index.html">نام سایت</a><div class="topbar-spacer"></div>
     </header>
     <aside class="sidebar" id="sidebar" aria-label="منوی اصلی">
       <nav class="sidebar-nav">
         <a class="nav-link" href="../../../index.html"><span class="nav-number">01</span><span>داشبورد</span></a>
         <div class="nav-group">
-          <a class="nav-link active" href="../index.html" aria-current="page"><span class="nav-number">02</span><span>ورود کالا</span></a>
+          <a class="nav-link active" href="../index.html"><span class="nav-number">02</span><span>ورود کالا</span></a>
           <div class="nav-submenu" aria-label="روش‌های ورود کالا">
-            <a class="nav-sublink" href="../file-import/index.html" >ورود از فایل Excel / CSV</a>
+            <a class="nav-sublink" href="../file-import/index.html">ورود از فایل Excel / CSV / JSON</a>
             <a class="nav-sublink" href="../copy-paste/index.html" aria-current="page">کپی از جدول</a>
-            <a class="nav-sublink" href="../manual/index.html" >ثبت دستی کالا</a>
+            <a class="nav-sublink" href="../manual/index.html">ثبت دستی کالا</a>
           </div>
         </div>
         <a class="nav-link" href="../../moshahede-kala/index.html"><span class="nav-number">03</span><span>مشاهده کالاها و موجودی</span></a>
@@ -37,9 +36,40 @@
       </nav>
     </aside>
     <main class="main-content" id="mainContent">
-      <div class="page-content goods-entry-subpage">
+      <div class="page-content goods-entry-subpage copy-paste-page">
         <a class="back-link" href="../index.html">بازگشت به ورود کالا</a>
-        <h1>ورود با کپی و پیست</h1>
+        <section class="guide-box" aria-labelledby="guideTitle">
+          <div class="guide-icon" aria-hidden="true">i</div>
+          <div class="guide-content">
+            <h1 id="guideTitle">راهنمای ورود کالا با کپی و پیست</h1>
+            <p>اطلاعات را از اکسل یا یک جدول کپی و در کادر زیر پیست کنید. پس از بررسی، فهرست کالاها و مغایرت‌ها نمایش داده می‌شود.</p>
+            <div class="guide-points">
+              <span><b>۱</b> ترتیب ستون‌ها: کد تدارکاتی، شرح کالا، تعداد موجودی و گروه</span>
+              <span><b>۲</b> کد تدارکاتی باید ۱۰ رقم باشد</span>
+              <span><b>۳</b> کد اختصاصی، ۸ رقم اول کد تدارکاتی است</span>
+              <span><b>۴</b> ردیف‌های تکراری یا ناقص ثبت نمی‌شوند</span>
+            </div>
+            <div class="format-badge">قابل استفاده با کپی از Excel و جدول‌ها</div>
+          </div>
+        </section>
+        <section class="import-panel" aria-labelledby="pasteTitle">
+          <div class="panel-heading"><span class="step-number">۱</span><div><h2 id="pasteTitle">چسباندن اطلاعات جدول</h2><p>چهار ستون را همراه با عنوان یا بدون عنوان در کادر وارد کنید.</p></div></div>
+          <textarea id="pasteInput" class="paste-input" rows="8" placeholder="کد تدارکاتی&#9;شرح کالا&#9;تعداد موجودی&#9;گروه&#10;1234567890&#9;نمونه کالا&#9;25&#9;قطعات"></textarea>
+          <div class="paste-actions"><span class="paste-hint">برای بهترین نتیجه، داده‌ها را مستقیماً از سلول‌های Excel کپی کنید.</span><button class="primary-button" id="analyzePaste" type="button">بررسی و نمایش کالاها</button></div>
+          <div id="importMessage" class="import-message" role="status" aria-live="polite" hidden></div>
+        </section>
+        <section class="import-panel preview-panel" id="previewPanel" hidden aria-labelledby="previewTitle">
+          <div class="panel-heading panel-heading-between"><div class="panel-heading"><span class="step-number">۲</span><div><h2 id="previewTitle">فهرست کالاهای شناسایی‌شده</h2><p>کد اختصاصی برابر با ۸ رقم اول کد تدارکاتی است.</p></div></div><span id="previewCount" class="count-pill"></span></div>
+          <div class="table-wrap"><table class="goods-table"><thead><tr><th>ردیف</th><th>کد اختصاصی</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>تعداد موجودی</th><th>گروه</th><th>وضعیت</th></tr></thead><tbody id="previewRows"></tbody></table></div>
+          <div class="preview-footer"><span id="validSummary"></span><button class="primary-button" id="confirmImportButton" type="button" disabled>تأیید و ثبت کالاهای بدون مغایرت</button></div>
+        </section>
+        <section class="import-panel discrepancies-panel" id="resultPanel" hidden aria-labelledby="resultTitle">
+          <div class="panel-heading"><span class="step-number">۳</span><div><h2 id="resultTitle">نتیجه ورود اطلاعات</h2><p id="resultSummary"></p></div></div>
+          <div class="result-stats" id="resultStats"></div>
+          <div class="discrepancy-heading"><h3>فهرست مغایرت‌های ثبت‌نشده در موجودی</h3><span id="discrepancyCount" class="count-pill"></span></div>
+          <div class="table-wrap"><table class="goods-table"><thead><tr><th>ردیف</th><th>کد اختصاصی</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>تعداد موجودی</th><th>گروه</th><th>علت عدم ثبت</th></tr></thead><tbody id="discrepancyRows"></tbody></table></div>
+          <p id="noDiscrepancies" class="empty-state" hidden>همه ردیف‌های معتبر با موفقیت به موجودی اضافه شدند و مغایرتی وجود ندارد.</p>
+        </section>
       </div>
     </main>
   </div>
