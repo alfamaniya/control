@@ -1,5 +1,5 @@
 /* استایل‌های اصلی این صفحه مستقیماً از صفحه ورود از فایل به ارث می‌رسند. */
-.copy-paste-page .paste-input{display:block;width:100%;min-height:205px;padding:18px;border:2px dashed #a9cbd2;border-radius:16px;background:linear-gradient(145deg,#f7fcfd,#f4f9fc);color:#263f5e;font:12px/2 ui-monospace,Consolas,monospace;resize:vertical;direction:rtl;outline:none;transition:border-color .2s,background .2s,box-shadow .2s}
+.copy-paste-page .paste-input{display:block;width:200%;max-width:none;min-height:205px;padding:18px;border:2px dashed #a9cbd2;border-radius:16px;background:linear-gradient(145deg,#f7fcfd,#f4f9fc);color:#263f5e;font:12px/2 ui-monospace,Consolas,monospace;resize:vertical;direction:rtl;outline:none;transition:border-color .2s,background .2s,box-shadow .2s}
 .copy-paste-page .paste-input:focus{border-color:#07949a;background:#eefdff;box-shadow:0 0 0 3px rgba(7,148,154,.1)}
 .copy-paste-page .paste-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:15px}
 .copy-paste-page .paste-hint{color:#718096;font-size:11px;line-height:1.8}
