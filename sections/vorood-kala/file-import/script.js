@@ -27,14 +27,9 @@
   }
   function saveInventory(items) { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
 
-  // Stable eight-digit identifier derived from the ten-digit procurement code.
+  // The internal identifier is exactly the first eight digits of the procurement code.
   function makeInternalCode(procurementCode) {
-    let hash = 2166136261;
-    for (let i = 0; i < procurementCode.length; i += 1) {
-      hash ^= procurementCode.charCodeAt(i);
-      hash = Math.imul(hash, 16777619);
-    }
-    return String((hash >>> 0) % 100000000).padStart(8, "0");
+    return /^\\d{10}$/.test(procurementCode) ? procurementCode.slice(0, 8) : "";
   }
   function findColumn(headers, aliases, fallback) {
     const normalized = headers.map(normalizeHeader);
