@@ -15,19 +15,19 @@
       <button class="menu-toggle" id="sidebarToggle" type="button" aria-label="باز و بسته کردن منو" aria-controls="sidebar" aria-expanded="true">
         <span></span><span></span><span></span>
       </button>
-      <a class="brand" href="../../index.html">نام سایت</a>
-      <nav class="header-subnav" aria-label="زیرمجموعه‌های ورود کالا">
-        <a href="index.html">ورود کالا</a>
-        <a href="file-import/index.html">ورود از فایل</a>
-        <a href="copy-paste/index.html">کپی و پیست</a>
-        <a href="manual/index.html">ورود دستی</a>
-      </nav>
-      <div class="topbar-spacer"></div>
+      <a class="brand" href="../../index.html">نام سایت</a><div class="topbar-spacer"></div>
     </header>
     <aside class="sidebar" id="sidebar" aria-label="منوی اصلی">
       <nav class="sidebar-nav">
         <a class="nav-link" href="../../index.html">صفحه اصلی</a>
-        <a class="nav-link active" href="index.html" aria-current="page">ورود کالا</a>
+        <div class="nav-group">
+          <a class="nav-link active" href="index.html">ورود کالا</a>
+          <div class="nav-submenu">
+            <a class="nav-sublink" href="file-import/index.html">ورود از فایل</a>
+            <a class="nav-sublink" href="copy-paste/index.html">کپی و پیست</a>
+            <a class="nav-sublink" href="manual/index.html">ورود دستی</a>
+          </div>
+        </div>
       </nav>
     </aside>
     <main class="main-content" id="mainContent">
