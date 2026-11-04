@@ -53,3 +53,8 @@ a { color: inherit; text-decoration: none; }
   }
   .app-shell.sidebar-closed .sidebar { visibility: hidden; }
 }
+
+.header-subnav { display:flex; align-items:center; gap:6px; margin-inline-start:18px; overflow-x:auto; white-space:nowrap; }
+.header-subnav a { display:inline-flex; align-items:center; padding:9px 11px; border-radius:7px; color:#4b5563; font-size:.9rem; }
+.header-subnav a:hover, .header-subnav a[aria-current="page"] { color:#3730a3; background:#eef2ff; }
+@media (max-width:640px) { .header-subnav { gap:2px; margin-inline-start:4px; } .header-subnav a { padding:8px 7px; font-size:.78rem; } }
