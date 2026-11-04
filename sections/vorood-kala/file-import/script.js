@@ -172,7 +172,7 @@
       const records = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.items) ? parsed.items : null);
       if (!records || !records.length) throw new Error("ساختار JSON باید آرایه‌ای از کالاها یا دارای آرایه items باشد.");
       const keys = Object.keys(records[0] || {});
-      const findKey = (aliases, fallback) => keys.find((key) => aliases.includes(normalizeHeader(key))) || keys[fallback];
+      const findKey = (aliases, fallback) => { const wanted = aliases.map(normalizeHeader); return keys.find((key) => wanted.includes(normalizeHeader(key))) || keys[fallback]; };
       const codeKey = findKey(["کد تدارکاتی", "کد تدارکاتی ۱۰ رقمی", "procurementcode"], 0);
       const descriptionKey = findKey(["شرح کالا", "شرح", "نام کالا", "description"], 1);
       const stockKey = findKey(["موجودی", "تعداد موجودی", "quantity", "stock"], 2);
