@@ -208,9 +208,9 @@
       const char = text[i], next = text[i + 1];
       if (char === '"' && quoted && next === '"') { cell += '"'; i += 1; }
       else if (char === '"') quoted = !quoted;
-      else if ((char === "," || char === ";" || char === "\\t") && !quoted) { row.push(cell); cell = ""; }
-      else if ((char === "\\n" || char === "\\r") && !quoted) {
-        if (char === "\\r" && next === "\\n") i += 1;
+      else if ((char === "," || char === ";" || char === "\t") && !quoted) { row.push(cell); cell = ""; }
+      else if ((char === "\n" || char === "\r") && !quoted) {
+        if (char === "\r" && next === "\n") i += 1;
         row.push(cell); rows.push(row); row = []; cell = "";
       } else cell += char;
     }
