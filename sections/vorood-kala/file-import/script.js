@@ -116,12 +116,6 @@
   function classifyRows(rows) {
     const inventory = readInventory();
     const procurementCodes = new Set(inventory.map(item => String(item.procurementCode || "")));
-    const internalCodes = new Map();
-    inventory.forEach(item => {
-      const procurement = String(item.procurementCode || "");
-      const internal = String(item.internalCode || ( /^\d{10}$/.test(procurement) ? makeInternalCode(procurement) : "" ));
-      if (internal) internalCodes.set(internal, procurement);
-    });
     const seenProcurement = new Set();
     validRows = []; discrepancies = [];
     rows.forEach(row => {
@@ -135,9 +129,6 @@
         if (seenProcurement.has(row.code)) reasons.push("کد تدارکاتی در همین فایل تکراری است");
         else seenProcurement.add(row.code);
         if (procurementCodes.has(row.code)) reasons.push("این کد تدارکاتی از قبل در موجودی ثبت شده است");
-        const owner = internalCodes.get(row.internalCode);
-        if (owner && owner !== row.code) reasons.push("تداخل کد اختصاصی تولیدشده با یک کالای دیگر");
-        else if (!owner) internalCodes.set(row.internalCode, row.code);
       }
       if (reasons.length) discrepancies.push({ ...row, reasons });
       else validRows.push({
@@ -151,7 +142,7 @@
     const invalidByLine = new Map(discrepancies.map(row => [row.rowNumber, row]));
     importedRows.forEach(row => {
       const issue = invalidByLine.get(row.rowNumber), tr = document.createElement("tr");
-      [row.rowNumber, row.internalCode || "—", row.description || "—", row.quantityRaw || "—", row.group || "—"].forEach((value, index) => {
+      [row.rowNumber, row.internalCode || "—", row.code || "—", row.description || "—", row.quantityRaw || "—", row.group || "—"].forEach((value, index) => {
         const td = document.createElement("td"); td.textContent = value;
         if (index === 1) td.className = "code-cell";
         tr.appendChild(td);
@@ -180,7 +171,7 @@
     document.querySelector("#resultPanel .table-wrap").hidden = issues.length === 0;
     issues.forEach(row => {
       const tr = document.createElement("tr");
-      [row.rowNumber, row.internalCode || "—", row.description || "—", row.quantityRaw || "—", row.group || "—", row.reasons.join("؛ ")].forEach(value => {
+      [row.rowNumber, row.internalCode || "—", row.code || "—", row.description || "—", row.quantityRaw || "—", row.group || "—", row.reasons.join("؛ ")].forEach(value => {
         const td = document.createElement("td"); td.textContent = value; tr.appendChild(td);
       });
       $("discrepancyRows").appendChild(tr);
