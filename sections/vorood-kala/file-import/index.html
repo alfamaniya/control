@@ -46,7 +46,7 @@
           <div class="guide-icon" aria-hidden="true">i</div>
           <div class="guide-content">
             <h1 id="guideTitle">راهنمای ورود کالا از فایل</h1>
-            <p>فایل اکسل، CSV یا JSON را انتخاب کنید. پس از تأیید فایل، فهرست کالاها نمایش داده می‌شود و کد اختصاصی ۸ رقمی هر کالا به‌صورت خودکار و بر اساس کد تدارکاتی ساخته خواهد شد.</p>
+            <p>فایل اکسل، CSV یا JSON را انتخاب کنید. پس از تأیید فایل، فهرست کالاها نمایش داده می‌شود و کد اختصاصی هر کالا به‌صورت خودکار از ۸ رقم اول کد تدارکاتی ساخته می‌شود.</p>
             <div class="guide-points">
               <span><b>۱</b> ستون‌های فایل: کد تدارکاتی، شرح کالا، موجودی و گروه</span>
               <span><b>۲</b> کد تدارکاتی باید دقیقاً ۱۰ رقم باشد</span>
@@ -73,8 +73,8 @@
         </section>
 
         <section class="import-panel preview-panel" id="previewPanel" hidden aria-labelledby="previewTitle">
-          <div class="panel-heading panel-heading-between"><div class="panel-heading"><span class="step-number">۲</span><div><h2 id="previewTitle">فهرست کالاهای شناسایی‌شده</h2><p id="previewDescription">کد اختصاصی به‌صورت خودکار از کد تدارکاتی تولید شده است.</p></div></div><span id="previewCount" class="count-pill"></span></div>
-          <div class="table-wrap"><table class="goods-table"><thead><tr><th>ردیف</th><th>کد اختصاصی ۸ رقمی</th><th>شرح کالا</th><th>تعداد موجودی</th><th>گروه</th><th>وضعیت</th></tr></thead><tbody id="previewRows"></tbody></table></div>
+          <div class="panel-heading panel-heading-between"><div class="panel-heading"><span class="step-number">۲</span><div><h2 id="previewTitle">فهرست کالاهای شناسایی‌شده</h2><p id="previewDescription">کد اختصاصی برابر با ۸ رقم اول کد تدارکاتی است.</p></div></div><span id="previewCount" class="count-pill"></span></div>
+          <div class="table-wrap"><table class="goods-table"><thead><tr><th>ردیف</th><th>کد اختصاصی</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>تعداد موجودی</th><th>گروه</th><th>وضعیت</th></tr></thead><tbody id="previewRows"></tbody></table></div>
           <div class="preview-footer"><span id="validSummary"></span><button class="primary-button" id="confirmImportButton" type="button" disabled>تأیید و ثبت کالاهای بدون مغایرت</button></div>
         </section>
 
@@ -82,7 +82,7 @@
           <div class="panel-heading"><span class="step-number">۳</span><div><h2 id="resultTitle">نتیجه ورود اطلاعات</h2><p id="resultSummary"></p></div></div>
           <div class="result-stats" id="resultStats"></div>
           <div class="discrepancy-heading"><h3>فهرست مغایرت‌های ثبت‌نشده در موجودی</h3><span id="discrepancyCount" class="count-pill"></span></div>
-          <div class="table-wrap"><table class="goods-table"><thead><tr><th>ردیف فایل</th><th>کد اختصاصی</th><th>شرح کالا</th><th>تعداد موجودی</th><th>گروه</th><th>علت عدم ثبت</th></tr></thead><tbody id="discrepancyRows"></tbody></table></div>
+          <div class="table-wrap"><table class="goods-table"><thead><tr><th>ردیف فایل</th><th>کد اختصاصی</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>تعداد موجودی</th><th>گروه</th><th>علت عدم ثبت</th></tr></thead><tbody id="discrepancyRows"></tbody></table></div>
           <p id="noDiscrepancies" class="empty-state" hidden>همه ردیف‌های معتبر با موفقیت به موجودی اضافه شدند و مغایرتی وجود ندارد.</p>
         </section>
       </div>
