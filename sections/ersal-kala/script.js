@@ -172,8 +172,14 @@
 
   function localDateTimeCode() {
     const date = new Date();
-    const pad = n => String(n).padStart(2, "0");
-    return date.getFullYear() + "-" + pad(date.getMonth() + 1) + "-" + pad(date.getDate()) + " " + pad(date.getHours()) + ":" + pad(date.getMinutes()) + ":" + pad(date.getSeconds());
+    const parts = new Intl.DateTimeFormat("fa-IR-u-ca-persian-nu-latn", {
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+    }).formatToParts(date);
+    const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    const pad = value => String(value).padStart(2, "0");
+    return values.year + "/" + pad(values.month) + "/" + pad(values.day) + " " +
+      pad(values.hour) + ":" + pad(values.minute) + ":" + pad(values.second);
   }
   function openModal() {
     if (!dispatchItems.length) return;
