@@ -35,3 +35,5 @@
 .sidebar-menu-toggle span{width:18px;height:2px;border-radius:2px;background:#42536b}
 .sidebar-demo-content{margin-right:var(--sidebar-width);padding:35px}
 @media(max-width:768px){.sidebar-demo-content{margin-right:0}.sidebar-demo-shell:not(.sidebar-closed)::after{content:none}}
+
+@media(max-width:768px){.app-shell::after{display:none!important}}
