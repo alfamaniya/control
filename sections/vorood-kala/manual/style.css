@@ -8,3 +8,11 @@
 .manual-field input:focus{border-color:#07949a;background:#fff;box-shadow:0 0 0 3px rgba(7,148,154,.10)}
 .manual-field input:hover{border-color:#a9cbd2}
 @media(max-width:760px){.manual-form-panel{padding:16px}.manual-fields{grid-template-columns:1fr;gap:14px}}
+
+.manual-form-actions{display:flex;justify-content:flex-start;margin-top:20px;padding-top:18px;border-top:1px solid #e8eef3}
+.manual-form-actions .primary-button{min-width:190px;min-height:46px}
+.manual-entry-message{margin-top:16px;padding:12px 14px;border-radius:10px;font-size:12px;font-weight:700;line-height:1.9}
+.manual-entry-message[hidden]{display:none}
+.manual-entry-message.success{background:#eaf8f4;color:#14765e;border:1px solid #cceee2}
+.manual-entry-message.error{background:#fff1f0;color:#b33b36;border:1px solid #f4d4d1}
+@media(max-width:760px){.manual-form-actions .primary-button{width:100%}}
