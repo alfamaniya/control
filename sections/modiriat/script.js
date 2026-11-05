@@ -11,7 +11,7 @@
   let products = [];
 
   function faNumber(value) {
-    return String(value).replace(/\\d/g, digit => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)]);
+    return String(value).replace(/\d/g, digit => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)]);
   }
 
   function normalizeDigits(value) {
