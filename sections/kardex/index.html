@@ -8,14 +8,14 @@
   <link rel="stylesheet" href="../../assets/css/style.css">
   <link rel="stylesheet" href="style.css">
   <script src="../../assets/js/app.js" defer></script>
+  <script src="../../assets/js/database.js" defer></script>
+  <script src="../../assets/js/table-sort.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <button class="menu-toggle" id="sidebarToggle" type="button" aria-label="باز و بسته کردن منو" aria-controls="sidebar" aria-expanded="true">
-        <span></span><span></span><span></span>
-      </button>
+      <button class="menu-toggle" id="sidebarToggle" type="button" aria-label="باز و بسته کردن منو" aria-controls="sidebar" aria-expanded="true"><span></span><span></span><span></span></button>
       <a class="brand" href="../../index.html">نام سایت</a>
       <div class="topbar-spacer"></div>
     </header>
@@ -25,14 +25,59 @@
         <a class="nav-link" href="../vorood-kala/index.html"><span class="nav-number">02</span><span>ورود کالا</span></a>
         <a class="nav-link" href="../moshahede-kala/index.html"><span class="nav-number">03</span><span>مشاهده کالاها و موجودی</span></a>
         <a class="nav-link" href="../ersal-kala/index.html"><span class="nav-number">04</span><span>ارسال کالا</span></a>
-        <a class="nav-link active" href="../kardex/index.html" aria-current="page"><span class="nav-number">05</span><span>کاردکس</span></a>
+        <a class="nav-link active" href="index.html" aria-current="page"><span class="nav-number">05</span><span>کاردکس</span></a>
         <a class="nav-link" href="../gozaresh-ha/index.html"><span class="nav-number">06</span><span>گزارش‌ها</span></a>
         <a class="nav-link" href="../modiriat/index.html"><span class="nav-number">07</span><span>تنظیمات و مدیریت</span></a>
       </nav>
     </aside>
     <main class="main-content" id="mainContent">
       <div class="page-content kardex-page">
-        <h1>کاردکس</h1>
+        <section class="kardex-heading">
+          <div><h1>کاردکس کالا</h1><p>برای مشاهده گردش موجودی، کالا را با یکی از مشخصات آن جست‌وجو و انتخاب کنید.</p></div>
+        </section>
+
+        <section class="kardex-search-card">
+          <div class="kardex-search-grid">
+            <div class="kardex-search-field autocomplete-wrap">
+              <label for="searchInternalCode">کد اختصاصی</label>
+              <input id="searchInternalCode" type="text" inputmode="numeric" autocomplete="off" placeholder="جست‌وجو با کد اختصاصی…">
+              <div class="kardex-suggestions" id="internalSuggestions" role="listbox" hidden></div>
+            </div>
+            <div class="kardex-search-field autocomplete-wrap">
+              <label for="searchProcurementCode">کد تدارکاتی</label>
+              <input id="searchProcurementCode" type="text" inputmode="numeric" autocomplete="off" placeholder="جست‌وجو با کد تدارکاتی…">
+              <div class="kardex-suggestions" id="procurementSuggestions" role="listbox" hidden></div>
+            </div>
+            <div class="kardex-search-field autocomplete-wrap">
+              <label for="searchDescription">شرح کالا</label>
+              <input id="searchDescription" type="text" autocomplete="off" placeholder="جست‌وجو با شرح کالا…">
+              <div class="kardex-suggestions" id="descriptionSuggestions" role="listbox" hidden></div>
+            </div>
+          </div>
+          <div class="kardex-message" id="kardexMessage" role="status" aria-live="polite" hidden></div>
+        </section>
+
+        <section class="kardex-product-card" id="selectedProductCard" hidden>
+          <div class="kardex-section-title"><div><h2>مشخصات کالای انتخاب‌شده</h2><span>اطلاعات پایه و موجودی فعلی</span></div></div>
+          <div class="kardex-product-table-wrap">
+            <table class="kardex-product-table">
+              <thead><tr><th>کد اختصاصی</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>گروه کالا</th><th>تعداد موجودی فعلی</th></tr></thead>
+              <tbody id="selectedProductDetails"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="kardex-history-card" id="kardexHistoryCard" hidden>
+          <div class="kardex-section-title"><div><h2>گردش عملیات کالا</h2><span id="kardexHistoryCaption">سوابق ورود و خروج موجودی</span></div><span class="kardex-count" id="kardexCount">۰ عملیات</span></div>
+          <div class="kardex-table-wrap">
+            <table class="kardex-history-table">
+              <thead><tr><th>ردیف</th><th>عملیات</th><th>تاریخ</th><th>ساعت</th><th>تعداد ورود</th><th>تعداد خروج</th><th>موجودی بعد از عملیات</th></tr></thead>
+              <tbody id="kardexRows"></tbody>
+            </table>
+            <div class="kardex-empty" id="kardexEmpty" hidden>برای این کالا هنوز سابقه ورود یا خروجی ثبت نشده است.</div>
+          </div>
+        </section>
+        <div class="kardex-empty kardex-start-empty" id="kardexStartEmpty"><span>⌕</span><strong>جست‌وجوی کالا</strong><p>با وارد کردن کد اختصاصی، کد تدارکاتی یا شرح کالا، پیشنهادها نمایش داده می‌شوند.</p></div>
       </div>
     </main>
   </div>
