@@ -15,7 +15,13 @@
     {number:"03",label:"مشاهده کالاها و موجودی",path:"sections/moshahede-kala/index.html"},
     {number:"04",label:"ارسال کالا",path:"sections/ersal-kala/index.html"},
     {number:"05",label:"کاردکس",path:"sections/kardex/index.html"},
-    {number:"06",label:"گزارش‌ها",path:"sections/gozaresh-ha/index.html"},
+    {number:"06",label:"گزارش‌ها",path:"sections/gozaresh-ha/index.html",children:[
+      ["گزارش بر اساس تاریخ","sections/gozaresh-ha/bar-asas-tarikh/index.html"],
+      ["گزارش بر اساس شماره حواله مصرف","sections/gozaresh-ha/shomare-havale-masraf/index.html"],
+      ["گزارش بر اساس شماره خروج","sections/gozaresh-ha/shomare-khorooj/index.html"],
+      ["گزارش بر اساس کد تدارکاتی یا شرح کالا","sections/gozaresh-ha/code-or-description/index.html"],
+      ["گزارش بر اساس کد اختصاصی","sections/gozaresh-ha/code-ekhtesasi/index.html"]
+    ]},
     {number:"07",label:"تنظیمات و مدیریت",path:"sections/modiriat/index.html",children:[
       ["مدیریت حذف کالا","sections/modiriat/manage-products/index.html"],
       ["مدیریت موجودی کالاها","sections/modiriat/manage-stock/index.html"]
