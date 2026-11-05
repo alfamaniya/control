@@ -23,7 +23,7 @@
 
   // The internal identifier is exactly the first eight digits of the procurement code.
   function makeInternalCode(procurementCode) {
-    return /^\\d{10}$/.test(procurementCode) ? procurementCode.slice(0, 8) : "";
+    return /^\d{10}$/.test(procurementCode) ? procurementCode.slice(0, 8) : "";
   }
   function findColumn(headers, aliases, fallback) {
     const normalized = headers.map(normalizeHeader);
