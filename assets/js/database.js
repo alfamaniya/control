@@ -141,6 +141,7 @@
     }
     if (!actualItems.length) {
       tx.abort();
+      try { await done; } catch (_) { /* لغو عمدی تراکنش */ }
       throw new Error("هیچ‌یک از کالاهای انتخاب‌شده موجودی قابل ارسال ندارند. فهرست را بررسی کنید.");
     }
     const dispatch = { ...metadata, items: actualItems, createdAt: new Date().toISOString() };
