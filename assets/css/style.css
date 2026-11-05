@@ -226,3 +226,18 @@ table thead th.sort-active {
 .sidebar .nav-group .nav-submenu{margin-top:7px}
 .sidebar .nav-group .nav-submenu[hidden]{display:none}
 @media(prefers-reduced-motion:reduce){.sidebar .nav-group-toggle .nav-chevron{transition:none}}
+
+
+/* Chevron is a visual indicator inside the section navigation link */
+.sidebar .nav-group-heading>.nav-group-link{display:flex;align-items:center;flex:1;min-width:0}
+.sidebar .nav-group-link .nav-chevron{
+  display:inline-block;
+  margin-right:5px;
+  color:#91a6bc;
+  font-size:1.05rem;
+  line-height:1;
+  transition:color .2s ease,transform .2s ease;
+}
+.sidebar .nav-group.is-open .nav-group-link .nav-chevron{color:#6fe0ce;transform:rotate(180deg)}
+.sidebar .nav-group-link:hover .nav-chevron{color:#fff}
+.sidebar .nav-group .nav-submenu[hidden]{display:none}
