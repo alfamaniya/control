@@ -23,6 +23,7 @@
     {number:"08",label:"درخت سامانه",path:"sections/derakht-samane/index.html"}
   ];
   const current = window.location.pathname.replace(/\/$/,"");
+  const routePath = (path) => new URL(path, root).pathname.replace(/\/$/,"");
   const nav = document.createElement("aside");
   nav.className = "control-sidebar";
   nav.id = "sidebar";
@@ -40,8 +41,8 @@
     const label = document.createElement("span");
     label.textContent = item.label;
     link.append(number,label);
-    const childPaths = (item.children || []).map((child) => url(child[1]).replace(/\/$/,""));
-    const isParent = url(item.path).replace(/\/$/,"") === current;
+    const childPaths = (item.children || []).map((child) => routePath(child[1]));
+    const isParent = routePath(item.path) === current;
     const activeChild = childPaths.includes(current);
     if (isParent || activeChild) {
       link.classList.add("active");
@@ -64,7 +65,7 @@
         child.className = "nav-sublink";
         child.href = url(path);
         child.textContent = text;
-        if (url(path).replace(/\/$/,"") === current) child.setAttribute("aria-current","page");
+        if (routePath(path) === current) child.setAttribute("aria-current","page");
         submenu.append(child);
       });
       group.append(submenu);
