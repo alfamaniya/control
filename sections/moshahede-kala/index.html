@@ -6,7 +6,10 @@
   <meta name="theme-color" content="#14243d">
   <title>مشاهده کالاها و موجودی</title>
   <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="style.css">
   <script src="../../assets/js/app.js" defer></script>
+  <script src="../../assets/js/database.js" defer></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -29,8 +32,32 @@
       </nav>
     </aside>
     <main class="main-content" id="mainContent">
-      <div class="page-content">
-        <h1>مشاهده کالاها و موجودی</h1>
+      <div class="page-content inventory-page">
+        <section class="inventory-heading">
+          <div>
+            <h1>مشاهده کالاها و موجودی</h1>
+            <p>فهرست کامل کالاهای ثبت‌شده در موجودی سامانه</p>
+          </div>
+          <div class="inventory-total"><strong id="inventoryCount">۰</strong><span>قلم کالا</span></div>
+        </section>
+        <section class="inventory-panel" aria-label="فهرست کل موجودی">
+          <div class="inventory-panel-heading">
+            <div><h2>کل موجودی</h2><p>اطلاعات کالاهای ذخیره‌شده در پایگاه داده محلی</p></div>
+            <button type="button" class="refresh-button" id="refreshInventory">↻ <span>بروزرسانی فهرست</span></button>
+          </div>
+          <div id="inventoryMessage" class="inventory-message" role="status" aria-live="polite">در حال دریافت اطلاعات موجودی…</div>
+          <div class="inventory-table-wrap" id="inventoryTableWrap" hidden>
+            <table class="inventory-table">
+              <thead><tr><th>ردیف</th><th>کد اختصاصی</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>گروه کالا</th><th>تعداد موجودی</th></tr></thead>
+              <tbody id="inventoryRows"></tbody>
+            </table>
+          </div>
+          <div class="inventory-empty" id="inventoryEmpty" hidden>
+            <span class="inventory-empty-icon">▤</span>
+            <strong>هنوز کالایی ثبت نشده است</strong>
+            <p>پس از ورود کالا از فایل، کپی از جدول یا ثبت دستی، فهرست موجودی در این قسمت نمایش داده می‌شود.</p>
+          </div>
+        </section>
       </div>
     </main>
   </div>
