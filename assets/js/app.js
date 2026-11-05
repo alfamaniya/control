@@ -4,23 +4,36 @@
   const sidebar = document.getElementById("sidebar");
   if (!shell || !toggle || !sidebar) return;
 
+  const currentPath = window.location.pathname.replace(/\\/$/, "/");
+  document.querySelectorAll(".nav-group").forEach((group) => {
+    const link = group.querySelector(".nav-group-link");
+    const submenu = group.querySelector(".nav-submenu");
+    if (!link || !submenu) return;
+
+    const resolvePath = (href) => new URL(href, window.location.href).pathname.replace(/\\/$/, "/");
+    const parentMatch = resolvePath(link.getAttribute("href")) === currentPath;
+    const childLinks = Array.from(submenu.querySelectorAll("a"));
+    const childMatch = childLinks.some((child) => resolvePath(child.getAttribute("href")) === currentPath);
+    const isCurrentGroup = parentMatch || childMatch;
+
+    link.classList.toggle("active", isCurrentGroup);
+    if (parentMatch) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+
+    childLinks.forEach((child) => {
+      if (resolvePath(child.getAttribute("href")) === currentPath) child.setAttribute("aria-current", "page");
+      else child.removeAttribute("aria-current");
+    });
+
+    group.classList.toggle("is-open", isCurrentGroup);
+    submenu.hidden = !isCurrentGroup;
+  });
+
   const setSidebarState = (isOpen) => {
     shell.classList.toggle("sidebar-closed", !isOpen);
     toggle.setAttribute("aria-expanded", String(isOpen));
     sidebar.setAttribute("aria-hidden", String(!isOpen));
   };
-
-  document.querySelectorAll(".nav-group-toggle").forEach((button) => {
-    button.addEventListener("click", () => {
-      const group = button.closest(".nav-group");
-      const submenu = group && group.querySelector(".nav-submenu");
-      if (!submenu) return;
-      const expanded = button.getAttribute("aria-expanded") === "true";
-      button.setAttribute("aria-expanded", String(!expanded));
-      submenu.hidden = expanded;
-      group.classList.toggle("is-open", !expanded);
-    });
-  });
 
   toggle.addEventListener("click", () => {
     setSidebarState(shell.classList.contains("sidebar-closed"));
