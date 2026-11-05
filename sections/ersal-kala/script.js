@@ -5,6 +5,7 @@
   const descriptionSearch = $("descriptionSearch");
   const selectedBox = $("selectedProduct");
   const quantityInput = $("dispatchQuantity");
+  const dispatchItemForm = $("dispatchItemForm");
   const rows = $("dispatchRows");
   const empty = $("dispatchEmpty");
   const count = $("dispatchItemCount");
@@ -69,9 +70,9 @@
     $("descriptionSuggestions").hidden = true;
     $("selectedDescription").textContent = product.description || "بدون شرح";
     $("selectedCode").textContent = "کد تدارکاتی: " + product.procurementCode + " | کد اختصاصی: " + String(product.procurementCode).slice(0, 8);
-    $("selectedStock").textContent = "موجودی قابل ارسال: " + fa(remaining) + " از " + fa(stockOf(product));
     const alreadyAdded = dispatchItems.find(item => item.procurementCode === product.procurementCode)?.quantity || 0;
     const remaining = Math.max(0, stockOf(product) - alreadyAdded);
+    $("selectedStock").textContent = "موجودی قابل ارسال: " + fa(remaining) + " از " + fa(stockOf(product));
     quantityInput.max = String(remaining);
     quantityInput.value = remaining > 0 ? "1" : "0";
     quantityInput.disabled = remaining < 1;
@@ -156,12 +157,9 @@
     showMessage("کالا به باکس جمع‌بندی منتقل شد. کالای بعدی را جست‌وجو کنید.");
     procurementSearch.focus();
   }
-  $("addDispatchItem").addEventListener("click", addCurrentProduct);
-  quantityInput.addEventListener("keydown", event => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      addCurrentProduct();
-    }
+  dispatchItemForm.addEventListener("submit", event => {
+    event.preventDefault();
+    addCurrentProduct();
   });
 
   quantityInput.addEventListener("change", () => {
