@@ -7,15 +7,14 @@
   <title>ارسال کالا</title>
   <link rel="stylesheet" href="../../assets/css/style.css">
   <link rel="stylesheet" href="style.css">
+  <script src="../../assets/js/database.js" defer></script>
   <script src="../../assets/js/app.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <button class="menu-toggle" id="sidebarToggle" type="button" aria-label="باز و بسته کردن منو" aria-controls="sidebar" aria-expanded="true">
-        <span></span><span></span><span></span>
-      </button>
+      <button class="menu-toggle" id="sidebarToggle" type="button" aria-label="باز و بسته کردن منو" aria-controls="sidebar" aria-expanded="true"><span></span><span></span><span></span></button>
       <a class="brand" href="../../index.html">نام سایت</a>
       <div class="topbar-spacer"></div>
     </header>
@@ -32,9 +31,55 @@
     </aside>
     <main class="main-content" id="mainContent">
       <div class="page-content ersal-kala-page">
-        <h1>ارسال کالا</h1>
+        <div class="page-heading"><div><h1>ارسال کالا</h1><p>کالاهای موردنظر را جست‌وجو و به فهرست ارسال اضافه کنید.</p></div></div>
+        <section class="dispatch-search-card">
+          <div class="search-fields">
+            <div class="search-field autocomplete-wrap">
+              <label for="procurementSearch">کد تدارکاتی</label>
+              <input id="procurementSearch" type="text" inputmode="numeric" autocomplete="off" placeholder="جست‌وجو با کد تدارکاتی…">
+              <div class="suggestions" id="procurementSuggestions" role="listbox" hidden></div>
+            </div>
+            <div class="search-field autocomplete-wrap">
+              <label for="descriptionSearch">شرح کالا</label>
+              <input id="descriptionSearch" type="text" autocomplete="off" placeholder="جست‌وجو با شرح کالا…">
+              <div class="suggestions" id="descriptionSuggestions" role="listbox" hidden></div>
+            </div>
+          </div>
+          <div class="selected-product" id="selectedProduct" hidden>
+            <div class="selected-product-info"><strong id="selectedDescription"></strong><span id="selectedCode"></span><small id="selectedStock"></small></div>
+            <div class="quantity-control"><label for="dispatchQuantity">تعداد ارسالی</label><input id="dispatchQuantity" type="number" min="1" step="1" value="1"><button id="addDispatchItem" class="primary-button" type="button">افزودن به فهرست</button></div>
+          </div>
+          <div id="dispatchMessage" class="dispatch-message" role="status" aria-live="polite" hidden></div>
+        </section>
+        <section class="dispatch-list-card">
+          <div class="section-heading"><div><h2>فهرست کالاهای ارسالی</h2><span id="dispatchItemCount">۰ کالا</span></div></div>
+          <div class="table-scroll">
+            <table class="dispatch-table">
+              <thead><tr><th>ردیف</th><th>کد اختصاصی</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>تعداد ارسالی</th><th>عملیات</th></tr></thead>
+              <tbody id="dispatchRows"></tbody>
+            </table>
+            <div class="dispatch-empty" id="dispatchEmpty">هنوز کالایی به فهرست ارسال اضافه نشده است.</div>
+          </div>
+          <div class="dispatch-actions"><button id="openDispatchConfirm" class="primary-button" type="button" disabled>تأیید و ادامه</button></div>
+        </section>
       </div>
     </main>
+  </div>
+
+  <div class="modal-backdrop" id="dispatchModal" hidden>
+    <section class="dispatch-modal" role="dialog" aria-modal="true" aria-labelledby="dispatchModalTitle">
+      <div class="modal-heading"><div><h2 id="dispatchModalTitle">اطلاعات ارسال</h2><p>مشخصات مقصد و اسناد ارسال را وارد کنید.</p></div><button type="button" class="modal-close" id="closeDispatchModal" aria-label="بستن">×</button></div>
+      <form id="dispatchForm">
+        <div class="modal-fields">
+          <div class="search-field"><label for="destination">محل ارسال</label><input id="destination" name="destination" type="text" required placeholder="محل ارسال را وارد کنید"></div>
+          <div class="search-field"><label for="destinationSub">زیرمجموعه محل ارسال</label><input id="destinationSub" name="destinationSub" type="text" placeholder="زیرمجموعه یا واحد مقصد"></div>
+          <div class="search-field"><label for="voucherNumber">شماره حواله</label><input id="voucherNumber" name="voucherNumber" type="text" placeholder="در صورت خالی بودن، خودکار ثبت می‌شود"></div>
+          <div class="search-field"><label for="exitNumber">شماره خروج</label><input id="exitNumber" name="exitNumber" type="text" placeholder="در صورت خالی بودن، خودکار ثبت می‌شود"></div>
+        </div>
+        <p class="auto-number-note">اگر شماره حواله یا شماره خروج خالی باشد، تاریخ و ساعت ثبت به‌عنوان شماره آن درج می‌شود.</p>
+        <div class="modal-actions"><button type="button" class="secondary-button" id="cancelDispatch">انصراف</button><button type="submit" class="primary-button" id="submitDispatch">ثبت ارسال</button></div>
+      </form>
+    </section>
   </div>
 </body>
 </html>
