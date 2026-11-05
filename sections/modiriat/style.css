@@ -48,3 +48,11 @@
 .stock-operation-hint{margin:0;padding:10px 12px;border-radius:9px;background:#f0f7fa;color:#6d7e91;font-size:11px;line-height:1.9}
 .stock-search-results:empty{display:none}
 @media(max-width:700px){.stock-adjustment-form{align-items:stretch;flex-direction:column}.stock-save-button,.stock-choose-button{width:100%}}
+
+/* صفحه آغازین تنظیمات و مدیریت؛ هم‌راستا با کارت‌های سکشن ورود کالا */
+.management-home{color:#1b2b43}
+.management-home h1{margin:0;color:#1b2b43;font-size:clamp(1.45rem,2vw,1.85rem);font-weight:800;letter-spacing:-.03em}
+.management-methods{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:30px}
+.management-methods .entry-method-card{min-height:190px}
+@media(max-width:900px){.management-methods{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.management-methods{grid-template-columns:1fr;gap:13px;margin-top:22px}.management-methods .entry-method-card{min-height:165px;padding:22px}}
