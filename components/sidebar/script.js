@@ -102,12 +102,17 @@
       group.className = "nav-group" + (isParent || activeChild ? " is-open" : "");
       const heading = document.createElement("div");
       heading.className = "nav-group-heading";
+      const expand = document.createElement("button");
+      expand.type = "button";
+      expand.className = "nav-chevron-toggle";
+      expand.setAttribute("aria-label","باز و بسته کردن زیرمجموعه‌های " + item.label);
+      expand.setAttribute("aria-expanded",String(isParent || activeChild));
       const chevron = document.createElement("span");
       chevron.className = "nav-chevron";
       chevron.setAttribute("aria-hidden","true");
       chevron.textContent = "⌄";
-      link.append(chevron);
-      heading.append(link);
+      expand.append(chevron);
+      heading.append(link,expand);
       group.append(heading);
       const submenu = document.createElement("div");
       submenu.className = "nav-submenu";
@@ -122,13 +127,11 @@
         submenu.append(child);
       });
       group.append(submenu);
-      link.addEventListener("click",(event) => {
-        if (event.target === chevron) {
-          event.preventDefault();
-          const open = !group.classList.contains("is-open");
-          group.classList.toggle("is-open",open);
-          submenu.hidden = !open;
-        }
+      expand.addEventListener("click",() => {
+        const open = !group.classList.contains("is-open");
+        group.classList.toggle("is-open",open);
+        submenu.hidden = !open;
+        expand.setAttribute("aria-expanded",String(open));
       });
     } else {
       group.append(link);
