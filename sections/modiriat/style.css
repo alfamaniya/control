@@ -33,3 +33,18 @@
 .empty-symbol{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#e8f7f7;color:#078b91;font-size:25px}
 .management-empty strong{color:#314761;font-size:13px}.management-empty p{margin:0;color:#8493a4;font-size:11px;line-height:1.9}
 @media(max-width:700px){.management-heading,.management-panel{padding:16px}.management-heading h1{font-size:18px}.management-panel-heading{align-items:stretch;flex-direction:column}.danger-button-all{width:100%}.product-result-card{align-items:stretch;flex-direction:column}.danger-button-item{width:100%}.product-result-meta{flex-direction:column;gap:3px}}
+
+.stock-selected-card{display:grid;gap:17px;margin-top:17px;padding:19px;border:1px solid #d8eae8;border-radius:15px;background:linear-gradient(135deg,#f8fdfc,#fff)}
+.stock-selected-info{display:grid;gap:7px;color:#60758b;font-size:12px;line-height:1.8}
+.stock-selected-info strong{color:#203652;font-size:14px;font-weight:900}
+.stock-selected-info b{color:#087f83;font-size:14px}
+.stock-adjustment-form{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.stock-quantity-field{display:grid;gap:7px;flex:1 1 220px}
+.stock-quantity-field label{color:#344a65;font-size:12px;font-weight:800}
+.stock-quantity-field input{width:100%;min-height:44px;padding:10px 13px;border:1px solid #dce6ee;border-radius:10px;background:#fff;color:#243a56;font:inherit;font-size:13px;outline:none}
+.stock-quantity-field input:focus{border-color:#69c5be;box-shadow:0 0 0 4px rgba(39,181,165,.1)}
+.stock-save-button,.stock-choose-button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 17px;border:1px solid #a9ded7;border-radius:11px;background:linear-gradient(135deg,#e9faf6,#dff5f0);color:#087f83;font:inherit;font-size:12px;font-weight:900;cursor:pointer;box-shadow:0 4px 12px rgba(25,145,135,.08);transition:.18s ease}
+.stock-save-button:hover,.stock-choose-button:hover{transform:translateY(-1px);border-color:#72c9bd;background:linear-gradient(135deg,#def7f0,#c9eee6);box-shadow:0 7px 16px rgba(25,145,135,.13)}
+.stock-operation-hint{margin:0;padding:10px 12px;border-radius:9px;background:#f0f7fa;color:#6d7e91;font-size:11px;line-height:1.9}
+.stock-search-results:empty{display:none}
+@media(max-width:700px){.stock-adjustment-form{align-items:stretch;flex-direction:column}.stock-save-button,.stock-choose-button{width:100%}}
