@@ -60,7 +60,7 @@
     });
     if (!migration) {
       legacy.forEach(item => {
-        if (item && /^\\d{10}$/.test(String(item.procurementCode || ""))) {
+        if (item && /^\d{10}$/.test(String(item.procurementCode || ""))) {
           products.put({
             ...item,
             internalCode: String(item.procurementCode).slice(0, 8),
@@ -104,7 +104,7 @@
     const skipped = [];
     for (const item of items) {
       const code = String(item && item.procurementCode || "");
-      if (!/^\\d{10}$/.test(code) || existingKeys.has(code)) {
+      if (!/^\d{10}$/.test(code) || existingKeys.has(code)) {
         skipped.push(item);
         continue;
       }
