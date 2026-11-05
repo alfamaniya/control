@@ -218,7 +218,13 @@
     });
     return movements.filter(item => String(item.procurementCode) === code)
       .concat(legacyDispatchMovements)
-      .sort((a, b) => String(b.occurredAt || "").localeCompare(String(a.occurredAt || "")));
+      .sort((a, b) => {
+        const timeA = Date.parse(a.occurredAt || "");
+        const timeB = Date.parse(b.occurredAt || "");
+        if (!Number.isFinite(timeA)) return Number.isFinite(timeB) ? 1 : 0;
+        if (!Number.isFinite(timeB)) return -1;
+        return timeA - timeB;
+      });
   }
 
   window.ControlDB = Object.freeze({ getAll, addMany, createDispatch, getKardex });
