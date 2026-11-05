@@ -72,7 +72,7 @@
     if (!value) return { date: "—", time: "—" };
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return { date: String(value), time: "—" };
-    const parts = new Intl.DateTimeFormat("fa-IR-u-ca-gregory", {
+    const parts = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
       year: "numeric", month: "2-digit", day: "2-digit"
     }).format(date);
     const time = new Intl.DateTimeFormat("fa-IR", {
