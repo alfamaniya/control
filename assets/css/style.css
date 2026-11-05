@@ -94,10 +94,6 @@ a { color: inherit; text-decoration: none; }
   .topbar { padding-inline: 16px; }
   .sidebar { box-shadow: -15px 0 35px rgba(7,20,38,.2); }
   .main-content { margin-right: 0; padding: calc(var(--header-height) + 24px) 16px 28px; }
-  .app-shell:not(.sidebar-closed)::after {
-    content: ""; position: fixed; z-index: 20; inset: var(--header-height) 0 0;
-    background: rgba(10,24,43,.42); backdrop-filter: blur(2px);
-  }
   .app-shell.sidebar-closed .sidebar { visibility: hidden; }
 }
 @media (prefers-reduced-motion: reduce) {
