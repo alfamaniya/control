@@ -106,9 +106,8 @@
   async function selectProduct(product) {
     selectedProduct = product;
     fields.forEach(field => {
-      field.input.value = field.key === "internalCode"
-        ? (product.internalCode || String(product.procurementCode).slice(0, 8))
-        : (product[field.key] || "");
+      field.input.value = "";
+      field.list.innerHTML = "";
       field.list.hidden = true;
     });
     renderProduct(product);
