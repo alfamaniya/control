@@ -1,1 +1,10 @@
-.goods-entry-subpage { display: grid; gap: 20px; }
+.manual-entry-page{display:grid;gap:20px;max-width:1280px;margin-inline:auto}
+.manual-form-panel{min-width:0}
+.manual-entry-form{width:100%}
+.manual-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.manual-field{display:grid;gap:9px;min-width:0;color:#40566f;font-size:12px;font-weight:800}
+.manual-field input{box-sizing:border-box;width:100%;height:54px;padding:0 16px;border:1px solid #dce6ed;border-radius:12px;outline:none;background:linear-gradient(145deg,#fbfdfe,#f7fafc);color:#263f5e;font:inherit;font-size:13px;font-weight:500;transition:border-color .2s,box-shadow .2s,background .2s}
+.manual-field input::placeholder{color:#9aa8b7;font-weight:400}
+.manual-field input:focus{border-color:#07949a;background:#fff;box-shadow:0 0 0 3px rgba(7,148,154,.10)}
+.manual-field input:hover{border-color:#a9cbd2}
+@media(max-width:760px){.manual-form-panel{padding:16px}.manual-fields{grid-template-columns:1fr;gap:14px}}
