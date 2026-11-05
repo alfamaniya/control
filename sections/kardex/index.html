@@ -6,11 +6,13 @@
   <meta name="theme-color" content="#14243d">
   <title>کاردکس</title>
   <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="../../components/sidebar/style.css">
   <link rel="stylesheet" href="style.css">
-  <script src="../../assets/js/app.js" defer></script>
+
   <script src="../../assets/js/database.js" defer></script>
   <script src="../../assets/js/table-sort.js" defer></script>
   <script src="script.js" defer></script>
+  <script src="../../components/sidebar/script.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -19,39 +21,7 @@
       <a class="brand" href="../../index.html">نام سایت</a>
       <div class="topbar-spacer"></div>
     </header>
-    <aside class="sidebar" id="sidebar" aria-label="منوی اصلی">
-      <nav class="sidebar-nav">
-        <a class="nav-link" href="../../index.html"><span class="nav-number">01</span><span>داشبورد</span></a>
-        <div class="nav-group">
-          <div class="nav-group-heading">
-            <a class="nav-link nav-group-link" href="../../sections/vorood-kala/index.html">
-              <span class="nav-number">02</span><span>ورود کالا</span>
-            <span class="nav-chevron" aria-hidden="true">⌄</span></a>
-          </div>
-          <div class="nav-submenu" id="entrySubmenu" hidden aria-label="زیرمجموعه‌های ورود کالا">
-            <a class="nav-sublink" href="../../sections/vorood-kala/file-import/index.html">ورود از فایل Excel / CSV</a>
-            <a class="nav-sublink" href="../../sections/vorood-kala/copy-paste/index.html">کپی از جدول</a>
-            <a class="nav-sublink" href="../../sections/vorood-kala/manual/index.html">ثبت دستی کالا</a>
-          </div>
-        </div>
-        <a class="nav-link" href="../../sections/moshahede-kala/index.html"><span class="nav-number">03</span><span>مشاهده کالاها و موجودی</span></a>
-        <a class="nav-link" href="../../sections/ersal-kala/index.html"><span class="nav-number">04</span><span>ارسال کالا</span></a>
-        <a class="nav-link active" href="../../sections/kardex/index.html" aria-current="page"><span class="nav-number">05</span><span>کاردکس</span></a>
-        <a class="nav-link" href="../../sections/gozaresh-ha/index.html"><span class="nav-number">06</span><span>گزارش‌ها</span></a>
-        <div class="nav-group">
-          <div class="nav-group-heading">
-            <a class="nav-link nav-group-link" href="../../sections/modiriat/index.html">
-              <span class="nav-number">07</span><span>تنظیمات و مدیریت</span>
-            <span class="nav-chevron" aria-hidden="true">⌄</span></a>
-          </div>
-          <div class="nav-submenu" id="managementSubmenu" hidden aria-label="زیرمجموعه‌های تنظیمات و مدیریت">
-            <a class="nav-sublink" href="../../sections/modiriat/manage-products/index.html">مدیریت حذف کالا</a>
-            <a class="nav-sublink" href="../../sections/modiriat/manage-stock/index.html">مدیریت موجودی کالاها</a>
-          </div>
-        </div>
-        <a class="nav-link" href="../../sections/derakht-samane/index.html"><span class="nav-number">08</span><span>درخت سامانه</span></a>
-      </nav>
-    </aside>
+    <div data-control-sidebar></div>
     <main class="main-content" id="mainContent">
       <div class="page-content kardex-page">
         <section class="kardex-heading">
