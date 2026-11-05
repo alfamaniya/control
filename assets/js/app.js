@@ -10,6 +10,18 @@
     sidebar.setAttribute("aria-hidden", String(!isOpen));
   };
 
+  document.querySelectorAll(".nav-group-toggle").forEach((button) => {
+    button.addEventListener("click", () => {
+      const group = button.closest(".nav-group");
+      const submenu = group && group.querySelector(".nav-submenu");
+      if (!submenu) return;
+      const expanded = button.getAttribute("aria-expanded") === "true";
+      button.setAttribute("aria-expanded", String(!expanded));
+      submenu.hidden = expanded;
+      group.classList.toggle("is-open", !expanded);
+    });
+  });
+
   toggle.addEventListener("click", () => {
     setSidebarState(shell.classList.contains("sidebar-closed"));
   });
