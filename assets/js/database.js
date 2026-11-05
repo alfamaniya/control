@@ -2,9 +2,10 @@
   "use strict";
 
   const DB_NAME = "control-offline-db";
-  const DB_VERSION = 1;
+  const DB_VERSION = 2;
   const STORE = "products";
   const META = "meta";
+  const DISPATCHES = "dispatches";
   const LEGACY_KEY = "control.inventory.v1";
   let databasePromise;
 
@@ -18,12 +19,9 @@
       const request = indexedDB.open(DB_NAME, DB_VERSION);
       request.onupgradeneeded = () => {
         const db = request.result;
-        if (!db.objectStoreNames.contains(STORE)) {
-          db.createObjectStore(STORE, { keyPath: "procurementCode" });
-        }
-        if (!db.objectStoreNames.contains(META)) {
-          db.createObjectStore(META, { keyPath: "key" });
-        }
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: "procurementCode" });
+        if (!db.objectStoreNames.contains(META)) db.createObjectStore(META, { keyPath: "key" });
+        if (!db.objectStoreNames.contains(DISPATCHES)) db.createObjectStore(DISPATCHES, { keyPath: "id", autoIncrement: true });
       };
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error || new Error("باز کردن پایگاه داده محلی ناموفق بود."));
@@ -45,9 +43,7 @@
     try {
       const raw = localStorage.getItem(LEGACY_KEY);
       legacy = raw ? JSON.parse(raw) : [];
-    } catch (_) {
-      legacy = [];
-    }
+    } catch (_) { legacy = []; }
     if (!Array.isArray(legacy)) legacy = [];
 
     const tx = db.transaction([STORE, META], "readwrite");
@@ -62,11 +58,7 @@
     if (!migration) {
       legacy.forEach(item => {
         if (item && /^\d{10}$/.test(String(item.procurementCode || ""))) {
-          products.put({
-            ...item,
-            internalCode: String(item.procurementCode).slice(0, 8),
-            migratedAt: new Date().toISOString()
-          });
+          products.put({ ...item, internalCode: String(item.procurementCode).slice(0, 8), migratedAt: new Date().toISOString() });
         }
       });
       marker.put({ key: "legacy-local-storage-migrated", value: true, migratedAt: new Date().toISOString() });
@@ -107,16 +99,8 @@
     const skipped = [];
     for (const item of items) {
       const code = String(item && item.procurementCode || "");
-      if (!/^\d{10}$/.test(code) || existingKeys.has(code)) {
-        skipped.push(item);
-        continue;
-      }
-      const record = {
-        ...item,
-        procurementCode: code,
-        internalCode: code.slice(0, 8),
-        createdAt: item.createdAt || new Date().toISOString()
-      };
+      if (!/^\d{10}$/.test(code) || existingKeys.has(code)) { skipped.push(item); continue; }
+      const record = { ...item, procurementCode: code, internalCode: code.slice(0, 8), createdAt: item.createdAt || new Date().toISOString() };
       store.add(record);
       existingKeys.add(code);
       added.push(record);
@@ -125,5 +109,49 @@
     return { added, skipped };
   }
 
-  window.ControlDB = Object.freeze({ getAll, addMany });
+  async function createDispatch(items, metadata) {
+    const db = await ready();
+    const tx = db.transaction([STORE, DISPATCHES], "readwrite");
+    const done = transactionDone(tx);
+    const productStore = tx.objectStore(STORE);
+    const dispatchStore = tx.objectStore(DISPATCHES);
+    const products = await new Promise((resolve, reject) => {
+      const request = productStore.getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error || new Error("بررسی موجودی کالاها ناموفق بود."));
+    });
+    const productMap = new Map(products.map(product => [String(product.procurementCode), product]));
+    const actualItems = [];
+    for (const requested of items) {
+      const code = String(requested.procurementCode || "");
+      const product = productMap.get(code);
+      if (!product) continue;
+      const stock = Math.max(0, Number(product.quantity) || 0);
+      const quantity = Math.min(stock, Math.max(0, Math.floor(Number(requested.quantity) || 0)));
+      if (!quantity) continue;
+      product.quantity = stock - quantity;
+      productStore.put(product);
+      actualItems.push({
+        internalCode: code.slice(0, 8),
+        procurementCode: code,
+        description: product.description || requested.description || "",
+        group: product.group || requested.group || "",
+        quantity
+      });
+    }
+    if (!actualItems.length) {
+      tx.abort();
+      throw new Error("هیچ‌یک از کالاهای انتخاب‌شده موجودی قابل ارسال ندارند. فهرست را بررسی کنید.");
+    }
+    const dispatch = { ...metadata, items: actualItems, createdAt: new Date().toISOString() };
+    const dispatchId = await new Promise((resolve, reject) => {
+      const request = dispatchStore.add(dispatch);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error("ثبت سابقه ارسال ناموفق بود."));
+    });
+    await done;
+    return { id: dispatchId, items: actualItems };
+  }
+
+  window.ControlDB = Object.freeze({ getAll, addMany, createDispatch });
 })();
