@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#14243d">
+  <title>درخت سامانه</title>
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="../../assets/js/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="menu-toggle" id="sidebarToggle" type="button" aria-label="باز و بسته کردن منو" aria-controls="sidebar" aria-expanded="true"><span></span><span></span><span></span></button>
+      <a class="brand" href="../../index.html">نام سایت</a>
+      <div class="topbar-spacer"></div>
+    </header>
+    <aside class="sidebar" id="sidebar" aria-label="منوی اصلی">
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="../../index.html"><span class="nav-number">01</span><span>داشبورد</span></a>
+        <a class="nav-link" href="../vorood-kala/index.html"><span class="nav-number">02</span><span>ورود کالا</span></a>
+        <a class="nav-link" href="../moshahede-kala/index.html"><span class="nav-number">03</span><span>مشاهده کالاها و موجودی</span></a>
+        <a class="nav-link" href="../ersal-kala/index.html"><span class="nav-number">04</span><span>ارسال کالا</span></a>
+        <a class="nav-link" href="../kardex/index.html"><span class="nav-number">05</span><span>کاردکس</span></a>
+        <a class="nav-link" href="../gozaresh-ha/index.html"><span class="nav-number">06</span><span>گزارش‌ها</span></a>
+        <a class="nav-link" href="../modiriat/index.html"><span class="nav-number">07</span><span>تنظیمات و مدیریت</span></a>
+        <a class="nav-link active" href="index.html" aria-current="page"><span class="nav-number">08</span><span>درخت سامانه</span></a>
+      </nav>
+    </aside>
+    <main class="main-content" id="mainContent">
+      <div class="page-content system-tree-page">
+        <section class="tree-intro">
+          <div><span class="tree-kicker">نمای کلی ساختار</span><h1>درخت سامانه</h1><p>نمایی یکپارچه از بخش‌های اصلی و زیرمجموعه‌های سامانه کنترل مصرف</p></div>
+          <div class="tree-legend"><span><i class="legend-main"></i> بخش اصلی</span><span><i class="legend-sub"></i> زیرمجموعه</span></div>
+        </section>
+        <section class="tree-board" aria-label="نمودار افقی ساختار سامانه">
+          <div class="tree-root-wrap"><div class="tree-root"><span class="root-icon">ک</span><span>سامانه کنترل مصرف</span><small>ساختار سامانه</small></div></div>
+          <div class="tree-branches">
+            <article class="tree-branch">
+              <a class="tree-node main-node" href="../../index.html"><span class="node-index">۰۱</span><span>داشبورد</span><small>صفحه اصلی سامانه</small></a>
+            </article>
+            <article class="tree-branch has-children">
+              <a class="tree-node main-node" href="../vorood-kala/index.html"><span class="node-index">۰۲</span><span>ورود کالا</span><small>ثبت و افزودن کالا</small></a>
+              <div class="tree-children">
+                <a class="tree-node sub-node" href="../vorood-kala/file-import/index.html">ورود از فایل</a>
+                <a class="tree-node sub-node" href="../vorood-kala/copy-paste/index.html">کپی از جدول</a>
+                <a class="tree-node sub-node" href="../vorood-kala/manual/index.html">ثبت دستی کالا</a>
+              </div>
+            </article>
+            <article class="tree-branch">
+              <a class="tree-node main-node" href="../moshahede-kala/index.html"><span class="node-index">۰۳</span><span>مشاهده کالاها و موجودی</span><small>فهرست و وضعیت کالاها</small></a>
+            </article>
+            <article class="tree-branch">
+              <a class="tree-node main-node" href="../ersal-kala/index.html"><span class="node-index">۰۴</span><span>ارسال کالا</span><small>ثبت خروج کالا</small></a>
+            </article>
+            <article class="tree-branch">
+              <a class="tree-node main-node" href="../kardex/index.html"><span class="node-index">۰۵</span><span>کاردکس</span><small>سوابق گردش کالا</small></a>
+            </article>
+            <article class="tree-branch">
+              <a class="tree-node main-node" href="../gozaresh-ha/index.html"><span class="node-index">۰۶</span><span>گزارش‌ها</span><small>گزارش‌گیری سامانه</small></a>
+            </article>
+            <article class="tree-branch has-children">
+              <a class="tree-node main-node" href="../modiriat/index.html"><span class="node-index">۰۷</span><span>تنظیمات و مدیریت</span><small>مدیریت اطلاعات پایه</small></a>
+              <div class="tree-children">
+                <a class="tree-node sub-node" href="../modiriat/manage-products/index.html">مدیریت حذف کالا</a>
+                <a class="tree-node sub-node" href="../modiriat/manage-stock/index.html">مدیریت موجودی کالاها</a>
+              </div>
+            </article>
+          </div>
+          <div class="tree-hint"><span>↔</span> برای مشاهده تمام شاخه‌ها، نمودار را به‌صورت افقی پیمایش کنید.</div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
