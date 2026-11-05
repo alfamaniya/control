@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#14243d">
-  <title>تنظیمات و مدیریت | مدیریت کالاها</title>
+  <title>تنظیمات و مدیریت | مدیریت موجودی کالاها</title>
   <link rel="stylesheet" href="../../assets/css/style.css">
   <link rel="stylesheet" href="style.css">
   <script src="../../assets/js/app.js" defer></script>
@@ -31,7 +31,8 @@
         <div class="nav-group">
           <a class="nav-link active" href="index.html" aria-current="page"><span class="nav-number">07</span><span>تنظیمات و مدیریت</span></a>
           <div class="nav-submenu">
-            <a class="nav-sublink" href="#manage-products" aria-current="page">مدیریت کالاها</a>
+            <a class="nav-sublink" href="#manage-products">مدیریت کالاها</a>
+            <a class="nav-sublink" href="#manage-stock" aria-current="page">مدیریت موجودی کالاها</a>
           </div>
         </div>
       </nav>
@@ -70,6 +71,24 @@
             <strong>کالایی پیدا نشد</strong>
             <p>عبارت دیگری را جست‌وجو کنید.</p>
           </div>
+        </section>
+
+        <section class="management-panel stock-management-panel" id="manage-stock" aria-labelledby="manageStockTitle">
+          <div class="management-panel-heading">
+            <div><h2 id="manageStockTitle">مدیریت موجودی کالاها</h2><p>کالا را جست‌وجو کنید و تعداد موجودی جدید آن را ثبت کنید.</p></div>
+          </div>
+          <label class="search-label" for="stockProductSearch">جست‌وجوی کالا</label>
+          <div class="management-search-wrap"><span class="search-symbol" aria-hidden="true">⌕</span><input id="stockProductSearch" class="management-search" type="search" autocomplete="off" placeholder="کد اختصاصی، کد تدارکاتی یا شرح کالا…"></div>
+          <div id="stockSearchResults" class="product-results stock-search-results" aria-live="polite"></div>
+          <div id="stockSelectedCard" class="stock-selected-card" hidden>
+            <div class="stock-selected-info"><strong id="stockSelectedDescription"></strong><span id="stockSelectedCodes"></span><span>موجودی فعلی: <b id="stockCurrentQuantity"></b></span></div>
+            <form id="stockAdjustmentForm" class="stock-adjustment-form">
+              <div class="stock-quantity-field"><label for="newStockQuantity">موجودی جدید</label><input id="newStockQuantity" type="number" min="0" step="1" inputmode="numeric" required placeholder="تعداد نهایی موجودی"></div>
+              <button class="stock-save-button" type="submit">ثبت تعدیل موجودی</button>
+            </form>
+            <p class="stock-operation-hint">افزایش موجودی با عنوان «تعدیل مثبت» و کاهش موجودی با عنوان «تعدیل منفی» در کاردکس ثبت می‌شود.</p>
+          </div>
+          <div id="stockAdjustmentMessage" class="management-message" role="status" aria-live="polite" hidden></div>
         </section>
       </div>
     </main>
