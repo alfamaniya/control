@@ -48,9 +48,10 @@
     } catch (_) {
       legacy = [];
     }
-    if (!Array.isArray(legacy) || legacy.length === 0) return;
+    if (!Array.isArray(legacy)) legacy = [];
 
     const tx = db.transaction([STORE, META], "readwrite");
+    const done = transactionDone(tx);
     const products = tx.objectStore(STORE);
     const marker = tx.objectStore(META);
     const migration = await new Promise((resolve, reject) => {
@@ -60,7 +61,7 @@
     });
     if (!migration) {
       legacy.forEach(item => {
-        if (item && /^\d{10}$/.test(String(item.procurementCode || ""))) {
+        if (item && /^\\d{10}$/.test(String(item.procurementCode || ""))) {
           products.put({
             ...item,
             internalCode: String(item.procurementCode).slice(0, 8),
@@ -70,7 +71,7 @@
       });
       marker.put({ key: "legacy-local-storage-migrated", value: true, migratedAt: new Date().toISOString() });
     }
-    await transactionDone(tx);
+    await done;
   }
 
   async function ready() {
@@ -82,18 +83,20 @@
   async function getAll() {
     const db = await ready();
     const tx = db.transaction(STORE, "readonly");
+    const done = transactionDone(tx);
     const request = tx.objectStore(STORE).getAll();
     const result = await new Promise((resolve, reject) => {
       request.onsuccess = () => resolve(request.result || []);
       request.onerror = () => reject(request.error || new Error("خواندن موجودی انجام نشد."));
     });
-    await transactionDone(tx);
+    await done;
     return result.sort((a, b) => String(a.procurementCode).localeCompare(String(b.procurementCode)));
   }
 
   async function addMany(items) {
     const db = await ready();
     const tx = db.transaction(STORE, "readwrite");
+    const done = transactionDone(tx);
     const store = tx.objectStore(STORE);
     const existingKeys = await new Promise((resolve, reject) => {
       const request = store.getAllKeys();
@@ -118,7 +121,7 @@
       existingKeys.add(code);
       added.push(record);
     }
-    await transactionDone(tx);
+    await done;
     return { added, skipped };
   }
 
