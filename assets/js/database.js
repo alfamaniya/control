@@ -61,7 +61,7 @@
     });
     if (!migration) {
       legacy.forEach(item => {
-        if (item && /^\\d{10}$/.test(String(item.procurementCode || ""))) {
+        if (item && /^\d{10}$/.test(String(item.procurementCode || ""))) {
           products.put({
             ...item,
             internalCode: String(item.procurementCode).slice(0, 8),
