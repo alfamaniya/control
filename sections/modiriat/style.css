@@ -140,3 +140,89 @@
 @media(max-width:600px){
   .management-methods .entry-method-card{min-height:165px;padding:21px}
 }
+
+
+/* اصلاح قطعی چیدمان کارت‌ها: تعریف مستقل شبکه، چون کلاس پایه entry-methods در این صفحه بارگذاری نمی‌شود */
+.management-home .management-methods{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:20px;
+  width:100%;
+  margin:30px 0 0;
+}
+.management-home .management-methods > a.entry-method-card{
+  display:flex !important;
+  position:relative;
+  box-sizing:border-box;
+  width:100%;
+  min-height:190px;
+  padding:25px;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:flex-start;
+  gap:12px;
+  overflow:hidden;
+  border:1px solid #dfe9ef;
+  border-radius:18px;
+  background:linear-gradient(145deg,#fff 0%,#f4fafc 100%);
+  color:#1b2b43;
+  text-decoration:none;
+  box-shadow:0 8px 24px rgba(25,48,78,.08);
+  transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.management-home .management-methods > a.entry-method-card::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto;
+  height:4px;
+  background:linear-gradient(90deg,#16a6a0,#68cfc0);
+}
+.management-home .management-methods > a.entry-method-card:hover{
+  transform:translateY(-3px);
+  border-color:#9ed8d1;
+  box-shadow:0 14px 30px rgba(25,48,78,.13);
+}
+.management-home .management-methods .entry-method-icon{
+  display:grid;
+  width:52px;
+  height:52px;
+  flex:0 0 52px;
+  place-items:center;
+  border:1px solid #d4eeeb;
+  border-radius:15px;
+  background:#e6f8f4;
+  color:#078b91;
+  font-size:27px;
+}
+.management-home .management-methods .entry-method-card strong{
+  display:block;
+  color:#203652;
+  font-size:15px;
+  font-weight:900;
+  line-height:1.8;
+}
+.management-home .management-methods .entry-method-card p{
+  display:block;
+  margin:0;
+  color:#718096;
+  font-size:12px;
+  line-height:2;
+}
+.management-home .management-methods .entry-method-arrow{
+  position:absolute;
+  left:22px;
+  bottom:20px;
+  display:grid;
+  width:34px;
+  height:34px;
+  place-items:center;
+  border:1px solid #e0ecef;
+  border-radius:11px;
+  background:#fff;
+  color:#078b91;
+  font-size:19px;
+}
+@media(max-width:600px){
+  .management-home .management-methods{grid-template-columns:1fr;gap:14px;margin-top:22px}
+  .management-home .management-methods > a.entry-method-card{min-height:165px;padding:21px}
+}
