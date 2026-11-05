@@ -1,6 +1,6 @@
 (() => {
   const script = document.currentScript;
-  const root = new URL("../../", script.src);
+  const root = new URL("../", script.src);
   const shell = document.querySelector(".app-shell, .sidebar-demo-shell");
   const mount = document.querySelector("[data-control-sidebar]");
   if (!shell || !mount) return;
