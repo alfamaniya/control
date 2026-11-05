@@ -4,13 +4,15 @@
   const sidebar = document.getElementById("sidebar");
   if (!shell || !toggle || !sidebar) return;
 
-  const currentPath = window.location.pathname.replace(/\\/$/, "/");
+  const normalizePath = (path) => path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
+  const currentPath = normalizePath(window.location.pathname);
+
   document.querySelectorAll(".nav-group").forEach((group) => {
     const link = group.querySelector(".nav-group-link");
     const submenu = group.querySelector(".nav-submenu");
     if (!link || !submenu) return;
 
-    const resolvePath = (href) => new URL(href, window.location.href).pathname.replace(/\\/$/, "/");
+    const resolvePath = (href) => normalizePath(new URL(href, window.location.href).pathname);
     const parentMatch = resolvePath(link.getAttribute("href")) === currentPath;
     const childLinks = Array.from(submenu.querySelectorAll("a"));
     const childMatch = childLinks.some((child) => resolvePath(child.getAttribute("href")) === currentPath);
