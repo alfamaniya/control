@@ -227,5 +227,43 @@
       });
   }
 
-  window.ControlDB = Object.freeze({ getAll, addMany, createDispatch, getKardex });
+
+  async function deleteProduct(procurementCode) {
+    const code = String(procurementCode || "");
+    if (!/^\\d{10}$/.test(code)) throw new Error("کد تدارکاتی کالا معتبر نیست.");
+    const db = await ready();
+    const tx = db.transaction(STORE, "readwrite");
+    const done = transactionDone(tx);
+    const store = tx.objectStore(STORE);
+    const existing = await new Promise((resolve, reject) => {
+      const request = store.get(code);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error("بررسی کالای انتخاب‌شده ناموفق بود."));
+    });
+    if (!existing) {
+      tx.abort();
+      try { await done; } catch (_) {}
+      return false;
+    }
+    store.delete(code);
+    await done;
+    return true;
+  }
+
+  async function deleteAllProducts() {
+    const db = await ready();
+    const tx = db.transaction(STORE, "readwrite");
+    const done = transactionDone(tx);
+    const store = tx.objectStore(STORE);
+    const count = await new Promise((resolve, reject) => {
+      const request = store.count();
+      request.onsuccess = () => resolve(request.result || 0);
+      request.onerror = () => reject(request.error || new Error("شمارش کالاها ناموفق بود."));
+    });
+    store.clear();
+    await done;
+    return count;
+  }
+
+  window.ControlDB = Object.freeze({ getAll, addMany, createDispatch, getKardex, deleteProduct, deleteAllProducts });
 })();
