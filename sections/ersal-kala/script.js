@@ -69,13 +69,16 @@
     $("descriptionSuggestions").hidden = true;
     $("selectedDescription").textContent = product.description || "بدون شرح";
     $("selectedCode").textContent = "کد تدارکاتی: " + product.procurementCode + " | کد اختصاصی: " + String(product.procurementCode).slice(0, 8);
-    $("selectedStock").textContent = "موجودی قابل ارسال: " + fa(stockOf(product));
-    quantityInput.max = String(stockOf(product));
-    quantityInput.value = stockOf(product) > 0 ? "1" : "0";
-    quantityInput.disabled = stockOf(product) < 1;
-    $("addDispatchItem").disabled = stockOf(product) < 1;
+    $("selectedStock").textContent = "موجودی قابل ارسال: " + fa(remaining) + " از " + fa(stockOf(product));
+    const alreadyAdded = dispatchItems.find(item => item.procurementCode === product.procurementCode)?.quantity || 0;
+    const remaining = Math.max(0, stockOf(product) - alreadyAdded);
+    quantityInput.max = String(remaining);
+    quantityInput.value = remaining > 0 ? "1" : "0";
+    quantityInput.disabled = remaining < 1;
+    $("addDispatchItem").disabled = remaining < 1;
     selectedBox.hidden = false;
-    showMessage(stockOf(product) < 1 ? "موجودی این کالا صفر است و امکان ارسال ندارد." : "");
+    if (remaining > 0) quantityInput.focus();
+    showMessage(remaining < 1 ? "تمام موجودی این کالا در فهرست جمع‌بندی قرار گرفته است." : "");
   }
 
   function renderItems() {
@@ -124,24 +127,18 @@
     }
   });
 
-  $("addDispatchItem").addEventListener("click", () => {
+  function addCurrentProduct() {
     if (!selectedProduct) return;
-    const available = stockOf(selectedProduct);
+    const alreadyAdded = dispatchItems.find(item => item.procurementCode === selectedProduct.procurementCode)?.quantity || 0;
+    const available = Math.max(0, stockOf(selectedProduct) - alreadyAdded);
     let quantity = Math.floor(numberOf(quantityInput.value));
     if (quantity > available) quantity = available;
     if (quantity < 1) {
-      showMessage("تعداد ارسالی باید حداقل یک عدد باشد و از موجودی بیشتر نشود.", true);
-      quantityInput.value = available > 0 ? "1" : "0";
+      showMessage("تعداد ارسالی باید حداقل یک عدد باشد و از موجودی باقی‌مانده بیشتر نشود.", true);
+      quantityInput.value = available > 0 ? String(available) : "0";
       return;
     }
     const existing = dispatchItems.find(item => item.procurementCode === selectedProduct.procurementCode);
-    const alreadyAdded = existing ? existing.quantity : 0;
-    const maxAllowed = Math.max(0, available - alreadyAdded);
-    if (maxAllowed < 1) {
-      showMessage("تمام موجودی این کالا در فهرست ارسال قرار گرفته است.", true);
-      return;
-    }
-    quantity = Math.min(quantity, maxAllowed);
     if (existing) existing.quantity += quantity;
     else dispatchItems.push({
       procurementCode: selectedProduct.procurementCode,
@@ -151,13 +148,26 @@
       quantity
     });
     renderItems();
-    showMessage(quantity < Math.floor(numberOf(quantityInput.value)) ? "تعداد به حداکثر موجودی قابل ارسال محدود شد." : "کالا به فهرست ارسال اضافه شد.");
+    selectedProduct = null;
+    selectedBox.hidden = true;
+    procurementSearch.value = "";
+    descriptionSearch.value = "";
     quantityInput.value = "1";
+    showMessage("کالا به باکس جمع‌بندی منتقل شد. کالای بعدی را جست‌وجو کنید.");
+    procurementSearch.focus();
+  }
+  $("addDispatchItem").addEventListener("click", addCurrentProduct);
+  quantityInput.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addCurrentProduct();
+    }
   });
 
   quantityInput.addEventListener("change", () => {
     if (!selectedProduct) return;
-    const max = stockOf(selectedProduct);
+    const alreadyAdded = dispatchItems.find(item => item.procurementCode === selectedProduct.procurementCode)?.quantity || 0;
+    const max = Math.max(0, stockOf(selectedProduct) - alreadyAdded);
     const requested = Math.floor(numberOf(quantityInput.value));
     quantityInput.value = String(Math.max(1, Math.min(requested || 1, max)));
   });
