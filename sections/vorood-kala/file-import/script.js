@@ -1,6 +1,5 @@
 (() => {
   "use strict";
-  const STORAGE_KEY = "control.inventory.v1";
   const $ = (id) => document.getElementById(id);
   const fileInput = $("goodsFile"), dropzone = $("dropzone");
   const selectedFileRow = $("selectedFileRow"), fileName = $("selectedFileName");
@@ -21,11 +20,6 @@
     message.className = "import-message" + (type ? " " + type : "");
     message.hidden = false;
   }
-  function readInventory() {
-    try { const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); return Array.isArray(data) ? data : []; }
-    catch { return []; }
-  }
-  function saveInventory(items) { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
 
   // The internal identifier is exactly the first eight digits of the procurement code.
   function makeInternalCode(procurementCode) {
@@ -108,8 +102,8 @@
     }
   }
 
-  function classifyRows(rows) {
-    const inventory = readInventory();
+  async function classifyRows(rows) {
+    const inventory = await window.ControlDB.getAll();
     const procurementCodes = new Set(inventory.map(item => String(item.procurementCode || "")));
     const seenProcurement = new Set();
     validRows = []; discrepancies = [];
@@ -198,27 +192,28 @@
     try {
       await parseFile(selectedFile);
       if (!importedRows.length) throw new Error("هیچ ردیف کالایی در فایل پیدا نشد.");
-      classifyRows(importedRows); renderPreview(); previewPanel.hidden = false;
+      await classifyRows(importedRows); renderPreview(); previewPanel.hidden = false;
       showMessage("فایل با موفقیت خوانده شد. کدهای اختصاصی تولید شده‌اند؛ مغایرت‌ها را بررسی و ثبت را تأیید کنید.", "success");
       previewPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
       showMessage(error.message || "خواندن فایل با خطا مواجه شد.", "error");
     } finally { confirmFileButton.disabled = false; }
   });
-  confirmButton.addEventListener("click", () => {
+  confirmButton.addEventListener("click", async () => {
     if (!validRows.length) return;
+    confirmButton.disabled = true;
     try {
-      const current = readInventory(), known = new Set(current.map(item => String(item.procurementCode || "")));
-      const fresh = validRows.filter(item => !known.has(item.procurementCode));
-      const skipped = validRows.filter(item => known.has(item.procurementCode));
-      saveInventory(current.concat(fresh.map(item => ({ ...item, createdAt: new Date().toISOString(), source: "file-import" }))));
-      const finalIssues = discrepancies.concat(skipped.map(item => ({
+      const outcome = await window.ControlDB.addMany(validRows.map(item => ({ ...item, source: "file-import" })));
+      const finalIssues = discrepancies.concat(outcome.skipped.map(item => ({
         rowNumber: "—", internalCode: item.internalCode, description: item.description,
         quantityRaw: String(item.quantity), group: item.group, reasons: ["این کد هنگام تأیید، در موجودی ثبت شده بود"]
       })));
-      renderResult(fresh.length, finalIssues); confirmButton.disabled = true;
-      showMessage("عملیات ورود اطلاعات انجام شد.", "success");
+      renderResult(outcome.added.length, finalIssues);
+      showMessage("اطلاعات با موفقیت در پایگاه داده محلی ذخیره شد.", "success");
       resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-    } catch { showMessage("ثبت اطلاعات انجام نشد. فضای ذخیره‌سازی مرورگر را بررسی کنید.", "error"); }
+    } catch (error) {
+      confirmButton.disabled = false;
+      showMessage(error.message || "ثبت اطلاعات در پایگاه داده محلی انجام نشد.", "error");
+    }
   });
 })();
