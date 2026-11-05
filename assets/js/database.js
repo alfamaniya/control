@@ -230,7 +230,7 @@
 
   async function deleteProduct(procurementCode) {
     const code = String(procurementCode || "");
-    if (!/^\\d{10}$/.test(code)) throw new Error("کد تدارکاتی کالا معتبر نیست.");
+    if (!/^\d{10}$/.test(code)) throw new Error("کد تدارکاتی کالا معتبر نیست.");
     const db = await ready();
     const tx = db.transaction(STORE, "readwrite");
     const done = transactionDone(tx);
