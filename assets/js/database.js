@@ -250,6 +250,53 @@
     return true;
   }
 
+  async function adjustStock(procurementCode, newQuantity) {
+    const code = String(procurementCode || "");
+    const quantity = Number(newQuantity);
+    if (!/^\d{10}$/.test(code)) throw new Error("کد تدارکاتی کالا معتبر نیست.");
+    if (!Number.isSafeInteger(quantity) || quantity < 0) throw new Error("موجودی جدید باید عدد صحیح و صفر یا بیشتر باشد.");
+
+    const db = await ready();
+    const tx = db.transaction([STORE, KARDEX], "readwrite");
+    const done = transactionDone(tx);
+    const products = tx.objectStore(STORE);
+    const history = tx.objectStore(KARDEX);
+    const product = await new Promise((resolve, reject) => {
+      const request = products.get(code);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error("خواندن کالای انتخاب‌شده ناموفق بود."));
+    });
+    if (!product) {
+      tx.abort();
+      try { await done; } catch (_) {}
+      throw new Error("کالای انتخاب‌شده در موجودی پیدا نشد.");
+    }
+
+    const previous = Math.max(0, Number(product.quantity) || 0);
+    const difference = quantity - previous;
+    if (difference === 0) {
+      tx.abort();
+      try { await done; } catch (_) {}
+      return { changed: false, product, previous, quantity };
+    }
+
+    const operation = difference > 0 ? "تعدیل مثبت" : "تعدیل منفی";
+    product.quantity = quantity;
+    products.put(product);
+    history.add({
+      procurementCode: code,
+      operation,
+      quantityIn: difference > 0 ? difference : 0,
+      quantityOut: difference < 0 ? Math.abs(difference) : 0,
+      stockAfter: quantity,
+      occurredAt: new Date().toISOString(),
+      source: "stock-adjustment",
+      previousStock: previous
+    });
+    await done;
+    return { changed: true, operation, difference: Math.abs(difference), previous, quantity, product };
+  }
+
   async function deleteAllProducts() {
     const db = await ready();
     const tx = db.transaction(STORE, "readwrite");
@@ -265,5 +312,5 @@
     return count;
   }
 
-  window.ControlDB = Object.freeze({ getAll, addMany, createDispatch, getKardex, deleteProduct, deleteAllProducts });
+  window.ControlDB = Object.freeze({ getAll, addMany, createDispatch, getKardex, deleteProduct, deleteAllProducts, adjustStock });
 })();
