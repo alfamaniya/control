@@ -2,10 +2,11 @@
   "use strict";
 
   const DB_NAME = "control-offline-db";
-  const DB_VERSION = 2;
+  const DB_VERSION = 3;
   const STORE = "products";
   const META = "meta";
   const DISPATCHES = "dispatches";
+  const KARDEX = "kardex";
   const LEGACY_KEY = "control.inventory.v1";
   let databasePromise;
 
@@ -22,6 +23,7 @@
         if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: "procurementCode" });
         if (!db.objectStoreNames.contains(META)) db.createObjectStore(META, { keyPath: "key" });
         if (!db.objectStoreNames.contains(DISPATCHES)) db.createObjectStore(DISPATCHES, { keyPath: "id", autoIncrement: true });
+        if (!db.objectStoreNames.contains(KARDEX)) db.createObjectStore(KARDEX, { keyPath: "id", autoIncrement: true });
       };
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error || new Error("باز کردن پایگاه داده محلی ناموفق بود."));
@@ -87,9 +89,10 @@
 
   async function addMany(items) {
     const db = await ready();
-    const tx = db.transaction(STORE, "readwrite");
+    const tx = db.transaction([STORE, KARDEX], "readwrite");
     const done = transactionDone(tx);
     const store = tx.objectStore(STORE);
+    const kardexStore = tx.objectStore(KARDEX);
     const existingKeys = await new Promise((resolve, reject) => {
       const request = store.getAllKeys();
       request.onsuccess = () => resolve(new Set(request.result.map(String)));
@@ -102,6 +105,15 @@
       if (!/^\d{10}$/.test(code) || existingKeys.has(code)) { skipped.push(item); continue; }
       const record = { ...item, procurementCode: code, internalCode: code.slice(0, 8), createdAt: item.createdAt || new Date().toISOString() };
       store.add(record);
+      kardexStore.add({
+        procurementCode: code,
+        operation: "ورود",
+        quantityIn: Math.max(0, Number(record.quantity) || 0),
+        quantityOut: 0,
+        stockAfter: Math.max(0, Number(record.quantity) || 0),
+        occurredAt: new Date().toISOString(),
+        source: record.source || "initial-import"
+      });
       existingKeys.add(code);
       added.push(record);
     }
@@ -111,10 +123,11 @@
 
   async function createDispatch(items, metadata) {
     const db = await ready();
-    const tx = db.transaction([STORE, DISPATCHES], "readwrite");
+    const tx = db.transaction([STORE, DISPATCHES, KARDEX], "readwrite");
     const done = transactionDone(tx);
     const productStore = tx.objectStore(STORE);
     const dispatchStore = tx.objectStore(DISPATCHES);
+    const kardexStore = tx.objectStore(KARDEX);
     const products = await new Promise((resolve, reject) => {
       const request = productStore.getAll();
       request.onsuccess = () => resolve(request.result || []);
@@ -136,7 +149,8 @@
         procurementCode: code,
         description: product.description || requested.description || "",
         group: product.group || requested.group || "",
-        quantity
+        quantity,
+        stockAfter: product.quantity
       });
     }
     if (!actualItems.length) {
@@ -144,15 +158,68 @@
       try { await done; } catch (_) { /* لغو عمدی تراکنش */ }
       throw new Error("هیچ‌یک از کالاهای انتخاب‌شده موجودی قابل ارسال ندارند. فهرست را بررسی کنید.");
     }
-    const dispatch = { ...metadata, items: actualItems, createdAt: new Date().toISOString() };
+    const createdAt = new Date().toISOString();
+    const dispatch = { ...metadata, items: actualItems, createdAt };
     const dispatchId = await new Promise((resolve, reject) => {
       const request = dispatchStore.add(dispatch);
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error || new Error("ثبت سابقه ارسال ناموفق بود."));
     });
+    actualItems.forEach(item => {
+      kardexStore.add({
+        dispatchId,
+        procurementCode: item.procurementCode,
+        operation: "خروج",
+        quantityIn: 0,
+        quantityOut: item.quantity,
+        stockAfter: item.stockAfter,
+        occurredAt: createdAt,
+        source: "dispatch"
+      });
+    });
     await done;
     return { id: dispatchId, items: actualItems };
   }
 
-  window.ControlDB = Object.freeze({ getAll, addMany, createDispatch });
+  async function getKardex(procurementCode) {
+    const db = await ready();
+    const tx = db.transaction([KARDEX, DISPATCHES], "readonly");
+    const done = transactionDone(tx);
+    const kardexRequest = tx.objectStore(KARDEX).getAll();
+    const dispatchRequest = tx.objectStore(DISPATCHES).getAll();
+    const [movements, dispatches] = await Promise.all([
+      new Promise((resolve, reject) => {
+        kardexRequest.onsuccess = () => resolve(kardexRequest.result || []);
+        kardexRequest.onerror = () => reject(kardexRequest.error || new Error("خواندن سوابق کاردکس ناموفق بود."));
+      }),
+      new Promise((resolve, reject) => {
+        dispatchRequest.onsuccess = () => resolve(dispatchRequest.result || []);
+        dispatchRequest.onerror = () => reject(dispatchRequest.error || new Error("خواندن سوابق ارسال ناموفق بود."));
+      })
+    ]);
+    await done;
+    const code = String(procurementCode);
+    const knownDispatchIds = new Set(movements.map(item => item.dispatchId).filter(value => value !== undefined));
+    const legacyDispatchMovements = [];
+    dispatches.forEach(dispatch => {
+      if (knownDispatchIds.has(dispatch.id)) return;
+      (dispatch.items || []).forEach(item => {
+        if (String(item.procurementCode) !== code) return;
+        legacyDispatchMovements.push({
+          procurementCode: code,
+          operation: "خروج",
+          quantityIn: 0,
+          quantityOut: Math.max(0, Number(item.quantity) || 0),
+          stockAfter: null,
+          occurredAt: dispatch.createdAt || dispatch.dispatchedAt || "",
+          source: "legacy-dispatch"
+        });
+      });
+    });
+    return movements.filter(item => String(item.procurementCode) === code)
+      .concat(legacyDispatchMovements)
+      .sort((a, b) => String(b.occurredAt || "").localeCompare(String(a.occurredAt || "")));
+  }
+
+  window.ControlDB = Object.freeze({ getAll, addMany, createDispatch, getKardex });
 })();
