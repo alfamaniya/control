@@ -122,17 +122,6 @@
         submenu.append(child);
       });
       group.append(submenu);
-      const toggle = document.createElement("button");
-      toggle.type = "button";
-      toggle.className = "nav-group-expand";
-      toggle.hidden = true;
-      toggle.setAttribute("aria-label","باز و بسته کردن زیرمجموعه‌های " + item.label);
-      toggle.addEventListener("click",() => {
-        const open = !group.classList.contains("is-open");
-        group.classList.toggle("is-open",open);
-        submenu.hidden = !open;
-      });
-      heading.append(toggle);
       link.addEventListener("click",(event) => {
         if (event.target === chevron) {
           event.preventDefault();
@@ -147,16 +136,6 @@
     panelNav.append(group);
   });
   rail.append(railNav);
-  const railBottom = document.createElement("div");
-  railBottom.className = "sidebar-rail-bottom";
-  const bottomLink = document.createElement("a");
-  bottomLink.className = "sidebar-rail-link";
-  bottomLink.href = url("sections/modiriat/index.html");
-  bottomLink.title = "تنظیمات و مدیریت";
-  bottomLink.setAttribute("aria-label","تنظیمات و مدیریت");
-  bottomLink.innerHTML = '<span class="sidebar-rail-icon" aria-hidden="true">⚙</span>';
-  railBottom.append(bottomLink);
-  rail.append(railBottom);
   panel.append(panelNav);
   const foot = document.createElement("div");
   foot.className = "sidebar-panel-foot";
