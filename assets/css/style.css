@@ -179,3 +179,13 @@ table thead th.sort-active {
   color: #087f83;
   background: #eaf7f6;
 }
+
+
+/* Expandable sidebar groups */
+.nav-group-toggle{width:100%;border:0;background:transparent;text-align:right;font-family:inherit;cursor:pointer}
+.nav-group-toggle .nav-chevron{margin-right:auto;font-size:1.05rem;color:#91a6bc;transition:transform .2s ease}
+.nav-group.is-open .nav-group-toggle .nav-chevron{transform:rotate(180deg);color:#6fe0ce}
+.nav-submenu[hidden]{display:none}
+.nav-submenu:not([hidden]){animation:submenu-reveal .18s ease-out}
+@keyframes submenu-reveal{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.nav-submenu:not([hidden]){animation:none}.nav-group-toggle .nav-chevron{transition:none}}
