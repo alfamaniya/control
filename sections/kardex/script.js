@@ -91,7 +91,7 @@
       cell(tr, fa(index + 1));
       const operation = document.createElement("td");
       const badge = document.createElement("span");
-      badge.className = "operation-badge " + (movement.operation === "ورود" ? "in" : "out");
+      badge.className = "operation-badge " + (movement.operation === "ورود" || movement.operation === "تعدیل مثبت" ? "in" : "out");
       badge.textContent = movement.operation || "—";
       operation.appendChild(badge);
       tr.appendChild(operation);
