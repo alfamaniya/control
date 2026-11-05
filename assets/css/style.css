@@ -205,3 +205,24 @@ table thead th.sort-active {
 .sidebar .nav-group-toggle:not(.active){background:transparent;color:#c2cfde}
 .sidebar .nav-group-toggle:not(.active):hover{background:rgba(255,255,255,.065);color:#fff}
 .sidebar .nav-group-toggle.active{color:#fff}
+
+
+/* Unified sidebar groups: section title navigates, chevron only expands */
+.sidebar .nav-group-heading{display:flex;align-items:stretch;gap:6px;width:100%}
+.sidebar .nav-group-heading>.nav-group-link{flex:1;min-width:0;text-decoration:none}
+.sidebar .nav-group-heading>.nav-group-toggle{
+  appearance:none;-webkit-appearance:none;display:grid;place-items:center;
+  flex:0 0 38px;width:38px;min-height:48px;padding:0;
+  border:1px solid rgba(154,177,201,.2);border-radius:11px;
+  color:#91a6bc;background:rgba(255,255,255,.035);
+  font:inherit;cursor:pointer;transition:background .2s ease,border-color .2s ease,color .2s ease;
+}
+.sidebar .nav-group-heading>.nav-group-toggle:hover,
+.sidebar .nav-group.is-open .nav-group-toggle{
+  color:#6fe0ce;border-color:rgba(85,213,193,.42);background:rgba(39,181,165,.1)
+}
+.sidebar .nav-group-toggle .nav-chevron{display:inline-block;margin:0;transition:transform .2s ease}
+.sidebar .nav-group.is-open .nav-group-toggle .nav-chevron{transform:rotate(180deg)}
+.sidebar .nav-group .nav-submenu{margin-top:7px}
+.sidebar .nav-group .nav-submenu[hidden]{display:none}
+@media(prefers-reduced-motion:reduce){.sidebar .nav-group-toggle .nav-chevron{transition:none}}
