@@ -16,3 +16,27 @@
 .manual-entry-message.success{background:#eaf8f4;color:#14765e;border:1px solid #cceee2}
 .manual-entry-message.error{background:#fff1f0;color:#b33b36;border:1px solid #f4d4d1}
 @media(max-width:760px){.manual-form-actions .primary-button{width:100%}}
+
+/* دکمه ثبت دستی؛ هم‌هویت با دکمه‌های اصلی سامانه */
+.manual-form-actions{align-items:center}
+.manual-form-actions .primary-button{
+  position:relative;isolation:isolate;min-width:218px;min-height:48px;padding:0 22px;
+  gap:10px;border:1px solid rgba(7,116,126,.18);border-radius:12px;
+  background:linear-gradient(135deg,#07969a 0%,#08747e 100%);
+  color:#fff;font-family:inherit;font-size:13px;font-weight:800;
+  box-shadow:0 6px 16px rgba(8,127,131,.22),inset 0 1px 0 rgba(255,255,255,.2);
+  cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,filter .2s ease
+}
+.manual-form-actions .primary-button::before{
+  content:"✓";display:inline-grid;place-items:center;width:23px;height:23px;
+  border:1px solid rgba(255,255,255,.42);border-radius:8px;
+  background:rgba(255,255,255,.14);font-size:14px;font-weight:900
+}
+.manual-form-actions .primary-button:hover:not(:disabled){
+  transform:translateY(-2px);filter:saturate(1.08);
+  box-shadow:0 10px 22px rgba(8,127,131,.28),inset 0 1px 0 rgba(255,255,255,.22)
+}
+.manual-form-actions .primary-button:active:not(:disabled){transform:translateY(0);box-shadow:0 3px 9px rgba(8,127,131,.2)}
+.manual-form-actions .primary-button:focus-visible{outline:3px solid rgba(39,181,165,.3);outline-offset:3px}
+.manual-form-actions .primary-button:disabled{opacity:.58;cursor:wait;box-shadow:none}
+@media(max-width:760px){.manual-form-actions .primary-button{width:100%;min-height:50px}}
