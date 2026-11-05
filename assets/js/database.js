@@ -299,17 +299,36 @@
 
   async function deleteAllProducts() {
     const db = await ready();
-    const tx = db.transaction(STORE, "readwrite");
+    const tx = db.transaction([STORE, KARDEX], "readwrite");
     const done = transactionDone(tx);
     const store = tx.objectStore(STORE);
-    const count = await new Promise((resolve, reject) => {
-      const request = store.count();
-      request.onsuccess = () => resolve(request.result || 0);
-      request.onerror = () => reject(request.error || new Error("شمارش کالاها ناموفق بود."));
+    const history = tx.objectStore(KARDEX);
+    const products = await new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error || new Error("خواندن کالاها برای حذف کلی ناموفق بود."));
     });
+    const occurredAt = new Date().toISOString();
+
+    products.forEach(product => {
+      const stock = Math.max(0, Number(product.quantity) || 0);
+      if (!stock) return;
+      const code = String(product.procurementCode || "");
+      history.add({
+        procurementCode: code,
+        operation: "تعدیل منفی",
+        quantityIn: 0,
+        quantityOut: stock,
+        stockAfter: 0,
+        occurredAt,
+        source: "bulk-product-deletion",
+        previousStock: stock
+      });
+    });
+
     store.clear();
     await done;
-    return count;
+    return products.length;
   }
 
   window.ControlDB = Object.freeze({ getAll, addMany, createDispatch, getKardex, deleteProduct, deleteAllProducts, adjustStock });
