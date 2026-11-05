@@ -138,5 +138,117 @@
     searchInput.focus();
   });
   $("deleteAllProducts").addEventListener("click", removeAllProducts);
+
+  const stockSearch = $("stockProductSearch");
+  const stockResults = $("stockSearchResults");
+  const stockCard = $("stockSelectedCard");
+  const stockForm = $("stockAdjustmentForm");
+  const stockMessage = $("stockAdjustmentMessage");
+  let stockSelectedProduct = null;
+
+  function renderStockMatches() {
+    const term = normalizeDigits(stockSearch.value.trim());
+    stockResults.innerHTML = "";
+    stockCard.hidden = true;
+    stockSelectedProduct = null;
+    if (!term) return;
+
+    const matches = products.filter(product => [
+      product.procurementCode,
+      product.internalCode || String(product.procurementCode || "").slice(0, 8),
+      product.description,
+      product.group
+    ].map(normalizeDigits).join(" ").includes(term)).slice(0, 30);
+
+    matches.forEach(product => {
+      const card = document.createElement("article");
+      card.className = "product-result-card";
+      const details = document.createElement("div");
+      details.className = "product-result-details";
+      const title = document.createElement("strong");
+      title.className = "product-result-title";
+      title.textContent = product.description || "بدون شرح";
+      const meta = document.createElement("div");
+      meta.className = "product-result-meta";
+      const code = document.createElement("span");
+      code.textContent = "کد تدارکاتی: " + product.procurementCode;
+      const stock = document.createElement("span");
+      stock.textContent = "موجودی فعلی: " + faNumber(product.quantity ?? 0);
+      meta.append(code, stock);
+      details.append(title, meta);
+      const choose = document.createElement("button");
+      choose.type = "button";
+      choose.className = "stock-choose-button";
+      choose.textContent = "انتخاب کالا";
+      choose.addEventListener("click", () => selectStockProduct(product));
+      card.append(details, choose);
+      stockResults.appendChild(card);
+    });
+
+    if (!matches.length) {
+      const noResult = document.createElement("div");
+      noResult.className = "management-empty";
+      noResult.textContent = "کالایی با این مشخصات پیدا نشد.";
+      stockResults.appendChild(noResult);
+    }
+  }
+
+  function selectStockProduct(product) {
+    stockSelectedProduct = product;
+    stockResults.innerHTML = "";
+    stockCard.hidden = false;
+    $("stockSelectedDescription").textContent = product.description || "بدون شرح";
+    $("stockSelectedCodes").textContent = "کد اختصاصی: " + (product.internalCode || String(product.procurementCode).slice(0, 8)) + " | کد تدارکاتی: " + product.procurementCode;
+    $("stockCurrentQuantity").textContent = faNumber(product.quantity ?? 0);
+    $("newStockQuantity").value = String(Math.max(0, Number(product.quantity) || 0));
+    stockMessage.hidden = true;
+    stockMessage.textContent = "";
+  }
+
+  stockSearch.addEventListener("input", renderStockMatches);
+  stockForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!stockSelectedProduct) {
+      stockMessage.textContent = "ابتدا یک کالا را از نتایج جست‌وجو انتخاب کنید.";
+      stockMessage.className = "management-message error";
+      stockMessage.hidden = false;
+      return;
+    }
+    const raw = $("newStockQuantity").value.trim();
+    const normalizedQuantity = normalizeDigits(raw);
+    if (!/^\d+$/.test(normalizedQuantity)) {
+      stockMessage.textContent = "موجودی جدید باید یک عدد صحیح و صفر یا بیشتر باشد.";
+      stockMessage.className = "management-message error";
+      stockMessage.hidden = false;
+      return;
+    }
+    const newQuantity = Number(normalizedQuantity);
+    if (!Number.isSafeInteger(newQuantity)) {
+      stockMessage.textContent = "عدد واردشده بیش از حد بزرگ است.";
+      stockMessage.className = "management-message error";
+      stockMessage.hidden = false;
+      return;
+    }
+    try {
+      const result = await window.ControlDB.adjustStock(stockSelectedProduct.procurementCode, newQuantity);
+      products = await window.ControlDB.getAll();
+      const updated = products.find(item => item.procurementCode === stockSelectedProduct.procurementCode);
+      if (updated) selectStockProduct(updated);
+      count.textContent = faNumber(products.length);
+      renderResults();
+      if (!result.changed) {
+        stockMessage.textContent = "موجودی تغییری نکرد؛ مقدار واردشده با موجودی فعلی برابر است.";
+      } else {
+        stockMessage.textContent = result.operation + " با موفقیت ثبت شد. مقدار تغییر: " + faNumber(result.difference) + " | موجودی جدید: " + faNumber(result.quantity);
+      }
+      stockMessage.className = "management-message";
+      stockMessage.hidden = false;
+    } catch (error) {
+      stockMessage.textContent = error.message || "ثبت تعدیل موجودی ناموفق بود.";
+      stockMessage.className = "management-message error";
+      stockMessage.hidden = false;
+    }
+  });
+
   loadProducts();
 })();
