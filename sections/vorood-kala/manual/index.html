@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ورود دستی</title>
+  <meta name="theme-color" content="#14243d">
+  <title>ورود دستی کالا</title>
   <link rel="stylesheet" href="../../../assets/css/style.css">
   <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="style.css">
@@ -22,10 +23,10 @@
       <nav class="sidebar-nav">
         <a class="nav-link" href="../../../index.html"><span class="nav-number">01</span><span>داشبورد</span></a>
         <div class="nav-group">
-          <a class="nav-link active" href="../index.html" aria-current="page"><span class="nav-number">02</span><span>ورود کالا</span></a>
+          <a class="nav-link active" href="../index.html"><span class="nav-number">02</span><span>ورود کالا</span></a>
           <div class="nav-submenu" aria-label="روش‌های ورود کالا">
-            <a class="nav-sublink" href="../file-import/index.html" >ورود از فایل Excel / CSV</a>
-            <a class="nav-sublink" href="../copy-paste/index.html" >کپی از جدول</a>
+            <a class="nav-sublink" href="../file-import/index.html">ورود از فایل Excel / CSV</a>
+            <a class="nav-sublink" href="../copy-paste/index.html">کپی از جدول</a>
             <a class="nav-sublink" href="../manual/index.html" aria-current="page">ثبت دستی کالا</a>
           </div>
         </div>
@@ -37,9 +38,49 @@
       </nav>
     </aside>
     <main class="main-content" id="mainContent">
-      <div class="page-content goods-entry-subpage">
+      <div class="page-content goods-entry-subpage manual-entry-page">
         <a class="back-link" href="../index.html">بازگشت به ورود کالا</a>
-        <h1>ورود دستی</h1>
+
+        <section class="guide-box" aria-labelledby="manualGuideTitle">
+          <div class="guide-icon" aria-hidden="true">i</div>
+          <div class="guide-content">
+            <h1 id="manualGuideTitle">راهنمای ثبت دستی کالا</h1>
+            <p>اطلاعات کالا را در چهار فیلد زیر وارد کنید. کد تدارکاتی باید دقیقاً ۱۰ رقم باشد و کد اختصاصی کالا از ۸ رقم اول آن به دست می‌آید.</p>
+            <div class="guide-points">
+              <span><b>۱</b> کد تدارکاتی: دقیقاً ۱۰ رقم</span>
+              <span><b>۲</b> شرح کالا و گروه کالا را وارد کنید</span>
+              <span><b>۳</b> تعداد موجودی باید عددی باشد</span>
+            </div>
+            <div class="format-badge">ثبت اطلاعات پایه کالا</div>
+          </div>
+        </section>
+
+        <section class="import-panel manual-form-panel" aria-labelledby="manualFormTitle">
+          <div class="panel-heading">
+            <span class="step-number">۱</span>
+            <div><h2 id="manualFormTitle">اطلاعات کالا</h2><p>چهار فیلد زیر را تکمیل کنید.</p></div>
+          </div>
+          <form class="manual-entry-form" id="manualEntryForm">
+            <div class="manual-fields">
+              <label class="manual-field" for="procurementCode">
+                <span>کد تدارکاتی</span>
+                <input id="procurementCode" name="procurementCode" type="text" inputmode="numeric" maxlength="10" placeholder="کد تدارکاتی ۱۰ رقمی" autocomplete="off">
+              </label>
+              <label class="manual-field" for="productDescription">
+                <span>شرح کالا</span>
+                <input id="productDescription" name="description" type="text" placeholder="شرح کالا را وارد کنید" autocomplete="off">
+              </label>
+              <label class="manual-field" for="productGroup">
+                <span>گروه کالا</span>
+                <input id="productGroup" name="group" type="text" placeholder="گروه کالا را وارد کنید" autocomplete="off">
+              </label>
+              <label class="manual-field" for="productQuantity">
+                <span>تعداد موجودی</span>
+                <input id="productQuantity" name="quantity" type="number" min="0" step="1" placeholder="تعداد موجودی را وارد کنید">
+              </label>
+            </div>
+          </form>
+        </section>
       </div>
     </main>
   </div>
