@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="style.css">
   <script src="../../../assets/js/app.js" defer></script>
+  <script src="../../../assets/js/database.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body>
@@ -79,7 +80,9 @@
                 <input id="productQuantity" name="quantity" type="number" min="0" step="1" placeholder="تعداد موجودی را وارد کنید">
               </label>
             </div>
+            <div class="manual-form-actions"><button class="primary-button" id="submitManualEntry" type="submit">تأیید و ورود کالا</button></div>
           </form>
+          <div class="manual-entry-message" id="manualEntryMessage" role="status" aria-live="polite" hidden></div>
         </section>
       </div>
     </main>
