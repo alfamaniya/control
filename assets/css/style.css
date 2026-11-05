@@ -144,3 +144,38 @@ a { color: inherit; text-decoration: none; }
   background: #ffbd59;
   box-shadow: 0 0 5px rgba(255,189,89,.9), 0 0 12px rgba(255,165,54,.62), 0 0 0 3px rgba(255,189,89,.12);
 }
+
+
+/* مرتب‌سازی یکپارچه تمام جدول‌های سامانه */
+table thead th[role="button"] {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color .18s ease, color .18s ease;
+}
+table thead th[role="button"]:hover,
+table thead th[role="button"]:focus-visible {
+  background: #eaf3f6;
+  color: #087f83;
+  outline: none;
+}
+table thead th[role="button"]::after {
+  content: "↕";
+  display: inline-block;
+  margin-right: 7px;
+  color: #9aa9b8;
+  font-size: 11px;
+  font-weight: 900;
+}
+table thead th[role="button"][data-sort-direction="asc"]::after {
+  content: "↑";
+  color: #078b91;
+}
+table thead th[role="button"][data-sort-direction="desc"]::after {
+  content: "↓";
+  color: #078b91;
+}
+table thead th.sort-active {
+  color: #087f83;
+  background: #eaf7f6;
+}
