@@ -2,7 +2,7 @@
 .kardex-heading{padding:22px 24px;border:1px solid #dce9f0;border-radius:18px;background:linear-gradient(125deg,#f4fbfd 0%,#fff 68%,#f3f9fc 100%);box-shadow:0 8px 26px rgba(25,48,78,.045)}
 .kardex-heading h1{margin:0 0 7px;color:#172b4d;font-size:20px;font-weight:800}.kardex-heading p{margin:0;color:#718096;font-size:12px;line-height:1.8}
 .kardex-search-card,.kardex-product-card,.kardex-history-card{min-width:0;padding:22px;background:#fff;border:1px solid #e7edf3;border-radius:18px;box-shadow:0 8px 26px rgba(25,48,78,.045)}
-.kardex-search-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.kardex-search-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .kardex-search-field{position:relative;display:grid;gap:8px;min-width:0}.kardex-search-field label{color:#34445b;font-size:12px;font-weight:800}
 .kardex-search-field input{width:100%;min-height:43px;padding:10px 13px;color:#24364d;background:#f9fbfd;border:1px solid #dce5ef;border-radius:10px;outline:none;font:inherit;font-size:13px;transition:border-color .18s,box-shadow .18s}
 .kardex-search-field input:focus{border-color:#18b8b2;box-shadow:0 0 0 3px rgba(24,184,178,.12)}
@@ -11,7 +11,7 @@
 .kardex-message{padding:11px 14px;border-radius:10px;background:#f4f8fb;color:#60728a;font-size:12px;line-height:1.8}.kardex-message.error{background:#fff0f0;color:#b33c45}
 .kardex-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.kardex-section-title h2{margin:0 0 5px;color:#263950;font-size:16px}.kardex-section-title span{color:#8290a2;font-size:11px}
 .kardex-product-table-wrap,.kardex-table-wrap{width:100%;overflow:auto;border:1px solid #e8edf3;border-radius:12px}
-.kardex-product-table,.kardex-history-table{width:100%;min-width:760px;border-collapse:collapse;text-align:right;font-size:12px}
+.kardex-product-table,.kardex-history-table{width:100%;min-width:920px;border-collapse:collapse;text-align:right;font-size:12px}
 .kardex-product-table th,.kardex-history-table th{padding:14px 13px;background:#f5f8fb;color:#60728a;font-size:11px;font-weight:800;white-space:nowrap}
 .kardex-product-table td,.kardex-history-table td{padding:13px;border-top:1px solid #edf1f5;color:#334963;vertical-align:middle;white-space:nowrap}
 .kardex-product-table tbody tr,.kardex-history-table tbody tr{background:#fff}.kardex-product-table .kardex-code{direction:ltr;text-align:right;font-family:ui-monospace,Consolas,monospace;font-weight:800;color:#087f83}.kardex-stock{font-weight:800;color:#1d3555;font-variant-numeric:tabular-nums}
@@ -20,7 +20,7 @@
 .kardex-count{padding:7px 11px;border:1px solid #d8eeee;border-radius:9px;background:#effafa;color:#087f83;font-weight:800}
 .kardex-empty{padding:30px 15px;color:#8a97a8;text-align:center;font-size:12px;line-height:1.9}.kardex-start-empty{display:grid;justify-items:center;gap:8px;border:1px dashed #d8e5ec;border-radius:15px;background:#fbfdfe}.kardex-start-empty[hidden]{display:none}.kardex-start-empty>span{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:#e8f7f7;color:#078b91;font-size:29px}.kardex-start-empty strong{color:#314761;font-size:14px}.kardex-start-empty p{margin:0;color:#8493a4;font-size:11px}
 @media(max-width:850px){.kardex-search-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.kardex-heading,.kardex-search-card,.kardex-product-card,.kardex-history-card{padding:15px}.kardex-heading h1{font-size:18px}.kardex-search-grid{grid-template-columns:1fr}.kardex-section-title{align-items:flex-start}.kardex-product-table,.kardex-history-table{min-width:720px}}
+@media(max-width:600px){.kardex-heading,.kardex-search-card,.kardex-product-card,.kardex-history-card{padding:15px}.kardex-heading h1{font-size:18px}.kardex-search-grid{grid-template-columns:1fr}.kardex-section-title{align-items:flex-start}.kardex-product-table,.kardex-history-table{min-width:850px}}
 
 /* Visual refinement: consistent hierarchy, spacing and responsive cards */
 .kardex-page{gap:20px;min-width:0}
