@@ -206,12 +206,12 @@
     const registeredAt = new Date();
     const createdAt = registeredAt.toISOString();
     const usedExitNumbers = new Set([
-      ...existingDispatches.map(item => item.exitNumber || ""),
-      ...existingMovements.map(item => item.exitNumber || "")
+      ...existingDispatches.map(item => String(item.exitNumber || "")),
+      ...existingMovements.map(item => String(item.exitNumber || ""))
     ].filter(Boolean));
     const usedVoucherNumbers = new Set([
-      ...existingDispatches.map(item => item.voucherNumber || ""),
-      ...existingMovements.map(item => item.voucherNumber || "")
+      ...existingDispatches.map(item => String(item.voucherNumber || "")),
+      ...existingMovements.map(item => String(item.voucherNumber || ""))
     ].filter(Boolean));
     const exitNumber = createDocumentNumber("out", usedExitNumbers, registeredAt);
     const voucherNumber = createDocumentNumber("vh", usedVoucherNumbers, registeredAt);
