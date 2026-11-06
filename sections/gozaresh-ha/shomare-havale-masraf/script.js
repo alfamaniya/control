@@ -11,8 +11,9 @@
   const pageLabel = $("voucherPageLabel");
   const prevButton = $("voucherPrevPage");
   const nextButton = $("voucherNextPage");
+  const searchInput = $("voucherNumberSearch");
   const PAGE_SIZE = 20;
-  let dispatches = [], voucherRecords = [], currentPage = 1, currentPageRecords = [], selectedMetadata = null, selectedItems = [];
+  let dispatches = [], voucherRecords = [], filteredVoucherRecords = [], currentPage = 1, currentPageRecords = [], selectedMetadata = null, selectedItems = [];
 
   function setMessage(text, error = false) {
     message.textContent = text;
@@ -54,11 +55,11 @@
     }).sort((a, b) => timestamp(b.createdAt || b.dispatchedAt) - timestamp(a.createdAt || a.dispatchedAt));
   }
   function renderList() {
-    const total = voucherRecords.length;
+    const total = filteredVoucherRecords.length;
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     currentPage = Math.min(Math.max(1, currentPage), totalPages);
     const start = (currentPage - 1) * PAGE_SIZE;
-    currentPageRecords = voucherRecords.slice(start, start + PAGE_SIZE);
+    currentPageRecords = filteredVoucherRecords.slice(start, start + PAGE_SIZE);
     listRows.innerHTML = "";
     currentPageRecords.forEach((record, index) => {
       const row = document.createElement("tr");
@@ -74,7 +75,7 @@
       addCell(row, record.destination || record.destinationSub || "—");
       listRows.appendChild(row);
     });
-    $("voucherListTotal").textContent = fa(total) + " حواله";
+    $("voucherListTotal").textContent = fa(total) + (searchInput.value.trim() ? " نتیجه از " + fa(voucherRecords.length) + " حواله" : " حواله");
     pageLabel.textContent = "صفحه " + fa(currentPage) + " از " + fa(totalPages);
     pageInput.value = String(currentPage);
     pageInput.max = String(totalPages);
@@ -82,7 +83,7 @@
     nextButton.disabled = currentPage >= totalPages || total === 0;
     $("voucherListEmpty").hidden = total > 0;
     $("voucherPagination").hidden = total === 0;
-    setMessage(total ? "برای مشاهده اقلام هر حواله، ردیف موردنظر را انتخاب کنید." : "هنوز هیچ حواله مصرفی در سامانه ثبت نشده است.");
+    setMessage(total ? "برای مشاهده اقلام هر حواله، ردیف موردنظر را انتخاب کنید." : (voucherRecords.length ? "حواله‌ای با شماره واردشده پیدا نشد." : "هنوز هیچ حواله مصرفی در سامانه ثبت نشده است."));
   }
   function openDetails(record) {
     if (!record) return;
@@ -122,7 +123,7 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function goToPage(value) {
-    const totalPages = Math.max(1, Math.ceil(voucherRecords.length / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(filteredVoucherRecords.length / PAGE_SIZE));
     const page = Number(digits(value));
     if (!Number.isInteger(page) || page < 1 || page > totalPages) {
       pageInput.value = String(currentPage);
@@ -164,6 +165,7 @@
       if (!window.ControlDB || typeof window.ControlDB.getAllDispatches !== "function") throw new Error("دسترسی به پایگاه داده محلی ممکن نیست. صفحه را دوباره بارگذاری کنید.");
       dispatches = await window.ControlDB.getAllDispatches();
       voucherRecords = buildVoucherRecords(dispatches);
+      filteredVoucherRecords = voucherRecords.slice();
       renderList();
     } catch (error) {
       setMessage(error.message || "دریافت فهرست حواله‌ها ناموفق بود.", true);
@@ -184,8 +186,16 @@
   });
   prevButton.addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderList(); } });
   nextButton.addEventListener("click", () => {
-    const totalPages = Math.max(1, Math.ceil(voucherRecords.length / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(filteredVoucherRecords.length / PAGE_SIZE));
     if (currentPage < totalPages) { currentPage++; renderList(); }
+  });
+  searchInput.addEventListener("input", () => {
+    const term = normalizeVoucher(searchInput.value);
+    filteredVoucherRecords = voucherRecords.filter(record =>
+      normalizeVoucher(record.voucherNumber).includes(term) || normalizeVoucher(record.exitNumber).includes(term)
+    );
+    currentPage = 1;
+    renderList();
   });
   $("voucherGoPage").addEventListener("click", () => goToPage(pageInput.value));
   pageInput.addEventListener("keydown", event => { if (event.key === "Enter") goToPage(pageInput.value); });
