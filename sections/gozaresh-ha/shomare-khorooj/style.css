@@ -93,3 +93,9 @@
   .exit-page-button{width:100%}
   .exit-page-status>span{width:100%;text-align:center}
 }
+
+
+/* ویژگی hidden باید بر display تعریف‌شده برای کارت‌ها اولویت داشته باشد */
+.report-subpage [hidden] {
+  display: none !important;
+}
