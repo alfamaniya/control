@@ -368,7 +368,7 @@
     });
 
     return records.filter(record => Number.isFinite(Date.parse(record.occurredAt)))
-      .sort((a, b) => Date.parse(a.occurredAt) - Date.parse(b.occurredAt) ||
+      .sort((a, b) => Date.parse(b.occurredAt) - Date.parse(a.occurredAt) ||
         String(a.procurementCode).localeCompare(String(b.procurementCode), "en"));
   }
 
