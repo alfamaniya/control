@@ -1,14 +1,48 @@
 (() => {
   "use strict";
 
-  const DB_NAME = "control-offline-db";
-  const DB_VERSION = 3;
-  const STORE = "products";
-  const META = "meta";
-  const DISPATCHES = "dispatches";
-  const KARDEX = "kardex";
-  const LEGACY_KEY = "control.inventory.v1";
+  // نسخه جدید پایگاه داده؛ دیتابیس قبلی عمداً دست‌نخورده باقی می‌ماند.
+  const DB_NAME = "control-offline-db-v2";
+  const DB_VERSION = 1;
+  const STORES = Object.freeze({
+    products: "products",
+    documents: "documents",
+    ledger: "ledger",
+    destinations: "destinations",
+    meta: "meta"
+  });
   let databasePromise;
+
+  const requestResult = request => new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error("عملیات پایگاه داده ناموفق بود."));
+  });
+  const transactionDone = tx => new Promise((resolve, reject) => {
+    tx.oncomplete = resolve;
+    tx.onabort = () => reject(tx.error || new Error("تراکنش پایگاه داده لغو شد."));
+    tx.onerror = () => reject(tx.error || new Error("ذخیره اطلاعات ناموفق بود."));
+  });
+  const digits = value => String(value ?? "")
+    .replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
+    .replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).trim();
+  const normalizeCode = value => digits(value).replace(/\s/g, "");
+  const validSupplyCode = value => /^\d{10}$/.test(normalizeCode(value));
+  const toJalaliNumber = date => {
+    const parts = new Intl.DateTimeFormat("en-u-ca-persian-nu-latn", {
+      year: "numeric", month: "2-digit", day: "2-digit"
+    }).formatToParts(date);
+    const p = Object.fromEntries(parts.map(x => [x.type, x.value]));
+    return Number(String(p.year).padStart(4, "0") + p.month + p.day);
+  };
+  const now = () => new Date();
+  const uid = () => {
+    if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
+    return "op-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+  };
+  const typeNames = Object.freeze({
+    opening: "ورود اولیه", receipt: "ورود", issue: "خروج",
+    adjust: "تعدیل", reversal: "برگشت"
+  });
 
   function openDatabase() {
     if (databasePromise) return databasePromise;
@@ -20,618 +54,380 @@
       const request = indexedDB.open(DB_NAME, DB_VERSION);
       request.onupgradeneeded = () => {
         const db = request.result;
-        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: "procurementCode" });
-        if (!db.objectStoreNames.contains(META)) db.createObjectStore(META, { keyPath: "key" });
-        if (!db.objectStoreNames.contains(DISPATCHES)) db.createObjectStore(DISPATCHES, { keyPath: "id", autoIncrement: true });
-        if (!db.objectStoreNames.contains(KARDEX)) db.createObjectStore(KARDEX, { keyPath: "id", autoIncrement: true });
+        let store;
+        if (!db.objectStoreNames.contains(STORES.products)) {
+          store = db.createObjectStore(STORES.products, { keyPath: "supplyCode" });
+          store.createIndex("procurementCode", "procurementCode", { unique: false });
+          store.createIndex("group", "group", { unique: false });
+          store.createIndex("active", "active", { unique: false });
+        }
+        if (!db.objectStoreNames.contains(STORES.documents)) {
+          store = db.createObjectStore(STORES.documents, { keyPath: "id", autoIncrement: true });
+          store.createIndex("type_docNo", ["type", "docNo"], { unique: true });
+          store.createIndex("opId", "opId", { unique: true });
+          store.createIndex("docDate", "docDate", { unique: false });
+          store.createIndex("dispatchRef", "dispatchRef", { unique: false });
+          store.createIndex("destinationId", "destinationId", { unique: false });
+          store.createIndex("reversalOf", "reversalOf", { unique: false });
+        }
+        if (!db.objectStoreNames.contains(STORES.ledger)) {
+          store = db.createObjectStore(STORES.ledger, { keyPath: "id", autoIncrement: true });
+          store.createIndex("supplyCode_docDate_id", ["supplyCode", "docDate", "id"], { unique: false });
+          store.createIndex("docId", "docId", { unique: false });
+          store.createIndex("docDate", "docDate", { unique: false });
+          store.createIndex("type", "type", { unique: false });
+        }
+        if (!db.objectStoreNames.contains(STORES.destinations)) {
+          store = db.createObjectStore(STORES.destinations, { keyPath: "id", autoIncrement: true });
+          store.createIndex("parentId", "parentId", { unique: false });
+          store.createIndex("parent_name", ["parentId", "name"], { unique: true });
+        }
+        if (!db.objectStoreNames.contains(STORES.meta)) db.createObjectStore(STORES.meta, { keyPath: "key" });
       };
-      request.onsuccess = () => resolve(request.result);
+      request.onsuccess = () => {
+        const db = request.result;
+        db.onversionchange = () => db.close();
+        resolve(db);
+      };
       request.onerror = () => reject(request.error || new Error("باز کردن پایگاه داده محلی ناموفق بود."));
-      request.onblocked = () => reject(new Error("پایگاه داده توسط زبانه دیگری در حال به‌روزرسانی است. سایر زبانه‌های سامانه را ببندید."));
+      request.onblocked = () => reject(new Error("پایگاه داده جدید توسط زبانه دیگری مسدود شده است. سایر زبانه‌های سامانه را ببندید."));
     });
     return databasePromise;
   }
 
-  function transactionDone(transaction) {
-    return new Promise((resolve, reject) => {
-      transaction.oncomplete = resolve;
-      transaction.onerror = () => reject(transaction.error || new Error("ذخیره اطلاعات انجام نشد."));
-      transaction.onabort = () => reject(transaction.error || new Error("عملیات ذخیره‌سازی لغو شد."));
+  async function ready() { return openDatabase(); }
+
+  function nextDocumentNumber(metaStore, type) {
+    return requestResult(metaStore.get("counter:" + type)).then(record => {
+      const next = (Number(record && record.value) || 0) + 1;
+      metaStore.put({ key: "counter:" + type, value: next });
+      return String(next).padStart(8, "0");
     });
   }
 
-  function createDocumentNumber(prefix, usedNumbers, baseDate = new Date()) {
-    let candidateDate = new Date(baseDate.getTime());
-    const formatter = new Intl.DateTimeFormat("fa-IR-u-ca-persian-nu-latn", {
-      year: "numeric", month: "2-digit", day: "2-digit",
-      hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
-    });
-    for (let attempt = 0; attempt < 10000; attempt += 1) {
-      const parts = Object.fromEntries(formatter.formatToParts(candidateDate).map(part => [part.type, part.value]));
-      const pad = value => String(value).padStart(2, "0");
-      const number = prefix + String(parts.year).padStart(4, "0") +
-        pad(parts.month) + pad(parts.day) + pad(parts.hour) + pad(parts.minute) + pad(parts.second);
-      if (!usedNumbers.has(number)) return number;
-      candidateDate = new Date(candidateDate.getTime() + 1000);
-    }
-    throw new Error("ساخت شماره سند یکتا انجام نشد؛ دوباره تلاش کنید.");
-  }
-
-  function createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, operation) {
-    const nextNumber = (prefix, usedNumbers) => {
-      let highest = 0;
-      usedNumbers.forEach(value => {
-        const match = String(value).match(new RegExp("^" + prefix + "(\\d+)$", "i"));
-        if (match) highest = Math.max(highest, Number(match[1]) || 0);
-      });
-      let candidate;
-      do {
-        highest += 1;
-        candidate = prefix + String(highest).padStart(8, "0");
-      } while (usedNumbers.has(candidate));
-      usedNumbers.add(candidate);
-      return candidate;
+  function productForUI(product) {
+    if (!product) return null;
+    return {
+      ...product,
+      procurementCode: product.supplyCode,
+      internalCode: product.procurementCode,
+      quantity: Number(product.qty) || 0
     };
-    const transactionNumber = nextNumber("TR", usedTransactionNumbers);
-    let adjustmentNumber = "";
-    if (operation === "تعدیل مثبت" || operation === "تعدیل منفی") {
-      adjustmentNumber = nextNumber("ADJ", usedAdjustmentNumbers);
-    }
-    return { transactionNumber, adjustmentNumber };
   }
 
-  async function backfillMovementNumbers(db) {
-    const tx = db.transaction([KARDEX, META], "readwrite");
-    const done = transactionDone(tx);
-    const history = tx.objectStore(KARDEX);
-    const meta = tx.objectStore(META);
-    const [marker, movements] = await Promise.all([
-      new Promise((resolve, reject) => {
-        const request = meta.get("movement-numbers-backfilled-v1");
-        request.onsuccess = () => resolve(request.result || null);
-        request.onerror = () => reject(request.error || new Error("بررسی وضعیت شماره‌گذاری سوابق ناموفق بود."));
-      }),
-      new Promise((resolve, reject) => {
-        const request = history.getAll();
-        request.onsuccess = () => resolve(request.result || []);
-        request.onerror = () => reject(request.error || new Error("خواندن سوابق برای شماره‌گذاری ناموفق بود."));
-      })
-    ]);
-    if (!marker) {
-      const usedTransactionNumbers = new Set(movements.map(item => String(item.transactionNumber || "")).filter(Boolean));
-      const usedAdjustmentNumbers = new Set(movements.map(item => String(item.adjustmentNumber || "")).filter(Boolean));
-      movements.forEach(movement => {
-        if (movement.transactionNumber && (movement.operation !== "تعدیل مثبت" && movement.operation !== "تعدیل منفی" || movement.adjustmentNumber)) return;
-        const numbers = createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, movement.operation || "");
-        history.put({ ...movement, ...numbers });
-      });
-      meta.put({ key: "movement-numbers-backfilled-v1", value: true, migratedAt: new Date().toISOString() });
-    }
-    await done;
+  function movementForUI(line, document, product) {
+    const amount = Math.abs(Number(line.delta) || 0);
+    const issue = line.delta < 0;
+    const operation = typeNames[line.type] || line.type || "";
+    return {
+      id: line.id,
+      transactionNumber: "TR" + String(line.id).padStart(8, "0"),
+      adjustmentNumber: line.type === "adjust" ? document.docNo : "",
+      procurementCode: line.supplyCode,
+      internalCode: product ? product.procurementCode : line.supplyCode.slice(0, 8),
+      description: product && product.description || line.description || "",
+      group: product && product.group || line.group || "",
+      operation,
+      quantityIn: issue ? 0 : amount,
+      quantityOut: issue ? amount : 0,
+      quantity: amount,
+      stockAfter: line.balanceAfter ?? "",
+      previousStock: line.balanceBefore ?? "",
+      occurredAt: document.createdAt,
+      docDate: document.docDate,
+      entryNumber: ["opening", "receipt"].includes(line.type) ? document.docNo : "",
+      exitNumber: line.type === "issue" ? document.docNo : "",
+      voucherNumber: document.dispatchRef || "",
+      destination: document.destinationName || "",
+      destinationSub: document.destinationSub || "",
+      dispatchId: line.type === "issue" ? document.id : "",
+      source: document.note || ""
+    };
   }
 
-  async function migrateLegacyData(db) {
-    let legacy = [];
-    try {
-      const raw = localStorage.getItem(LEGACY_KEY);
-      legacy = raw ? JSON.parse(raw) : [];
-    } catch (_) { legacy = []; }
-    if (!Array.isArray(legacy)) legacy = [];
-
-    const tx = db.transaction([STORE, META], "readwrite");
-    const done = transactionDone(tx);
-    const products = tx.objectStore(STORE);
-    const marker = tx.objectStore(META);
-    const migration = await new Promise((resolve, reject) => {
-      const request = marker.get("legacy-local-storage-migrated");
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-    if (!migration) {
-      legacy.forEach(item => {
-        if (item && /^\d{10}$/.test(String(item.procurementCode || ""))) {
-          products.put({ ...item, internalCode: String(item.procurementCode).slice(0, 8), migratedAt: new Date().toISOString() });
-        }
-      });
-      marker.put({ key: "legacy-local-storage-migrated", value: true, migratedAt: new Date().toISOString() });
+  async function ensureDestination(tx, name, parentName) {
+    const store = tx.objectStore(STORES.destinations);
+    const clean = String(name || "").trim();
+    if (!clean) return null;
+    let parentId = 0;
+    if (parentName) {
+      const parent = await findOrCreate(parentName, 0);
+      parentId = parent.id;
     }
-    await done;
+    return findOrCreate(clean, parentId);
+
+    async function findOrCreate(label, parent) {
+      const index = store.index("parent_name");
+      const existing = await requestResult(index.get([parent, label]));
+      if (existing) return existing;
+      const record = { name: label, parentId: parent, active: 1 };
+      record.id = await requestResult(store.add(record));
+      return record;
+    }
   }
 
-  async function ready() {
-    const db = await openDatabase();
-    await migrateLegacyData(db);
-    await backfillMovementNumbers(db);
-    return db;
+  async function createDocument(tx, type, options = {}) {
+    const meta = tx.objectStore(STORES.meta);
+    const docNo = await nextDocumentNumber(meta, type);
+    const created = now();
+    const doc = {
+      type, docNo, docDate: toJalaliNumber(created), createdAt: created.getTime(),
+      destinationId: options.destinationId ?? null,
+      destinationName: options.destinationName || "",
+      destinationSub: options.destinationSub || "",
+      dispatchRef: options.dispatchRef || "",
+      note: options.note || "",
+      opId: options.opId || uid(),
+      status: "active"
+    };
+    doc.id = await requestResult(tx.objectStore(STORES.documents).add(doc));
+    return doc;
   }
 
   async function getAll() {
     const db = await ready();
-    const tx = db.transaction(STORE, "readonly");
+    const tx = db.transaction(STORES.products, "readonly");
     const done = transactionDone(tx);
-    const request = tx.objectStore(STORE).getAll();
-    const result = await new Promise((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error || new Error("خواندن موجودی انجام نشد."));
-    });
+    const rows = await requestResult(tx.objectStore(STORES.products).getAll());
     await done;
-    return result.sort((a, b) => String(a.procurementCode).localeCompare(String(b.procurementCode)));
+    return rows.filter(p => p.active !== 0).map(productForUI)
+      .sort((a, b) => String(a.procurementCode).localeCompare(String(b.procurementCode)));
   }
 
   async function addMany(items) {
+    if (!Array.isArray(items)) throw new Error("فهرست کالاهای ورودی معتبر نیست.");
     const db = await ready();
-    const tx = db.transaction([STORE, KARDEX], "readwrite");
+    const tx = db.transaction([STORES.products, STORES.documents, STORES.ledger, STORES.meta], "readwrite");
     const done = transactionDone(tx);
-    const store = tx.objectStore(STORE);
-    const kardexStore = tx.objectStore(KARDEX);
-    const keysRequest = store.getAllKeys();
-    const movementsRequest = kardexStore.getAll();
-    const [keys, existingMovements] = await Promise.all([
-      new Promise((resolve, reject) => {
-        keysRequest.onsuccess = () => resolve(keysRequest.result || []);
-        keysRequest.onerror = () => reject(keysRequest.error || new Error("بررسی کالاهای تکراری انجام نشد."));
-      }),
-      new Promise((resolve, reject) => {
-        movementsRequest.onsuccess = () => resolve(movementsRequest.result || []);
-        movementsRequest.onerror = () => reject(movementsRequest.error || new Error("بررسی شماره‌های ورود قبلی انجام نشد."));
-      })
-    ]);
-    const existingKeys = new Set(keys.map(String));
-    const usedEntryNumbers = new Set(existingMovements.map(item =>
-      String(item.entryNumber || item.incomingNumber || item.receiptNumber || "")
-    ).filter(Boolean));
-    const usedTransactionNumbers = new Set(existingMovements.map(item => String(item.transactionNumber || "")).filter(Boolean));
-    const usedAdjustmentNumbers = new Set(existingMovements.map(item => String(item.adjustmentNumber || "")).filter(Boolean));
-    const registeredAt = new Date();
-    const entryNumber = createDocumentNumber("in", usedEntryNumbers, registeredAt);
-    const occurredAt = registeredAt.toISOString();
-    const added = [];
+    const products = tx.objectStore(STORES.products);
+    const ledger = tx.objectStore(STORES.ledger);
+    const existing = new Set((await requestResult(products.getAllKeys())).map(String));
+    const valid = [];
     const skipped = [];
     for (const item of items) {
-      const code = String(item && item.procurementCode || "");
-      if (!/^\d{10}$/.test(code) || existingKeys.has(code)) { skipped.push(item); continue; }
-      const record = { ...item, procurementCode: code, internalCode: code.slice(0, 8), createdAt: item.createdAt || new Date().toISOString() };
-      store.add(record);
-      const movementNumbers = createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, "ورود", registeredAt);
-      kardexStore.add({
-        ...movementNumbers,
-        procurementCode: code,
-        operation: "ورود",
-        description: record.description || "",
-        quantityIn: Math.max(0, Number(record.quantity) || 0),
-        quantityOut: 0,
-        stockAfter: Math.max(0, Number(record.quantity) || 0),
-        entryNumber,
-        occurredAt,
-        source: record.source || "initial-import"
+      const code = normalizeCode(item && item.procurementCode);
+      const qty = Number(item && item.quantity);
+      const description = String(item && item.description || "").trim();
+      const group = String(item && item.group || "").trim();
+      if (!validSupplyCode(code) || !description || !group || !Number.isSafeInteger(qty) || qty < 0 || existing.has(code)) {
+        skipped.push(item);
+        continue;
+      }
+      existing.add(code);
+      valid.push({
+        supplyCode: code, procurementCode: code.slice(0, 8), description, group,
+        qty, active: 1, createdAt: Date.now()
       });
-      existingKeys.add(code);
-      added.push(record);
+    }
+    let document = null;
+    if (valid.some(p => p.qty > 0)) document = await createDocument(tx, "opening", { note: "ثبت اولیه کالا" });
+    for (const product of valid) {
+      products.add(product);
+      if (product.qty > 0) {
+        ledger.add({
+          docId: document.id, supplyCode: product.supplyCode, delta: product.qty,
+          type: "opening", docDate: document.docDate, balanceBefore: 0,
+          balanceAfter: product.qty, description: product.description, group: product.group
+        });
+      }
     }
     await done;
-    return { added, skipped, entryNumber: added.length ? entryNumber : "" };
+    return {
+      added: valid.map(productForUI), skipped,
+      entryNumber: document ? document.docNo : ""
+    };
   }
 
-  async function createDispatch(items, metadata) {
+  async function createDispatch(items, metadata = {}) {
+    if (!Array.isArray(items) || !items.length) throw new Error("حداقل یک قلم برای خروج انتخاب کنید.");
     const db = await ready();
-    const tx = db.transaction([STORE, DISPATCHES, KARDEX], "readwrite");
+    const tx = db.transaction([STORES.products, STORES.documents, STORES.ledger, STORES.destinations, STORES.meta], "readwrite");
     const done = transactionDone(tx);
-    const productStore = tx.objectStore(STORE);
-    const dispatchStore = tx.objectStore(DISPATCHES);
-    const kardexStore = tx.objectStore(KARDEX);
-    const productsRequest = productStore.getAll();
-    const dispatchesRequest = dispatchStore.getAll();
-    const movementsRequest = kardexStore.getAll();
-    const [products, existingDispatches, existingMovements] = await Promise.all([
-      new Promise((resolve, reject) => {
-        productsRequest.onsuccess = () => resolve(productsRequest.result || []);
-        productsRequest.onerror = () => reject(productsRequest.error || new Error("بررسی موجودی کالاها ناموفق بود."));
-      }),
-      new Promise((resolve, reject) => {
-        dispatchesRequest.onsuccess = () => resolve(dispatchesRequest.result || []);
-        dispatchesRequest.onerror = () => reject(dispatchesRequest.error || new Error("بررسی شماره خروج و حواله‌های قبلی ناموفق بود."));
-      }),
-      new Promise((resolve, reject) => {
-        movementsRequest.onsuccess = () => resolve(movementsRequest.result || []);
-        movementsRequest.onerror = () => reject(movementsRequest.error || new Error("بررسی سوابق شماره اسناد ناموفق بود."));
-      })
-    ]);
-    const productMap = new Map(products.map(product => [String(product.procurementCode), product]));
+    const products = tx.objectStore(STORES.products);
+    const ledger = tx.objectStore(STORES.ledger);
+    const allProducts = await requestResult(products.getAll());
+    const map = new Map(allProducts.map(p => [p.supplyCode, p]));
+    const combined = new Map();
+    for (const item of items) {
+      const code = normalizeCode(item && item.procurementCode);
+      const amount = Number(item && item.quantity);
+      if (!validSupplyCode(code) || !Number.isSafeInteger(amount) || amount <= 0) throw new Error("کد یا تعداد یکی از اقلام خروج معتبر نیست.");
+      combined.set(code, (combined.get(code) || 0) + amount);
+    }
+    const prepared = [];
+    for (const [code, amount] of combined) {
+      const product = map.get(code);
+      if (!product || product.active === 0) throw new Error("یکی از کالاها وجود ندارد یا غیرفعال است: " + code);
+      if (amount > Number(product.qty || 0)) throw new Error("موجودی کالا برای خروج کافی نیست: " + code);
+      prepared.push({ product, amount });
+    }
+    const destinationName = String(metadata.destination || metadata.destinationName || "").trim();
+    const destinationSub = String(metadata.destinationSub || "").trim();
+    if (!destinationName) throw new Error("محل ارسال الزامی است.");
+    const destination = await ensureDestination(tx, destinationName, "");
+    const subDestination = destinationSub ? await ensureDestination(tx, destinationSub, destinationName) : null;
+    const doc = await createDocument(tx, "issue", {
+      destinationId: subDestination ? subDestination.id : destination.id,
+      destinationName, destinationSub,
+      dispatchRef: metadata.voucherNumber || metadata.dispatchRef || "",
+      note: metadata.note || ""
+    });
     const actualItems = [];
-    for (const requested of items) {
-      const code = String(requested.procurementCode || "");
-      const product = productMap.get(code);
-      if (!product) continue;
-      const stock = Math.max(0, Number(product.quantity) || 0);
-      const quantity = Math.min(stock, Math.max(0, Math.floor(Number(requested.quantity) || 0)));
-      if (!quantity) continue;
-      product.quantity = stock - quantity;
-      productStore.put(product);
+    for (const { product, amount } of prepared) {
+      const before = Number(product.qty) || 0;
+      product.qty = before - amount;
+      products.put(product);
+      ledger.add({
+        docId: doc.id, supplyCode: product.supplyCode, delta: -amount,
+        type: "issue", docDate: doc.docDate, balanceBefore: before,
+        balanceAfter: product.qty, description: product.description, group: product.group
+      });
       actualItems.push({
-        internalCode: code.slice(0, 8),
-        procurementCode: code,
-        description: product.description || requested.description || "",
-        group: product.group || requested.group || "",
-        quantity,
-        stockAfter: product.quantity
+        procurementCode: product.supplyCode, internalCode: product.procurementCode,
+        description: product.description, group: product.group,
+        quantity: amount, stockAfter: product.qty
       });
     }
-    if (!actualItems.length) {
-      tx.abort();
-      try { await done; } catch (_) { /* لغو عمدی تراکنش */ }
-      throw new Error("هیچ‌یک از کالاهای انتخاب‌شده موجودی قابل ارسال ندارند. فهرست را بررسی کنید.");
-    }
-    const registeredAt = new Date();
-    const createdAt = registeredAt.toISOString();
-    const usedExitNumbers = new Set([
-      ...existingDispatches.map(item => String(item.exitNumber || "")),
-      ...existingMovements.map(item => String(item.exitNumber || ""))
-    ].filter(Boolean));
-    const usedVoucherNumbers = new Set([
-      ...existingDispatches.map(item => String(item.voucherNumber || "")),
-      ...existingMovements.map(item => String(item.voucherNumber || ""))
-    ].filter(Boolean));
-    const exitNumber = createDocumentNumber("out", usedExitNumbers, registeredAt);
-    const voucherNumber = createDocumentNumber("vh", usedVoucherNumbers, registeredAt);
-    const dispatch = { ...metadata, exitNumber, voucherNumber, items: actualItems, createdAt };
-    const usedTransactionNumbers = new Set(existingMovements.map(item => String(item.transactionNumber || "")).filter(Boolean));
-    const usedAdjustmentNumbers = new Set(existingMovements.map(item => String(item.adjustmentNumber || "")).filter(Boolean));
-    const dispatchId = await new Promise((resolve, reject) => {
-      const request = dispatchStore.add(dispatch);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error || new Error("ثبت سابقه ارسال ناموفق بود."));
-    });
-    actualItems.forEach(item => {
-      const movementNumbers = createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, "خروج", registeredAt);
-      kardexStore.add({
-        ...movementNumbers,
-        dispatchId,
-        procurementCode: item.procurementCode,
-        operation: "خروج",
-        quantityIn: 0,
-        quantityOut: item.quantity,
-        stockAfter: item.stockAfter,
-        exitNumber,
-        voucherNumber,
-        occurredAt: createdAt,
-        source: "dispatch"
-      });
-    });
     await done;
-    return { id: dispatchId, items: actualItems, exitNumber, voucherNumber };
+    return {
+      id: doc.id, items: actualItems, exitNumber: doc.docNo,
+      voucherNumber: doc.dispatchRef, createdAt: new Date(doc.createdAt).toISOString(),
+      destination: destinationName, destinationSub
+    };
+  }
+
+  async function readLedgerAndDocuments() {
+    const db = await ready();
+    const tx = db.transaction([STORES.ledger, STORES.documents, STORES.products], "readonly");
+    const done = transactionDone(tx);
+    const [lines, documents, products] = await Promise.all([
+      requestResult(tx.objectStore(STORES.ledger).getAll()),
+      requestResult(tx.objectStore(STORES.documents).getAll()),
+      requestResult(tx.objectStore(STORES.products).getAll())
+    ]);
+    await done;
+    const docs = new Map(documents.map(d => [d.id, d]));
+    const productMap = new Map(products.map(p => [p.supplyCode, p]));
+    return { lines, documents, docs, products, productMap };
+  }
+
+  async function getAllTransactions() {
+    const data = await readLedgerAndDocuments();
+    return data.lines.map(line => movementForUI(line, data.docs.get(line.docId) || {}, data.productMap.get(line.supplyCode)))
+      .sort((a, b) => Date.parse(b.occurredAt) - Date.parse(a.occurredAt) || b.id - a.id);
   }
 
   async function getKardex(procurementCode) {
-    const db = await ready();
-    const tx = db.transaction([KARDEX, DISPATCHES], "readonly");
-    const done = transactionDone(tx);
-    const kardexRequest = tx.objectStore(KARDEX).getAll();
-    const dispatchRequest = tx.objectStore(DISPATCHES).getAll();
-    const [movements, dispatches] = await Promise.all([
-      new Promise((resolve, reject) => {
-        kardexRequest.onsuccess = () => resolve(kardexRequest.result || []);
-        kardexRequest.onerror = () => reject(kardexRequest.error || new Error("خواندن سوابق کاردکس ناموفق بود."));
-      }),
-      new Promise((resolve, reject) => {
-        dispatchRequest.onsuccess = () => resolve(dispatchRequest.result || []);
-        dispatchRequest.onerror = () => reject(dispatchRequest.error || new Error("خواندن سوابق ارسال ناموفق بود."));
-      })
-    ]);
-    await done;
-    const code = String(procurementCode);
-    const dispatchMap = new Map(dispatches.map(dispatch => [String(dispatch.id), dispatch]));
-    const enrichedMovements = movements.map(item => {
-      const dispatch = item.dispatchId === undefined ? null : dispatchMap.get(String(item.dispatchId));
-      return {
-        ...item,
-        entryNumber: item.entryNumber || item.incomingNumber || item.receiptNumber || "",
-        exitNumber: item.exitNumber || (dispatch && dispatch.exitNumber) || "",
-        voucherNumber: item.voucherNumber || (dispatch && dispatch.voucherNumber) || ""
-      };
-    });
-    const knownDispatchIds = new Set(movements.map(item => item.dispatchId).filter(value => value !== undefined));
-    const legacyDispatchMovements = [];
-    dispatches.forEach(dispatch => {
-      if (knownDispatchIds.has(dispatch.id)) return;
-      (dispatch.items || []).forEach(item => {
-        if (String(item.procurementCode) !== code) return;
-        legacyDispatchMovements.push({
-          procurementCode: code,
-          operation: "خروج",
-          quantityIn: 0,
-          quantityOut: Math.max(0, Number(item.quantity) || 0),
-          stockAfter: null,
-          occurredAt: dispatch.createdAt || dispatch.dispatchedAt || "",
-          source: "legacy-dispatch",
-          exitNumber: dispatch.exitNumber || "",
-          voucherNumber: dispatch.voucherNumber || ""
-        });
-      });
-    });
-    return enrichedMovements.filter(item => String(item.procurementCode) === code)
-      .concat(legacyDispatchMovements)
-      .sort((a, b) => {
-        const timeA = Date.parse(a.occurredAt || "");
-        const timeB = Date.parse(b.occurredAt || "");
-        if (!Number.isFinite(timeA)) return Number.isFinite(timeB) ? 1 : 0;
-        if (!Number.isFinite(timeB)) return -1;
-        return timeA - timeB;
-      });
+    const code = normalizeCode(procurementCode);
+    const records = await getAllTransactions();
+    return records.filter(row => row.procurementCode === code)
+      .sort((a, b) => Number(a.docDate) - Number(b.docDate) || a.id - b.id);
   }
 
   async function getReportTransactions(startDate, endDate) {
     const start = Date.parse(startDate);
     const end = Date.parse(endDate);
-    if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) {
-      throw new Error("بازه زمانی گزارش معتبر نیست.");
-    }
-    const db = await ready();
-    const tx = db.transaction([KARDEX, DISPATCHES, STORE], "readonly");
-    const done = transactionDone(tx);
-    const requests = [
-      tx.objectStore(KARDEX).getAll(),
-      tx.objectStore(DISPATCHES).getAll(),
-      tx.objectStore(STORE).getAll()
-    ];
-    const [movements, dispatches, products] = await Promise.all(requests.map(request => new Promise((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error || new Error("خواندن اطلاعات گزارش ناموفق بود."));
-    })));
-    await done;
-
-    const productMap = new Map(products.map(product => [String(product.procurementCode), product]));
-    const dispatchMap = new Map(dispatches.map(dispatch => [String(dispatch.id), dispatch]));
-    const knownDispatchIds = new Set(movements.map(item => item.dispatchId).filter(value => value !== undefined));
-    const records = movements.map(movement => {
-      const dispatch = movement.dispatchId === undefined ? null : dispatchMap.get(String(movement.dispatchId));
-      const dispatchItem = dispatch && (dispatch.items || []).find(item => String(item.procurementCode) === String(movement.procurementCode));
-      const product = productMap.get(String(movement.procurementCode));
-      const occurredAt = movement.occurredAt || (dispatch && (dispatch.createdAt || dispatch.dispatchedAt)) || "";
-      return {
-        occurredAt,
-        transactionNumber: movement.transactionNumber || "",
-        adjustmentNumber: movement.adjustmentNumber || "",
-        operation: movement.operation || "",
-        procurementCode: String(movement.procurementCode || ""),
-        description: movement.description || (dispatchItem && dispatchItem.description) || (product && product.description) || "",
-        quantity: Math.max(0, Number(movement.quantityIn) || 0) || Math.max(0, Number(movement.quantityOut) || 0),
-        destination: dispatch && (dispatch.destination || dispatch.destinationSub) || "",
-        entryNumber: movement.entryNumber || movement.incomingNumber || movement.receiptNumber || "",
-        voucherNumber: movement.voucherNumber || (dispatch && dispatch.voucherNumber) || "",
-        exitNumber: movement.exitNumber || (dispatch && dispatch.exitNumber) || ""
-      };
-    });
-
-    dispatches.forEach(dispatch => {
-      if (knownDispatchIds.has(dispatch.id)) return;
-      (dispatch.items || []).forEach(item => records.push({
-        occurredAt: dispatch.createdAt || dispatch.dispatchedAt || "",
-        operation: "خروج",
-        procurementCode: String(item.procurementCode || ""),
-        description: item.description || "",
-        quantity: Math.max(0, Number(item.quantity) || 0),
-        destination: dispatch.destination || dispatch.destinationSub || "",
-        entryNumber: "",
-        voucherNumber: dispatch.voucherNumber || "",
-        exitNumber: dispatch.exitNumber || ""
-      }));
-    });
-
-    return records.filter(record => {
-      const timestamp = Date.parse(record.occurredAt);
-      return Number.isFinite(timestamp) && timestamp >= start && timestamp <= end;
+    if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) throw new Error("بازه زمانی گزارش معتبر نیست.");
+    return (await getAllTransactions()).filter(row => {
+      const time = Date.parse(row.occurredAt);
+      return Number.isFinite(time) && time >= start && time <= end;
     }).sort((a, b) => Date.parse(a.occurredAt) - Date.parse(b.occurredAt));
   }
 
-  async function getAllTransactions() {
-    const db = await ready();
-    const tx = db.transaction([KARDEX, DISPATCHES, STORE], "readonly");
-    const done = transactionDone(tx);
-    const requests = [
-      tx.objectStore(KARDEX).getAll(),
-      tx.objectStore(DISPATCHES).getAll(),
-      tx.objectStore(STORE).getAll()
-    ];
-    const [movements, dispatches, products] = await Promise.all(requests.map(request => new Promise((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error || new Error("خواندن تراکنش‌های گزارش کلی ناموفق بود."));
-    })));
-    await done;
-
-    const productMap = new Map(products.map(product => [String(product.procurementCode), product]));
-    const dispatchMap = new Map(dispatches.map(dispatch => [String(dispatch.id), dispatch]));
-    const knownDispatchIds = new Set(movements.map(item => item.dispatchId).filter(value => value !== undefined));
-    const records = movements.map(movement => {
-      const dispatch = movement.dispatchId === undefined ? null : dispatchMap.get(String(movement.dispatchId));
-      const dispatchItem = dispatch && (dispatch.items || []).find(item => String(item.procurementCode) === String(movement.procurementCode));
-      const product = productMap.get(String(movement.procurementCode));
-      return {
-        ...movement,
-        occurredAt: movement.occurredAt || (dispatch && (dispatch.createdAt || dispatch.dispatchedAt)) || "",
-        operation: movement.operation || "",
-        internalCode: movement.internalCode || (dispatchItem && dispatchItem.internalCode) || (product && product.internalCode) || String(movement.procurementCode || "").slice(0, 8),
-        procurementCode: String(movement.procurementCode || ""),
-        description: movement.description || (dispatchItem && dispatchItem.description) || (product && product.description) || "",
-        group: movement.group || (dispatchItem && dispatchItem.group) || (product && product.group) || "",
-        quantity: Math.max(0, Number(movement.quantityIn) || 0) || Math.max(0, Number(movement.quantityOut) || 0),
-        destination: movement.destination || (dispatch && dispatch.destination) || "",
-        destinationSub: movement.destinationSub || (dispatch && dispatch.destinationSub) || "",
-        voucherNumber: movement.voucherNumber || (dispatch && dispatch.voucherNumber) || "",
-        exitNumber: movement.exitNumber || (dispatch && dispatch.exitNumber) || "",
-        entryNumber: movement.entryNumber || movement.incomingNumber || movement.receiptNumber || "",
-        dispatchedAt: movement.dispatchedAt || (dispatch && dispatch.dispatchedAt) || "",
-        dispatchId: movement.dispatchId ?? (dispatch && dispatch.id) ?? "",
-        source: movement.source || "",
-        previousStock: movement.previousStock ?? "",
-        stockAfter: movement.stockAfter ?? (dispatchItem && dispatchItem.stockAfter) ?? ""
-      };
-    });
-
-    dispatches.forEach(dispatch => {
-      if (knownDispatchIds.has(dispatch.id)) return;
-      (dispatch.items || []).forEach(item => records.push({
-        occurredAt: dispatch.createdAt || dispatch.dispatchedAt || "",
-        operation: "خروج",
-        internalCode: item.internalCode || String(item.procurementCode || "").slice(0, 8),
-        procurementCode: String(item.procurementCode || ""),
-        description: item.description || "",
-        group: item.group || "",
-        quantity: Math.max(0, Number(item.quantity) || 0),
-        quantityIn: 0,
-        quantityOut: Math.max(0, Number(item.quantity) || 0),
-        stockAfter: item.stockAfter ?? "",
-        destination: dispatch.destination || "",
-        destinationSub: dispatch.destinationSub || "",
-        voucherNumber: dispatch.voucherNumber || "",
-        exitNumber: dispatch.exitNumber || "",
-        entryNumber: "",
-        dispatchedAt: dispatch.dispatchedAt || "",
-        dispatchId: dispatch.id,
-        source: "legacy-dispatch",
-        previousStock: ""
-      }));
-    });
-
-    return records.filter(record => Number.isFinite(Date.parse(record.occurredAt)))
-      .sort((a, b) => Date.parse(b.occurredAt) - Date.parse(a.occurredAt) ||
-        String(a.procurementCode).localeCompare(String(b.procurementCode), "en"));
+  async function getAllDispatches() {
+    const data = await readLedgerAndDocuments();
+    return data.documents.filter(d => d.type === "issue").map(doc => ({
+      ...doc,
+      exitNumber: doc.docNo,
+      voucherNumber: doc.dispatchRef || "",
+      createdAt: new Date(doc.createdAt).toISOString(),
+      destination: doc.destinationName || "",
+      destinationSub: doc.destinationSub || "",
+      items: data.lines.filter(line => line.docId === doc.id).map(line => ({
+        procurementCode: line.supplyCode,
+        internalCode: line.supplyCode.slice(0, 8),
+        description: line.description || "",
+        group: line.group || "",
+        quantity: Math.abs(line.delta),
+        stockAfter: line.balanceAfter
+      }))
+    })).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
-  async function getAllDispatches() {
+  async function adjustStock(procurementCode, newQuantity) {
+    const code = normalizeCode(procurementCode);
+    const quantity = Number(newQuantity);
+    if (!validSupplyCode(code)) throw new Error("کد تدارکاتی کالا معتبر نیست.");
+    if (!Number.isSafeInteger(quantity) || quantity < 0) throw new Error("موجودی جدید باید عدد صحیح و صفر یا بیشتر باشد.");
     const db = await ready();
-    const tx = db.transaction(DISPATCHES, "readonly");
+    const tx = db.transaction([STORES.products, STORES.documents, STORES.ledger, STORES.meta], "readwrite");
     const done = transactionDone(tx);
-    const request = tx.objectStore(DISPATCHES).getAll();
-    const records = await new Promise((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error || new Error("خواندن حواله‌های ثبت‌شده ناموفق بود."));
+    const products = tx.objectStore(STORES.products);
+    const product = await requestResult(products.get(code));
+    if (!product || product.active === 0) throw new Error("کالای انتخاب‌شده در موجودی پیدا نشد.");
+    const previous = Number(product.qty) || 0;
+    const difference = quantity - previous;
+    if (!difference) {
+      tx.abort();
+      try { await done; } catch (_) {}
+      return { changed: false, product: productForUI(product), previous, quantity };
+    }
+    const doc = await createDocument(tx, "adjust", { note: "تعدیل موجودی" });
+    product.qty = quantity;
+    products.put(product);
+    tx.objectStore(STORES.ledger).add({
+      docId: doc.id, supplyCode: code, delta: difference,
+      type: "adjust", docDate: doc.docDate,
+      balanceBefore: previous, balanceAfter: quantity,
+      description: product.description, group: product.group
     });
     await done;
-    return records.sort((a, b) => Date.parse(b.createdAt || b.dispatchedAt || 0) - Date.parse(a.createdAt || a.dispatchedAt || 0));
+    return {
+      changed: true, operation: difference > 0 ? "تعدیل مثبت" : "تعدیل منفی",
+      difference: Math.abs(difference), adjustmentNumber: doc.docNo,
+      previous, quantity, product: productForUI(product)
+    };
   }
 
   async function deleteProduct(procurementCode) {
-    const code = String(procurementCode || "");
-    if (!/^\d{10}$/.test(code)) throw new Error("کد تدارکاتی کالا معتبر نیست.");
+    const code = normalizeCode(procurementCode);
+    if (!validSupplyCode(code)) throw new Error("کد تدارکاتی کالا معتبر نیست.");
     const db = await ready();
-    const tx = db.transaction(STORE, "readwrite");
+    const tx = db.transaction([STORES.products, STORES.ledger], "readwrite");
     const done = transactionDone(tx);
-    const store = tx.objectStore(STORE);
-    const existing = await new Promise((resolve, reject) => {
-      const request = store.get(code);
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error || new Error("بررسی کالای انتخاب‌شده ناموفق بود."));
-    });
-    if (!existing) {
+    const products = tx.objectStore(STORES.products);
+    const product = await requestResult(products.get(code));
+    if (!product) {
       tx.abort();
       try { await done; } catch (_) {}
       return false;
     }
-    store.delete(code);
+    const history = await requestResult(tx.objectStore(STORES.ledger).index("supplyCode_docDate_id").getAll(IDBKeyRange.bound([code, 0, 0], [code, 99999999, Number.MAX_SAFE_INTEGER])));
+    if (history.length) {
+      product.active = 0;
+      products.put(product);
+    } else products.delete(code);
     await done;
     return true;
   }
 
-  async function adjustStock(procurementCode, newQuantity) {
-    const code = String(procurementCode || "");
-    const quantity = Number(newQuantity);
-    if (!/^\d{10}$/.test(code)) throw new Error("کد تدارکاتی کالا معتبر نیست.");
-    if (!Number.isSafeInteger(quantity) || quantity < 0) throw new Error("موجودی جدید باید عدد صحیح و صفر یا بیشتر باشد.");
-
-    const db = await ready();
-    const tx = db.transaction([STORE, KARDEX], "readwrite");
-    const done = transactionDone(tx);
-    const products = tx.objectStore(STORE);
-    const history = tx.objectStore(KARDEX);
-    const existingMovements = await new Promise((resolve, reject) => {
-      const request = history.getAll();
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error || new Error("بررسی شماره تراکنش‌ها ناموفق بود."));
-    });
-    const usedTransactionNumbers = new Set(existingMovements.map(item => String(item.transactionNumber || "")).filter(Boolean));
-    const usedAdjustmentNumbers = new Set(existingMovements.map(item => String(item.adjustmentNumber || "")).filter(Boolean));
-    const product = await new Promise((resolve, reject) => {
-      const request = products.get(code);
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error || new Error("خواندن کالای انتخاب‌شده ناموفق بود."));
-    });
-    if (!product) {
-      tx.abort();
-      try { await done; } catch (_) {}
-      throw new Error("کالای انتخاب‌شده در موجودی پیدا نشد.");
-    }
-
-    const previous = Math.max(0, Number(product.quantity) || 0);
-    const difference = quantity - previous;
-    if (difference === 0) {
-      tx.abort();
-      try { await done; } catch (_) {}
-      return { changed: false, product, previous, quantity };
-    }
-
-    const operation = difference > 0 ? "تعدیل مثبت" : "تعدیل منفی";
-    product.quantity = quantity;
-    products.put(product);
-    const movementNumbers = createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, operation);
-    history.add({
-      ...movementNumbers,
-      procurementCode: code,
-      operation,
-      description: product.description || "",
-      quantityIn: difference > 0 ? difference : 0,
-      quantityOut: difference < 0 ? Math.abs(difference) : 0,
-      stockAfter: quantity,
-      occurredAt: new Date().toISOString(),
-      source: "stock-adjustment",
-      previousStock: previous
-    });
-    await done;
-    return { changed: true, operation, difference: Math.abs(difference), previous, quantity, product };
-  }
-
   async function deleteAllProducts() {
     const db = await ready();
-    const tx = db.transaction([STORE, KARDEX], "readwrite");
+    const tx = db.transaction(STORES.products, "readwrite");
     const done = transactionDone(tx);
-    const store = tx.objectStore(STORE);
-    const history = tx.objectStore(KARDEX);
-    const products = await new Promise((resolve, reject) => {
-      const request = store.getAll();
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error || new Error("خواندن کالاها برای حذف کلی ناموفق بود."));
+    const products = tx.objectStore(STORES.products);
+    const rows = await requestResult(products.getAll());
+    rows.forEach(product => {
+      product.active = 0;
+      product.qty = 0;
+      products.put(product);
     });
-    const occurredAt = new Date().toISOString();
-    const existingMovements = await new Promise((resolve, reject) => {
-      const request = history.getAll();
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error || new Error("بررسی شماره تراکنش‌ها ناموفق بود."));
-    });
-    const usedTransactionNumbers = new Set(existingMovements.map(item => String(item.transactionNumber || "")).filter(Boolean));
-    const usedAdjustmentNumbers = new Set(existingMovements.map(item => String(item.adjustmentNumber || "")).filter(Boolean));
-
-    products.forEach(product => {
-      const stock = Math.max(0, Number(product.quantity) || 0);
-      if (!stock) return;
-      const code = String(product.procurementCode || "");
-      const movementNumbers = createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, "تعدیل منفی", new Date(occurredAt));
-      history.add({
-        ...movementNumbers,
-        procurementCode: code,
-        operation: "تعدیل منفی",
-        description: product.description || "",
-        quantityIn: 0,
-        quantityOut: stock,
-        stockAfter: 0,
-        occurredAt,
-        source: "bulk-product-deletion",
-        previousStock: stock
-      });
-    });
-
-    store.clear();
     await done;
-    return products.length;
+    return rows.length;
   }
 
-  window.ControlDB = Object.freeze({ getAll, addMany, createDispatch, getKardex, getReportTransactions, getAllTransactions, getAllDispatches, deleteProduct, deleteAllProducts, adjustStock });
+  window.ControlDB = Object.freeze({
+    getAll, addMany, createDispatch, getKardex, getReportTransactions,
+    getAllTransactions, getAllDispatches, deleteProduct, deleteAllProducts, adjustStock
+  });
 })();
