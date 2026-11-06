@@ -4,10 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#14243d">
-  <title>گزارش بر اساس تاریخ</title>
-  <link rel="stylesheet" href="../../../assets/css/style.css?v=20261105-3">
+  <title>گزارش کلی</title>
+  <link rel="stylesheet" href="../../../assets/css/style.css?v=20261106-1">
   <link rel="stylesheet" href="../../../components/sidebar/style.css?v=20261105-3">
   <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="style.css?v=20261106-1">
+  <script src="../../../assets/js/database.js?v=20261106-1" defer></script>
+  <script src="script.js?v=20261106-1" defer></script>
   <script src="../../../components/sidebar/script.js?v=20261105-2" defer></script>
 </head>
 <body>
@@ -18,7 +21,37 @@
       <div class="topbar-spacer"></div>
     </header>
     <div data-control-sidebar></div>
-    <main class="main-content" id="mainContent"></main>
+    <main class="main-content" id="mainContent">
+      <div class="page-content general-report-page">
+        <section class="general-report-heading">
+          <div><span class="general-report-eyebrow">مرکز گزارش‌گیری سامانه</span><h1>گزارش کلی</h1><p>تمام تراکنش‌های ثبت‌شده در سامانه، همراه با مشخصات کالا، اسناد و جزئیات گردش موجودی.</p></div>
+          <span class="general-report-heading-icon" aria-hidden="true">▤</span>
+        </section>
+        <section class="general-report-card">
+          <div class="general-report-toolbar">
+            <div><h2>فهرست تمام تراکنش‌ها</h2><p id="reportSummary">در حال دریافت اطلاعات…</p></div>
+            <span class="report-page-size">۵۰ تراکنش در هر صفحه</span>
+          </div>
+          <div class="general-report-message" id="reportMessage" role="status" aria-live="polite" hidden></div>
+          <div class="general-report-table-wrap">
+            <table class="general-report-table">
+              <thead><tr>
+                <th>ردیف</th><th>تاریخ</th><th>ساعت</th><th>کد اختصاصی</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>گروه کالا</th><th>نوع عملیات</th>
+                <th>شماره ورود</th><th>شماره خروج</th><th>تعداد ورود</th><th>تعداد خروج</th><th>تعداد کل عملیات</th><th>موجودی قبل</th><th>موجودی بعد</th>
+                <th>محل ارسال</th><th>زیرمجموعه مقصد</th><th>شماره حواله</th><th>شناسه ارسال</th><th>زمان ثبت ارسال</th><th>منشأ ثبت</th>
+              </tr></thead>
+              <tbody id="generalReportRows"></tbody>
+            </table>
+            <div class="general-report-empty" id="reportEmpty" hidden>هیچ تراکنشی در سامانه ثبت نشده است.</div>
+          </div>
+          <div class="general-report-pagination" id="reportPagination" hidden>
+            <button type="button" class="report-page-button" id="previousPage" disabled>→ صفحه قبل</button>
+            <div class="report-page-picker"><label for="pageSelect">صفحه</label><select id="pageSelect" aria-label="انتخاب صفحه"></select><span id="pageCountLabel"></span></div>
+            <button type="button" class="report-page-button" id="nextPage">صفحه بعد ←</button>
+          </div>
+        </section>
+      </div>
+    </main>
   </div>
 </body>
 </html>
