@@ -2,6 +2,7 @@
 .ersal-kala-page h1{margin:0 0 7px;color:#172b4d;font-size:20px;font-weight:800}
 .page-heading p,.modal-heading p{margin:0;color:#718096;font-size:12px;line-height:1.8}
 .dispatch-search-card,.selected-product-card,.dispatch-list-card{min-width:0;padding:22px;background:#fff;border:1px solid #e7edf3;border-radius:18px;box-shadow:0 8px 26px rgba(25,48,78,.045)}
+.dispatch-search-card{position:relative;z-index:2}
 .search-fields,.modal-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
 .search-field{position:relative;display:grid;gap:8px;min-width:0}
 .search-field label,.quantity-control label{color:#34445b;font-size:12px;font-weight:800}

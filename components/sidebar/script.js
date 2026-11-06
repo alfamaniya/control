@@ -72,6 +72,10 @@
   nav.className = "control-sidebar";
   nav.id = "sidebar";
   nav.setAttribute("aria-label","منوی اصلی سامانه");
+  const submenuLayer = document.createElement("div");
+  submenuLayer.className = "sidebar-submenu-layer";
+  const submenuGroups = [];
+  const isMobileViewport = () => window.matchMedia("(max-width: 768px)").matches;
 
   const panel = document.createElement("section");
   panel.className = "sidebar-panel";
@@ -137,21 +141,52 @@
       heading.append(link);
       group.append(submenu);
       const initiallyOpen = isParent || activeChild;
+      let closeTimer;
+      const positionSubmenu = () => {
+        const groupRect = group.getBoundingClientRect();
+        const navRect = nav.getBoundingClientRect();
+        submenu.style.top = Math.max(8, Math.min(groupRect.top - navRect.top, navRect.height - submenu.offsetHeight - 8)) + "px";
+      };
       const setGroupOpen = (open) => {
         group.classList.toggle("is-open",open);
+        if (isMobileViewport()) group.append(submenu);
+        else submenuLayer.append(submenu);
         submenu.hidden = !open;
         link.setAttribute("aria-expanded",String(open));
+        if (open && !isMobileViewport()) positionSubmenu();
+      };
+      const scheduleClose = () => {
+        window.clearTimeout(closeTimer);
+        closeTimer = window.setTimeout(() => {
+          if (group.matches(":hover") || submenu.matches(":hover") || group.contains(document.activeElement) || submenu.contains(document.activeElement)) return;
+          setGroupOpen(initiallyOpen);
+        },180);
       };
       group.addEventListener("pointerenter",(event) => {
-        if (event.pointerType === "mouse") setGroupOpen(true);
+        if (event.pointerType === "mouse") {
+          window.clearTimeout(closeTimer);
+          setGroupOpen(true);
+        }
       });
       group.addEventListener("pointerleave",(event) => {
-        if (event.pointerType === "mouse") setGroupOpen(initiallyOpen);
+        if (event.pointerType === "mouse") scheduleClose();
+      });
+      submenu.addEventListener("pointerenter",(event) => {
+        if (event.pointerType === "mouse") window.clearTimeout(closeTimer);
+      });
+      submenu.addEventListener("pointerleave",(event) => {
+        if (event.pointerType === "mouse") scheduleClose();
       });
       group.addEventListener("focusin",() => setGroupOpen(true));
       group.addEventListener("focusout",(event) => {
-        if (!group.contains(event.relatedTarget)) setGroupOpen(initiallyOpen);
+        if (!group.contains(event.relatedTarget) && !submenu.contains(event.relatedTarget)) setGroupOpen(initiallyOpen);
       });
+      submenu.addEventListener("focusin",() => setGroupOpen(true));
+      submenu.addEventListener("focusout",(event) => {
+        if (!group.contains(event.relatedTarget) && !submenu.contains(event.relatedTarget)) setGroupOpen(initiallyOpen);
+      });
+      submenuGroups.push({group,submenu,initiallyOpen,setGroupOpen});
+      if (initiallyOpen) setGroupOpen(true);
     } else {
       group.append(link);
     }
@@ -163,6 +198,10 @@
   foot.textContent = "سامانه کنترل مصرف و ارسال کالا";
   panel.append(foot);
   nav.append(panel);
+  nav.append(submenuLayer);
+  submenuGroups.forEach(({submenu}) => {
+    if (!isMobileViewport()) submenuLayer.append(submenu);
+  });
   mount.replaceWith(nav);
 
   const backdrop = document.createElement("div");
@@ -183,6 +222,15 @@
   document.addEventListener("keydown",(event) => {if(event.key === "Escape") setOpen(false);});
   window.addEventListener("resize",() => {
     if (toggle) toggle.setAttribute("aria-expanded",String(nav.classList.contains("is-open")));
+    submenuGroups.forEach(({group,submenu,initiallyOpen,setGroupOpen}) => {
+      if (isMobileViewport()) {
+        group.append(submenu);
+        if (submenu.hidden) setGroupOpen(initiallyOpen);
+      } else {
+        submenuLayer.append(submenu);
+        if (!submenu.hidden) setGroupOpen(true);
+      }
+    });
   });
   if (toggle) toggle.setAttribute("aria-expanded","false");
 })();

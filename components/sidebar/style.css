@@ -119,6 +119,14 @@
   border-right:1px solid rgba(165,188,212,.22);
 }
 .control-sidebar .nav-submenu[hidden]{display:none}
+.sidebar-submenu-layer{position:absolute;inset:0;z-index:40;pointer-events:none}
+.control-sidebar .sidebar-submenu-layer .nav-submenu{
+  position:absolute;right:calc(100% + 10px);width:260px;max-height:min(340px,calc(100vh - 100px));
+  overflow-y:auto;margin:0;padding:8px;border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;background:linear-gradient(165deg,#1b3453 0%,#132640 100%);
+  box-shadow:0 12px 30px rgba(8,22,41,.3);pointer-events:auto;
+}
+.control-sidebar .sidebar-submenu-layer .nav-sublink{min-height:39px;padding:0 10px;font-size:.78rem}
 .control-sidebar .nav-sublink{
   position:relative;display:flex;align-items:center;min-height:37px;
   padding:0 10px;border-radius:9px;color:#9fb0c4;font-size:.78rem;
