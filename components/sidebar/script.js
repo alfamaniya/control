@@ -59,7 +59,10 @@
     const headingSection = heading && heading.closest("section");
     if (headingSection && !headingSection.classList.contains("guide-box") && !headingSection.classList.contains("command-hero")) {
       const directSection = Array.from(pageContent.children).find((node) => node === headingSection || node.contains(headingSection));
-      if (directSection && directSection.tagName === "SECTION") directSection.remove();
+      if (directSection && directSection.tagName === "SECTION") {
+        if (directSection.classList.contains("inventory-heading")) heading.parentElement.remove();
+        else directSection.remove();
+      }
     } else if (heading && heading.closest(".command-hero")) {
       heading.remove();
       const heroDescription = pageContent.querySelector(".command-hero .hero-copy > p");
