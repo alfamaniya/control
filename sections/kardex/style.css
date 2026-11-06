@@ -72,3 +72,17 @@
  .kardex-count{padding:6px 9px;font-size:10px}
  .kardex-start-empty{padding:27px 15px}
 }
+
+/* تفکیک رنگی ردیف‌های ورود و خروج در کاردکس */
+.kardex-history-table tbody tr.kardex-row-in,
+.kardex-history-table tbody tr.kardex-row-in:nth-child(even){background:#effaf3}
+.kardex-history-table tbody tr.kardex-row-in td{color:#176b43;border-top-color:#d9efdf}
+.kardex-history-table tbody tr.kardex-row-in td:first-child{box-shadow:inset -3px 0 0 #35a86b}
+.kardex-history-table tbody tr.kardex-row-in:hover{background:#e5f6eb}
+.kardex-history-table tbody tr.kardex-row-out,
+.kardex-history-table tbody tr.kardex-row-out:nth-child(even){background:#fff2f1}
+.kardex-history-table tbody tr.kardex-row-out td{color:#9d3438;border-top-color:#f4dddd}
+.kardex-history-table tbody tr.kardex-row-out td:first-child{box-shadow:inset -3px 0 0 #df6262}
+.kardex-history-table tbody tr.kardex-row-out:hover{background:#ffe8e6}
+.kardex-history-table tbody tr.kardex-row-in .quantity-in{color:#087f4c!important}
+.kardex-history-table tbody tr.kardex-row-out .quantity-out{color:#b52f39!important}
