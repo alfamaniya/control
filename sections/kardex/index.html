@@ -54,6 +54,11 @@
               <input id="searchDescription" type="text" autocomplete="off" placeholder="جست‌وجو با شرح کالا…">
               <div class="kardex-suggestions" id="descriptionSuggestions" role="listbox" hidden></div>
             </div>
+            <div class="kardex-search-field autocomplete-wrap">
+              <label for="searchDocumentNumber">شماره ورود، خروج یا حواله</label>
+              <input id="searchDocumentNumber" type="search" autocomplete="off" placeholder="جست‌وجوی شماره سند…">
+              <div class="kardex-suggestions" id="documentSuggestions" role="listbox" hidden></div>
+            </div>
           </div>
           <div class="kardex-message" id="kardexMessage" role="status" aria-live="polite" hidden></div>
         </section>
@@ -72,7 +77,7 @@
           <div class="kardex-section-title"><div><h2>گردش عملیات کالا</h2><span id="kardexHistoryCaption">سوابق ورود و خروج موجودی</span></div><span class="kardex-count" id="kardexCount">۰ عملیات</span></div>
           <div class="kardex-table-wrap">
             <table class="kardex-history-table">
-              <thead><tr><th>ردیف</th><th>شماره ورود</th><th>شماره خروج</th><th>تاریخ</th><th>ساعت</th><th>تعداد ورود</th><th>تعداد خروج</th><th>موجودی بعد از عملیات</th></tr></thead>
+              <thead><tr><th>ردیف</th><th>شماره ورود</th><th>شماره خروج</th><th>شماره حواله مصرف</th><th>تاریخ</th><th>ساعت</th><th>تعداد ورود</th><th>تعداد خروج</th><th>موجودی بعد از عملیات</th></tr></thead>
               <tbody id="kardexRows"></tbody>
             </table>
             <div class="kardex-empty" id="kardexEmpty" hidden>برای این کالا هنوز سابقه ورود یا خروجی ثبت نشده است.</div>
