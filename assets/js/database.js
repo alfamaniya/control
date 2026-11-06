@@ -108,6 +108,7 @@
       kardexStore.add({
         procurementCode: code,
         operation: "ورود",
+        description: record.description || "",
         quantityIn: Math.max(0, Number(record.quantity) || 0),
         quantityOut: 0,
         stockAfter: Math.max(0, Number(record.quantity) || 0),
@@ -345,6 +346,7 @@
     history.add({
       procurementCode: code,
       operation,
+      description: product.description || "",
       quantityIn: difference > 0 ? difference : 0,
       quantityOut: difference < 0 ? Math.abs(difference) : 0,
       stockAfter: quantity,
@@ -376,6 +378,7 @@
       history.add({
         procurementCode: code,
         operation: "تعدیل منفی",
+        description: product.description || "",
         quantityIn: 0,
         quantityOut: stock,
         stockAfter: 0,
