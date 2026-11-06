@@ -330,8 +330,9 @@
         description: movement.description || (dispatchItem && dispatchItem.description) || (product && product.description) || "",
         quantity: Math.max(0, Number(movement.quantityIn) || 0) || Math.max(0, Number(movement.quantityOut) || 0),
         destination: dispatch && (dispatch.destination || dispatch.destinationSub) || "",
-        voucherNumber: dispatch && dispatch.voucherNumber || "",
-        exitNumber: dispatch && dispatch.exitNumber || ""
+        entryNumber: movement.entryNumber || movement.incomingNumber || movement.receiptNumber || "",
+        voucherNumber: movement.voucherNumber || (dispatch && dispatch.voucherNumber) || "",
+        exitNumber: movement.exitNumber || (dispatch && dispatch.exitNumber) || ""
       };
     });
 
@@ -344,6 +345,7 @@
         description: item.description || "",
         quantity: Math.max(0, Number(item.quantity) || 0),
         destination: dispatch.destination || dispatch.destinationSub || "",
+        entryNumber: "",
         voucherNumber: dispatch.voucherNumber || "",
         exitNumber: dispatch.exitNumber || ""
       }));
