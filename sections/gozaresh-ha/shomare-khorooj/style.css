@@ -51,3 +51,45 @@
 .report-export-button span{font-size:17px}
 @media(max-width:850px){.exit-meta-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.report-subpage-panel{align-items:flex-start;flex-direction:column;padding:20px}.exit-search-card,.exit-results{padding:18px}.exit-search-control{grid-template-columns:1fr}.exit-search-control>label{grid-column:auto}.exit-search-control .report-primary-button{width:100%}.exit-meta-grid{grid-template-columns:1fr 1fr}.exit-meta-item{padding:13px}.exit-items-heading{align-items:flex-start;flex-direction:column}.exit-report-footer{align-items:stretch;flex-direction:column}.exit-report-footer .report-export-button{width:100%}}
+
+
+/* فهرست صفحه‌بندی‌شده خروج‌ها */
+.exit-list-card{display:grid;gap:18px;padding:24px;border:1px solid #e1eaf0;border-radius:18px;background:#fff;box-shadow:0 8px 26px rgba(25,48,78,.045)}
+.exit-list-heading{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.exit-list-heading h2{margin:0 0 6px;color:#1b2b43;font-size:15px;font-weight:900}
+.exit-list-heading p{margin:0;color:#8290a5;font-size:12px;line-height:1.9}
+.exit-list-total{flex:none;padding:8px 12px;border:1px solid #d9efed;border-radius:10px;background:#effaf8;color:#087f83;font-size:11px;font-weight:900}
+.exit-list-table-wrap{width:100%;overflow:auto;border:1px solid #e7edf2;border-radius:12px}
+.exit-list-table{width:100%;min-width:720px;border-collapse:separate;border-spacing:0;text-align:right}
+.exit-list-table th{padding:14px 13px;background:#f3f7fa;color:#52647a;font-size:11px;font-weight:900;white-space:nowrap}
+.exit-list-table td{padding:14px 13px;border-top:1px solid #edf1f5;color:#34465d;font-size:12px;line-height:1.8;white-space:nowrap}
+.exit-list-row{cursor:pointer;transition:background .15s ease}
+.exit-list-row:hover,.exit-list-row:focus-visible{outline:0;background:#effaf8}
+.exit-list-row:focus-visible{box-shadow:inset 0 0 0 2px #159b98}
+.exit-list-row .exit-row-number{color:#8492a6;font-weight:800}
+.exit-list-row .exit-row-code{color:#087f83;font-weight:900;font-variant-numeric:tabular-nums}
+.exit-pagination{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:2px}
+.exit-page-button,.exit-page-go{display:inline-flex;align-items:center;justify-content:center;min-width:86px;min-height:40px;padding:0 16px;border:1px solid #dce7ed;border-radius:10px;background:#fff;color:#34465d;font:800 12px Tahoma,"Segoe UI",sans-serif;cursor:pointer;transition:all .18s ease}
+.exit-page-button:hover:not(:disabled),.exit-page-go:hover{border-color:#159b98;background:#effaf8;color:#087f83}
+.exit-page-button:disabled{opacity:.42;cursor:not-allowed}
+.exit-page-status{display:flex;align-items:center;justify-content:center;gap:13px;flex-wrap:wrap;color:#52647a;font-size:11px;font-weight:800}
+.exit-page-status>span{padding:8px 11px;border-radius:9px;background:#f3f7fa;color:#1e3855}
+.exit-page-status label{color:#8290a5}
+.exit-page-jump{display:flex;align-items:center;gap:6px}
+.exit-page-jump input{width:64px;height:38px;padding:0 8px;border:1px solid #dce5ed;border-radius:9px;outline:none;background:#f9fbfd;color:#24364f;text-align:center;font:700 12px Tahoma,"Segoe UI",sans-serif}
+.exit-page-jump input:focus{border-color:#159b98;box-shadow:0 0 0 3px rgba(39,181,165,.12)}
+.exit-page-go{min-width:54px;min-height:38px;border-color:#087f83;background:#087f83;color:#fff}
+.exit-detail-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.exit-back-button{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid #d9e9e9;border-radius:10px;background:#f3fbfa;color:#087f83;font:800 11px Tahoma,"Segoe UI",sans-serif;cursor:pointer;transition:all .18s ease}
+.exit-back-button:hover{background:#e5f6f3;border-color:#9bd8d0}
+.exit-back-button span{font-size:17px}
+.exit-detail-caption{color:#8290a5;font-size:11px;font-weight:700}
+@media(max-width:650px){
+  .exit-list-card{padding:17px}
+  .exit-list-heading{align-items:flex-start}
+  .exit-list-heading p{max-width:260px}
+  .exit-pagination{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .exit-page-status{grid-column:1/-1;grid-row:1;gap:9px}
+  .exit-page-button{width:100%}
+  .exit-page-status>span{width:100%;text-align:center}
+}
