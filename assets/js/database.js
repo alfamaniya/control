@@ -217,7 +217,7 @@
       existing.add(code);
       valid.push({
         supplyCode: code, procurementCode: code.slice(0, 8), description, group,
-        qty, active: 1, createdAt: Date.now()
+        qty, active: 1, createdAt: Date.now(), source: item.source || "initial-import"
       });
     }
     let document = null;
@@ -395,7 +395,7 @@
     const code = normalizeCode(procurementCode);
     if (!validSupplyCode(code)) throw new Error("کد تدارکاتی کالا معتبر نیست.");
     const db = await ready();
-    const tx = db.transaction([STORES.products, STORES.ledger], "readwrite");
+    const tx = db.transaction([STORES.products, STORES.ledger, STORES.documents, STORES.meta], "readwrite");
     const done = transactionDone(tx);
     const products = tx.objectStore(STORES.products);
     const product = await requestResult(products.get(code));
@@ -404,8 +404,20 @@
       try { await done; } catch (_) {}
       return false;
     }
-    const history = await requestResult(tx.objectStore(STORES.ledger).index("supplyCode_docDate_id").getAll(IDBKeyRange.bound([code, 0, 0], [code, 99999999, Number.MAX_SAFE_INTEGER])));
+    const history = await requestResult(tx.objectStore(STORES.ledger).index("supplyCode_docDate_id")
+      .getAll(IDBKeyRange.bound([code, 0, 0], [code, 99999999, Number.MAX_SAFE_INTEGER])));
     if (history.length) {
+      const previous = Number(product.qty) || 0;
+      if (previous > 0) {
+        const doc = await createDocument(tx, "adjust", { note: "تخلیه موجودی پیش از غیرفعال‌سازی کالا" });
+        tx.objectStore(STORES.ledger).add({
+          docId: doc.id, supplyCode: code, delta: -previous,
+          type: "adjust", docDate: doc.docDate, balanceBefore: previous,
+          balanceAfter: 0, description: product.description, group: product.group,
+          source: "product-deactivation"
+        });
+      }
+      product.qty = 0;
       product.active = 0;
       products.put(product);
     } else products.delete(code);
