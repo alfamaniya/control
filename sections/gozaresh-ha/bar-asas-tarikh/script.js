@@ -20,9 +20,22 @@
   function selectedDate(input, endOfDay = false) {
     const parsed = window.JalaliCalendar && window.JalaliCalendar.parse(input.value);
     if (!parsed) return null;
-    const date = window.JalaliCalendar.toGregorian(parsed.jy, parsed.jm, parsed.jd);
-    date.setHours(endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
-    return date;
+
+    // گزارش بر اساس روز تقویم ایران است، نه timezone دستگاهی که برنامه روی آن اجرا می‌شود.
+    // تاریخ میلادی را از تقویم جلالی می‌گیریم و مرز روز ایران (UTC+03:30) را
+    // مستقیماً به UTC تبدیل می‌کنیم تا جابه‌جایی روز به timezone محلی وابسته نباشد.
+    const gregorian = window.JalaliCalendar.toGregorian(parsed.jy, parsed.jm, parsed.jd);
+    const year = gregorian.getFullYear();
+    const month = gregorian.getMonth();
+    const day = gregorian.getDate();
+    const iranUtcOffsetMinutes = 210;
+    const hour = endOfDay ? 23 : 0;
+    const minute = endOfDay ? 59 : 0;
+    const second = endOfDay ? 59 : 0;
+    const millisecond = endOfDay ? 999 : 0;
+
+    return new Date(Date.UTC(year, month, day, hour, minute, second, millisecond)
+      - iranUtcOffsetMinutes * 60 * 1000);
   }
   function formatDate(value) {
     const date = new Date(value);
