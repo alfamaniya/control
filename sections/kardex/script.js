@@ -89,12 +89,8 @@
       const tr = document.createElement("tr");
       const dateTime = formatDateTime(movement.occurredAt);
       cell(tr, fa(index + 1));
-      const operation = document.createElement("td");
-      const badge = document.createElement("span");
-      badge.className = "operation-badge " + (movement.operation === "ورود" || movement.operation === "تعدیل مثبت" ? "in" : "out");
-      badge.textContent = movement.operation || "—";
-      operation.appendChild(badge);
-      tr.appendChild(operation);
+      cell(tr, movement.operation === "ورود" || movement.operation === "تعدیل مثبت" ? (movement.entryNumber || movement.incomingNumber || movement.receiptNumber || "—") : "—", "kardex-code");
+      cell(tr, movement.operation === "خروج" || movement.operation === "تعدیل منفی" ? (movement.exitNumber || "—") : "—", "kardex-code");
       cell(tr, dateTime.date);
       cell(tr, dateTime.time, "kardex-time");
       cell(tr, movement.quantityIn ? fa(movement.quantityIn) : "—", "quantity-in");
