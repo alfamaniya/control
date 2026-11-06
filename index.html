@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#14243d">
-  <title>داشبورد</title>
+  <title>مرکز فرماندهی | سامانه کنترل</title>
   <link rel="stylesheet" href="assets/css/style.css?v=20261105-3">
   <link rel="stylesheet" href="components/sidebar/style.css?v=20261105-3">
-
+  <link rel="stylesheet" href="assets/css/dashboard.css">
   <script src="components/sidebar/script.js?v=20261105-2" defer></script>
+  <script src="assets/js/database.js" defer></script>
+  <script src="assets/js/dashboard.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -21,8 +23,89 @@
     </header>
     <div data-control-sidebar></div>
     <main class="main-content" id="mainContent">
-      <div class="page-content">
-        <!-- محتوای اختصاصی صفحه اصلی در این بخش قرار می‌گیرد. -->
+      <div class="page-content dashboard" id="dashboard">
+        <section class="command-hero">
+          <div class="hero-copy">
+            <div class="hero-kicker"><i class="live-dot"></i> مرکز فرماندهی عملیات · CONTROL ROOM</div>
+            <h1>نمای کلی عملیات انبار</h1>
+            <p>نمایش یکپارچه وضعیت موجودی، گردش کالا و فعالیت‌های ثبت‌شده؛ همه‌چیز در یک نگاه برای تصمیم‌گیری سریع‌تر.</p>
+            <div class="hero-actions">
+              <a class="dash-btn primary" href="sections/ersal-kala/index.html">＋ ثبت ارسال کالا</a>
+              <a class="dash-btn" href="sections/vorood-kala/index.html">＋ ورود کالا</a>
+              <a class="dash-btn" href="sections/kardex/index.html">مشاهده کاردکس ←</a>
+            </div>
+          </div>
+          <div class="hero-side">
+            <div><div class="hero-clock" data-clock>--:--:--</div><div class="hero-date" data-today>در حال دریافت تاریخ…</div></div>
+            <button class="dash-btn" type="button" data-refresh>↻ به‌روزرسانی</button>
+          </div>
+        </section>
+
+        <div class="dash-section-head">
+          <div><h2>شاخص‌های کلیدی عملیات</h2><p>وضعیت فعلی موجودی و عملکرد هفت روز گذشته</p></div>
+          <span class="dash-section-tag" data-last-update>در انتظار دریافت اطلاعات</span>
+        </div>
+        <section class="kpi-grid" aria-label="شاخص‌های کلیدی">
+          <article class="kpi-card teal"><div class="kpi-top"><span class="kpi-label">تعداد اقلام ثبت‌شده</span><span class="kpi-icon">▦</span></div><div class="kpi-value" data-product-count>—</div><div class="kpi-foot">تعداد انواع کالا در فهرست موجودی</div></article>
+          <article class="kpi-card blue"><div class="kpi-top"><span class="kpi-label">مجموع موجودی فعلی</span><span class="kpi-icon">◫</span></div><div class="kpi-value" data-stock-total>—</div><div class="kpi-foot">مجموع تعداد واحدهای موجود</div></article>
+          <article class="kpi-card amber"><div class="kpi-top"><span class="kpi-label">ورود در ۷ روز اخیر</span><span class="kpi-icon">↓</span></div><div class="kpi-value" data-in-count>—</div><div class="kpi-foot">شامل ورود و تعدیل مثبت</div></article>
+          <article class="kpi-card coral"><div class="kpi-top"><span class="kpi-label">خروج در ۷ روز اخیر</span><span class="kpi-icon">↑</span></div><div class="kpi-value" data-out-count>—</div><div class="kpi-foot">شامل خروج و تعدیل منفی</div></article>
+        </section>
+
+        <section class="dash-main-grid">
+          <article class="dash-panel">
+            <div class="panel-title"><h3>رادار گردش کالا</h3><div class="flow-legend"><span><i class="legend-dot" style="background:#27b5a5"></i>ورود</span><span><i class="legend-dot" style="background:#e9aa4d"></i>خروج</span></div></div>
+            <div class="flow-chart" data-flow-chart aria-label="نمودار ورود و خروج هفت روز اخیر"><div class="chart-empty">در حال تحلیل گردش کالا…</div></div>
+            <div class="flow-summary"><div><small>مجموع ورود در هفته</small><strong data-in-week>—</strong></div><div><small>مجموع خروج در هفته</small><strong data-out-week>—</strong></div></div>
+          </article>
+          <article class="dash-panel">
+            <div class="panel-title"><h3>وضعیت آمادگی موجودی</h3><span>بر اساس تعداد اقلام</span></div>
+            <div class="stock-status">
+              <div class="stock-total"><span>مجموع واحدهای موجود در انبار</span><strong data-stock-total>—</strong></div>
+              <div class="stock-track" aria-label="ترکیب وضعیت موجودی"><span class="healthy" data-stock-healthy-bar></span><span class="low" data-stock-low-bar></span><span class="empty" data-stock-empty-bar></span></div>
+              <div class="stock-legend">
+                <div class="stock-legend-row"><span class="stock-key"><i style="--key:#28b5a5"></i>موجودی مناسب</span><b data-stock-healthy>—</b></div>
+                <div class="stock-legend-row"><span class="stock-key"><i style="--key:#f1b64f"></i>موجودی محدود (۱ تا ۵)</span><b data-stock-low>—</b></div>
+                <div class="stock-legend-row"><span class="stock-key"><i style="--key:#e17c6c"></i>فاقد موجودی</span><b data-stock-empty>—</b></div>
+              </div>
+              <div class="dash-footnote">موجودی محدود در این داشبورد به‌صورت شاخص هشدار اولیه، ۵ عدد یا کمتر تعریف شده است.</div>
+            </div>
+          </article>
+        </section>
+
+        <section class="dash-main-grid">
+          <article class="dash-panel activity-panel">
+            <div class="panel-title"><h3>جریان زنده فعالیت‌ها</h3><span>آخرین تراکنش‌های ۷ روز اخیر</span></div>
+            <div class="activity-list" data-activity-list><div class="activity-empty">در حال دریافت سوابق…</div></div>
+          </article>
+          <article class="dash-panel">
+            <div class="panel-title"><h3>هشدارهای عملیاتی</h3><span>نیازمند توجه</span></div>
+            <div class="alert-list" data-alert-list><div class="dash-loading">در حال بررسی سطح موجودی…</div></div>
+          </article>
+        </section>
+
+        <section class="dash-bottom-grid">
+          <article class="dash-panel">
+            <div class="panel-title"><h3>دسترسی سریع عملیات</h3><span>میانبرهای پرکاربرد</span></div>
+            <div class="shortcut-grid">
+              <a class="shortcut-link" href="sections/vorood-kala/index.html"><span class="shortcut-icon">＋</span>ثبت و ورود کالا</a>
+              <a class="shortcut-link" href="sections/ersal-kala/index.html"><span class="shortcut-icon">⇧</span>ارسال و ثبت خروج</a>
+              <a class="shortcut-link" href="sections/moshahede-kala/index.html"><span class="shortcut-icon">▤</span>مشاهده موجودی</a>
+              <a class="shortcut-link" href="sections/kardex/index.html"><span class="shortcut-icon">≋</span>دفتر گردش کالا</a>
+              <a class="shortcut-link" href="sections/gozaresh-ha/index.html"><span class="shortcut-icon">▥</span>گزارش‌های مدیریتی</a>
+              <a class="shortcut-link" href="sections/modiriat/index.html"><span class="shortcut-icon">⚙</span>تنظیمات و مدیریت</a>
+            </div>
+          </article>
+          <article class="dash-panel">
+            <div class="panel-title"><h3>وضعیت سامانه</h3><span>زیرساخت محلی</span></div>
+            <div class="stock-status">
+              <div class="stock-total"><span>پایگاه داده مرورگر</span><strong style="font-size:.9rem;color:#159889" data-db-state>در حال بررسی…</strong></div>
+              <div class="stock-total"><span>حواله‌های ثبت‌شده</span><strong data-dispatch-count>—</strong></div>
+              <div class="dash-footnote">اطلاعات این صفحه مستقیماً از پایگاه داده محلی همین مرورگر خوانده می‌شود. اتصال اینترنت یا سرویس بیرونی برای نمایش آمار لازم نیست.</div>
+              <div class="dash-error" data-dashboard-error hidden></div>
+            </div>
+          </article>
+        </section>
       </div>
     </main>
   </div>
