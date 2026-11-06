@@ -17,3 +17,8 @@
 .report-card:hover .report-card-arrow{transform:translateX(-3px);background:#effaf8}
 @media(max-width:900px){.reports-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.reports-heading{padding:19px}.reports-heading-mark{flex-basis:48px;width:48px;height:48px}.reports-grid{grid-template-columns:1fr;gap:13px}.report-card{min-height:160px;padding:20px}}
+
+/* جست‌وجوی شماره سند در گزارش‌های خروج و حواله */
+.report-document-search{display:grid;gap:7px;margin:0 0 14px;max-width:440px;color:#34445b;font-size:11px;font-weight:800}
+.report-document-search input{width:100%;min-height:42px;padding:9px 12px;border:1px solid #dce5ef;border-radius:10px;background:#f9fbfd;color:#24364d;font:inherit;font-weight:500;outline:none}
+.report-document-search input:focus{border-color:#18aaa6;box-shadow:0 0 0 3px rgba(24,170,166,.12);background:#fff}
