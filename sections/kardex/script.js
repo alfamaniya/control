@@ -134,6 +134,10 @@
     empty.hidden = movements.length > 0;
     movements.forEach((movement, index) => {
       const tr = document.createElement("tr");
+      const isIncoming = movement.operation === "ورود" || movement.operation === "تعدیل مثبت";
+      const isOutgoing = movement.operation === "خروج" || movement.operation === "تعدیل منفی";
+      if (isIncoming) tr.classList.add("kardex-row-in");
+      else if (isOutgoing) tr.classList.add("kardex-row-out");
       const dateTime = formatDateTime(movement.occurredAt);
       cell(tr, fa(index + 1));
       cell(tr, movement.operation === "ورود" || movement.operation === "تعدیل مثبت" ? (movement.entryNumber || movement.incomingNumber || movement.receiptNumber || "—") : "—", "kardex-code");
