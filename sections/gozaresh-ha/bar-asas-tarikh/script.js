@@ -47,7 +47,7 @@
       const previousStock = item.previousStock !== undefined && item.previousStock !== "" ? item.previousStock :
         (item.stockAfter !== undefined && item.stockAfter !== "" ? Number(item.stockAfter) - quantityIn + quantityOut : "");
       [
-        [fa(start + index + 1), ""], [dt.date, ""], [dt.time, "report-time"],
+        [fa(start + index + 1), ""], [item.id, "report-code"], [dt.date, ""], [dt.time, "report-time"],
         [item.internalCode, "report-code"], [item.procurementCode, "report-code"], [item.description, "report-description"], [item.group, ""],
         [item.operation, "report-operation"], [item.entryNumber, "report-code"], [item.exitNumber, "report-code"],
         [quantityIn ? number(quantityIn) : "—", "report-in"], [quantityOut ? number(quantityOut) : "—", "report-out"],
@@ -59,7 +59,7 @@
       rows.appendChild(tr);
     });
     empty.hidden = transactions.length > 0;
-    pagination.hidden = transactions.length <= PAGE_SIZE;
+    pagination.hidden = transactions.length === 0;
     previous.disabled = currentPage <= 1;
     next.disabled = currentPage >= pageCount;
     pageCountLabel.textContent = "از " + fa(pageCount) + " صفحه";
