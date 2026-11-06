@@ -127,6 +127,24 @@
     }
   }
 
+  function referenceLabel(movement) {
+    switch (movement.source) {
+      case "manual": return "ورود دستی";
+      case "file-import": return "ورود از فایل";
+      case "copy-paste": return "کپی از جدول";
+      case "initial-import": return "ورود اولیه";
+      case "stock-adjustment": return movement.operation || "تعدیل موجودی";
+      case "dispatch": return "ارسال کالا";
+      case "legacy-dispatch": return "ارسال کالا (سابق)";
+      case "bulk-product-deletion": return "حذف گروهی کالا";
+      default:
+        if (movement.operation === "تعدیل مثبت" || movement.operation === "تعدیل منفی") return movement.operation;
+        if (movement.operation === "ورود") return "ورود کالا";
+        if (movement.operation === "خروج") return "ارسال کالا";
+        return "—";
+    }
+  }
+
   async function renderHistory(product) {
     rows.innerHTML = "";
     const movements = await window.ControlDB.getKardex(product.procurementCode);
@@ -143,6 +161,7 @@
       cell(tr, movement.operation === "ورود" || movement.operation === "تعدیل مثبت" ? (movement.entryNumber || movement.incomingNumber || movement.receiptNumber || "—") : "—", "kardex-code");
       cell(tr, movement.operation === "خروج" || movement.operation === "تعدیل منفی" ? (movement.exitNumber || "—") : "—", "kardex-code");
       cell(tr, movement.voucherNumber || "—", "kardex-code");
+      cell(tr, referenceLabel(movement), "kardex-reference");
       cell(tr, dateTime.date);
       cell(tr, dateTime.time, "kardex-time");
       cell(tr, movement.quantityIn ? fa(movement.quantityIn) : "—", "quantity-in");
