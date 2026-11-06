@@ -122,7 +122,12 @@
     const match = toEn(value || "").trim().match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
     if (!match) return null;
     const jy = Number(match[1]), jm = Number(match[2]), jd = Number(match[3]);
-    if (jm < 1 || jm > 12 || jd < 1 || jd > monthLength(jy, jm)) return null;
+    if (jm < 1 || jm > 12 || jd < 1) return null;
+    try {
+      if (jd > monthLength(jy, jm)) return null;
+    } catch (_) {
+      return null;
+    }
     return { jy, jm, jd };
   }
 
