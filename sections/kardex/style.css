@@ -86,3 +86,5 @@
 .kardex-history-table tbody tr.kardex-row-out:hover{background:#ffe8e6}
 .kardex-history-table tbody tr.kardex-row-in .quantity-in{color:#087f4c!important}
 .kardex-history-table tbody tr.kardex-row-out .quantity-out{color:#b52f39!important}
+
+.kardex-history-table td.kardex-reference{font-weight:800;color:#536b83;white-space:nowrap}
