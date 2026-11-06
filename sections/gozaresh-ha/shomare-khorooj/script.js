@@ -11,9 +11,11 @@
   const pageLabel = $("exitPageLabel");
   const prevButton = $("exitPrevPage");
   const nextButton = $("exitNextPage");
+  const searchInput = $("exitNumberSearch");
   const PAGE_SIZE = 20;
   let dispatches = [];
   let exitRecords = [];
+  let filteredExitRecords = [];
   let currentPage = 1;
   let currentPageRecords = [];
   let selectedMetadata = null;
@@ -58,11 +60,11 @@
     );
   }
   function renderList() {
-    const total = exitRecords.length;
+    const total = filteredExitRecords.length;
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     currentPage = Math.min(Math.max(1, currentPage), totalPages);
     const start = (currentPage - 1) * PAGE_SIZE;
-    currentPageRecords = exitRecords.slice(start, start + PAGE_SIZE);
+    currentPageRecords = filteredExitRecords.slice(start, start + PAGE_SIZE);
     listRows.innerHTML = "";
 
     currentPageRecords.forEach((record, index) => {
@@ -80,7 +82,7 @@
       listRows.appendChild(row);
     });
 
-    $("exitListTotal").textContent = fa(total) + " خروج";
+    $("exitListTotal").textContent = fa(total) + (searchInput.value.trim() ? " نتیجه از " + fa(exitRecords.length) + " خروج" : " خروج");
     pageLabel.textContent = "صفحه " + fa(currentPage) + " از " + fa(totalPages);
     pageInput.value = String(currentPage);
     pageInput.max = String(totalPages);
@@ -89,7 +91,7 @@
     $("exitListEmpty").hidden = total > 0;
     $("exitPagination").hidden = total === 0;
     if (total) setMessage("برای مشاهده اقلام هر خروج، ردیف موردنظر را انتخاب کنید.");
-    else setMessage("هنوز هیچ خروجی در سامانه ثبت نشده است.");
+    else setMessage(exitRecords.length ? "خروجی با شماره واردشده پیدا نشد." : "هنوز هیچ خروجی در سامانه ثبت نشده است.");
   }
   function openDetails(record) {
     if (!record) return;
@@ -129,7 +131,7 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function goToPage(value) {
-    const totalPages = Math.max(1, Math.ceil(exitRecords.length / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(filteredExitRecords.length / PAGE_SIZE));
     const page = Number(digits(value));
     if (!Number.isInteger(page) || page < 1 || page > totalPages) {
       pageInput.value = String(currentPage);
@@ -173,6 +175,7 @@
       }
       dispatches = await window.ControlDB.getAllDispatches();
       exitRecords = buildExitRecords(dispatches);
+      filteredExitRecords = exitRecords.slice();
       renderList();
     } catch (error) {
       setMessage(error.message || "دریافت فهرست خروج‌ها ناموفق بود.", true);
@@ -195,8 +198,16 @@
   });
   prevButton.addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderList(); } });
   nextButton.addEventListener("click", () => {
-    const totalPages = Math.max(1, Math.ceil(exitRecords.length / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(filteredExitRecords.length / PAGE_SIZE));
     if (currentPage < totalPages) { currentPage++; renderList(); }
+  });
+  searchInput.addEventListener("input", () => {
+    const term = normalizeExit(searchInput.value);
+    filteredExitRecords = exitRecords.filter(record =>
+      normalizeExit(record.exitNumber).includes(term) || normalizeExit(record.voucherNumber).includes(term)
+    );
+    currentPage = 1;
+    renderList();
   });
   $("exitGoPage").addEventListener("click", () => goToPage(pageInput.value));
   pageInput.addEventListener("keydown", event => {
