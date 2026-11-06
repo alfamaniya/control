@@ -170,17 +170,6 @@
     quantityInput.value = String(Math.max(1, Math.min(requested || 1, max)));
   });
 
-  function localDateTimeCode() {
-    const date = new Date();
-    const parts = new Intl.DateTimeFormat("fa-IR-u-ca-persian-nu-latn", {
-      year: "numeric", month: "2-digit", day: "2-digit",
-      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
-    }).formatToParts(date);
-    const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
-    const pad = value => String(value).padStart(2, "0");
-    return values.year + "/" + pad(values.month) + "/" + pad(values.day) + " " +
-      pad(values.hour) + ":" + pad(values.minute) + ":" + pad(values.second);
-  }
   function openModal() {
     if (!dispatchItems.length) return;
     modal.hidden = false;
@@ -199,12 +188,9 @@
     submit.disabled = true;
     submit.textContent = "در حال ثبت…";
     try {
-      const nowCode = localDateTimeCode();
       const metadata = {
         destination: $("destination").value.trim(),
         destinationSub: $("destinationSub").value.trim(),
-        voucherNumber: $("voucherNumber").value.trim() || nowCode,
-        exitNumber: $("exitNumber").value.trim() || nowCode,
         dispatchedAt: new Date().toISOString()
       };
       const result = await window.ControlDB.createDispatch(dispatchItems, metadata);
@@ -212,7 +198,7 @@
       renderItems();
       closeModal();
       form.reset();
-      showMessage("ارسال با موفقیت ثبت شد. تعداد " + fa(result.items.length) + " ردیف کالا از موجودی کسر شد.");
+      showMessage("ارسال با موفقیت ثبت شد. شماره خروج: " + result.exitNumber + " | شماره حواله مصرف: " + result.voucherNumber + " | تعداد " + fa(result.items.length) + " ردیف کالا از موجودی کسر شد.");
       await loadInventory();
     } catch (error) {
       showMessage(error.message || "ثبت ارسال انجام نشد.", true);
