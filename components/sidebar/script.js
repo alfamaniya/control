@@ -19,7 +19,6 @@
       ["گزارش بر اساس تاریخ","sections/gozaresh-ha/bar-asas-tarikh/index.html"],
       ["گزارش بر اساس شماره حواله مصرف","sections/gozaresh-ha/shomare-havale-masraf/index.html"],
       ["گزارش بر اساس شماره خروج","sections/gozaresh-ha/shomare-khorooj/index.html"],
-      ["گزارش بر اساس کد تدارکاتی یا شرح کالا","sections/gozaresh-ha/code-or-description/index.html"],
     ]},
     {number:"07",label:"تنظیمات و مدیریت",icon:"⚙",path:"sections/modiriat/index.html",children:[
       ["مدیریت حذف کالا","sections/modiriat/manage-products/index.html"],
