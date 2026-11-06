@@ -61,7 +61,7 @@
         return;
       }
       form.reset();
-      showMessage("کالا با کد اختصاصی " + fa(procurementCode.slice(0, 8)) + " با موفقیت به موجودی اضافه شد.");
+      showMessage("کالا با موفقیت ثبت شد. شماره ورود: " + result.entryNumber + " | کد اختصاصی: " + fa(procurementCode.slice(0, 8)));
       $("procurementCode").focus();
     } catch (error) {
       showMessage(error.message || "ثبت کالا انجام نشد.", true);
