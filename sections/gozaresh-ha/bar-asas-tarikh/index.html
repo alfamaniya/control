@@ -8,11 +8,6 @@
   <link rel="stylesheet" href="../../../assets/css/style.css?v=20261105-3">
   <link rel="stylesheet" href="../../../components/sidebar/style.css?v=20261105-3">
   <link rel="stylesheet" href="../style.css">
-  <link rel="stylesheet" href="style.css">
-  <script src="../../../assets/js/database.js" defer></script>
-  <script src="../../../assets/js/jalali-calendar.js?v=20261106-3" defer></script>
-  <script src="../../../assets/libs/xlsx.full.min.js" defer></script>
-  <script src="script.js" defer></script>
   <script src="../../../components/sidebar/script.js?v=20261105-2" defer></script>
 </head>
 <body>
@@ -23,56 +18,7 @@
       <div class="topbar-spacer"></div>
     </header>
     <div data-control-sidebar></div>
-    <main class="main-content" id="mainContent">
-      <div class="page-content report-subpage">
-        <a class="back-link" href="../index.html">بازگشت به گزارش‌ها</a>
-        <section class="report-subpage-panel">
-          <span class="report-subpage-icon">▦</span>
-          <div>
-            <span class="report-eyebrow">بخش گزارش‌ها</span>
-            <h1>گزارش بر اساس تاریخ</h1>
-            <p>تهیه و مشاهده گزارش‌ها بر پایه بازه زمانی شمسی.</p>
-          </div>
-        </section>
-        <section class="date-range-card" aria-labelledby="dateRangeTitle">
-          <div class="date-range-card-head">
-            <h2 id="dateRangeTitle">انتخاب بازه زمانی</h2>
-            <p>تاریخ شروع و پایان گزارش را مشخص کنید.</p>
-          </div>
-          <div class="date-range-fields">
-            <div class="date-field">
-              <label for="reportStartDate">از تاریخ</label>
-              <input id="reportStartDate" name="startDate" type="text" data-jalali-calendar placeholder="انتخاب تاریخ شروع" readonly autocomplete="off">
-            </div>
-            <div class="date-field">
-              <label for="reportEndDate">تا تاریخ</label>
-              <input id="reportEndDate" name="endDate" type="text" data-jalali-calendar placeholder="انتخاب تاریخ پایان" readonly autocomplete="off">
-            </div>
-          </div>
-          <div class="date-range-actions">
-            <button id="showDateReport" class="report-primary-button" type="button">نمایش گزارش</button>
-            <p id="reportMessage" class="report-message" role="status" aria-live="polite" hidden></p>
-          </div>
-        </section>
-        <section class="date-report-results" id="dateReportResults" hidden>
-          <div class="date-report-heading">
-            <div><h2>تراکنش‌های بازه انتخاب‌شده</h2><p id="reportResultSummary">حداکثر ۳۰ ردیف نخست نمایش داده می‌شود.</p></div>
-            <span class="date-report-count" id="reportResultCount">۰ تراکنش</span>
-          </div>
-          <div class="date-report-table-wrap">
-            <table class="date-report-table">
-              <thead><tr><th>ردیف</th><th>تاریخ</th><th>نوع عملیات</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>تعداد</th><th>محل ارسال</th><th>شماره ورود</th><th>شماره خروج</th></tr></thead>
-              <tbody id="dateReportRows"></tbody>
-            </table>
-            <div class="date-report-empty" id="dateReportEmpty" hidden>در بازه زمانی انتخاب‌شده تراکنشی ثبت نشده است.</div>
-          </div>
-          <div class="date-report-footer">
-            <span id="reportExportHint">برای دریافت تمام ردیف‌های این بازه، فایل اکسل را دریافت کنید.</span>
-            <button id="exportDateReport" class="report-export-button" type="button"><span aria-hidden="true">⇩</span> نمایش بیشتر در فایل خروجی اکسل</button>
-          </div>
-        </section>
-      </div>
-    </main>
+    <main class="main-content" id="mainContent"></main>
   </div>
 </body>
 </html>
