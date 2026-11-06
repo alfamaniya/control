@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="../../../assets/css/style.css?v=20261105-3">
   <link rel="stylesheet" href="../../../components/sidebar/style.css?v=20261106-1">
   <link rel="stylesheet" href="../style.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261106-1">
 
   <script src="../../../assets/libs/xlsx.full.min.js" defer></script>
   <script src="../../../assets/js/database.js?v=20261106-5" defer></script>
@@ -33,18 +33,12 @@
           <div class="guide-icon" aria-hidden="true">i</div>
           <div class="guide-content">
             <h1 id="guideTitle">راهنمای ورود کالا از فایل</h1>
-            <p>فایل اکسل، CSV یا JSON را انتخاب کنید. پس از تأیید فایل، فهرست کالاها نمایش داده می‌شود و کد اختصاصی هر کالا به‌صورت خودکار از ۸ رقم اول کد تدارکاتی ساخته می‌شود.</p>
-            <div class="guide-points">
-              <span><b>۱</b> ستون‌های فایل: کد تدارکاتی، شرح کالا، موجودی و گروه</span>
-              <span><b>۲</b> کد تدارکاتی باید دقیقاً ۱۰ رقم باشد</span>
-              <span><b>۳</b> کدهای تکراری یا ناقص ثبت نمی‌شوند</span>
-            </div>
-            <div class="format-badge">فرمت‌های مجاز: Excel · CSV · JSON</div>
+            <p>Excel، CSV یا JSON؛ کد ۱۰ رقمی و ستون‌های کد، شرح، موجودی و گروه.</p>
           </div>
         </section>
 
         <section class="import-panel upload-panel" aria-labelledby="uploadTitle">
-          <div class="panel-heading"><span class="step-number">۱</span><div><h2 id="uploadTitle">انتخاب و بارگذاری فایل</h2><p>فایل را به کادر زیر بکشید یا برای باز شدن پنجره انتخاب فایل کلیک کنید.</p></div></div>
+          <div class="panel-heading"><div><h2 id="uploadTitle">انتخاب فایل</h2><p>فایل را انتخاب کنید یا اینجا رها کنید.</p></div></div>
           <input id="goodsFile" class="visually-hidden" type="file" accept=".xlsx,.xls,.csv,.json,application/json,text/csv">
           <button class="dropzone" id="dropzone" type="button" aria-describedby="dropHint">
             <span class="drop-icon" aria-hidden="true">⇧</span>

@@ -1,12 +1,15 @@
-/* استایل‌های اصلی صفحه با صفحه ورود از فایل مشترک است. */
+/* استایل‌های پایه با صفحه ورود از فایل مشترک است. */
+.copy-paste-page .import-panel{padding:18px}
+.copy-paste-page .import-panel>.panel-heading{margin-bottom:12px}
+.copy-paste-page .import-panel>.panel-heading h2{margin:0}
 .copy-paste-page .paste-input{
   display:block;
   box-sizing:border-box;
   width:100%;
-  height:205px;
-  min-height:205px;
+  height:165px;
+  min-height:165px;
   max-width:100%;
-  padding:24px;
+  padding:16px;
   border:2px dashed #a9cbd2;
   border-radius:16px;
   background:linear-gradient(145deg,#f7fcfd,#f4f9fc);
@@ -26,13 +29,12 @@
 }
 .copy-paste-page .paste-actions{
   display:flex;
-  align-items:center;
-  justify-content:space-between;
+  justify-content:flex-start;
   gap:14px;
-  margin-top:15px;
+  margin-top:12px;
 }
-.copy-paste-page .paste-hint{color:#718096;font-size:11px;line-height:1.8}
 @media(max-width:760px){
+  .copy-paste-page .import-panel{padding:14px}
   .copy-paste-page .paste-actions{align-items:stretch;flex-direction:column}
   .copy-paste-page .paste-actions .primary-button{width:100%}
 }

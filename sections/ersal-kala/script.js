@@ -74,7 +74,7 @@
     const remaining = Math.max(0, stockOf(product) - alreadyAdded);
     $("selectedStock").textContent = "موجودی قابل ارسال: " + fa(remaining) + " از " + fa(stockOf(product));
     quantityInput.max = String(remaining);
-    quantityInput.value = remaining > 0 ? "1" : "0";
+    quantityInput.value = "";
     quantityInput.disabled = remaining < 1;
     $("addDispatchItem").disabled = remaining < 1;
     selectedBox.hidden = false;
@@ -153,21 +153,13 @@
     selectedBox.hidden = true;
     procurementSearch.value = "";
     descriptionSearch.value = "";
-    quantityInput.value = "1";
+    quantityInput.value = "";
     showMessage("کالا به باکس جمع‌بندی منتقل شد. کالای بعدی را جست‌وجو کنید.");
     procurementSearch.focus();
   }
   dispatchItemForm.addEventListener("submit", event => {
     event.preventDefault();
     addCurrentProduct();
-  });
-
-  quantityInput.addEventListener("change", () => {
-    if (!selectedProduct) return;
-    const alreadyAdded = dispatchItems.find(item => item.procurementCode === selectedProduct.procurementCode)?.quantity || 0;
-    const max = Math.max(0, stockOf(selectedProduct) - alreadyAdded);
-    const requested = Math.floor(numberOf(quantityInput.value));
-    quantityInput.value = String(Math.max(1, Math.min(requested || 1, max)));
   });
 
   function openModal() {

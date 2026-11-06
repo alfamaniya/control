@@ -11,7 +11,7 @@
   <script src="../../assets/js/database.js?v=20261106-5" defer></script>
 
   <script src="../../assets/js/table-sort.js" defer></script>
-  <script src="script.js?v=20261106-4" defer></script>
+  <script src="script.js?v=20261106-5" defer></script>
   <script src="../../components/sidebar/script.js?v=20261106-4" defer></script>
 </head>
 <body>
@@ -42,7 +42,7 @@
         </section>
         <section class="selected-product-card" id="selectedProduct" hidden>
           <div class="selected-product-info"><strong id="selectedDescription"></strong><span id="selectedCode"></span><small id="selectedStock"></small></div>
-          <form class="quantity-control" id="dispatchItemForm"><label for="dispatchQuantity">تعداد ارسالی</label><input id="dispatchQuantity" type="number" inputmode="numeric" min="1" step="1" value="1"><button id="addDispatchItem" class="primary-button" type="submit">تأیید و افزودن</button></form>
+          <form class="quantity-control" id="dispatchItemForm"><label for="dispatchQuantity">تعداد ارسالی</label><input id="dispatchQuantity" type="number" inputmode="numeric" min="1" step="1" required><button id="addDispatchItem" class="primary-button" type="submit">تأیید و افزودن</button></form>
         </section>
         <section class="dispatch-list-card">
           <div class="section-heading"><div><h2>جمع‌بندی کالاهای انتخاب‌شده</h2><span id="dispatchItemCount">۰ کالا</span></div></div>

@@ -31,38 +31,31 @@
           <div class="guide-icon" aria-hidden="true">i</div>
           <div class="guide-content">
             <h1 id="manualGuideTitle">راهنمای ثبت دستی کالا</h1>
-            <p>اطلاعات کالا را در چهار فیلد زیر وارد کنید. کد تدارکاتی باید دقیقاً ۱۰ رقم باشد و کد اختصاصی کالا از ۸ رقم اول آن به دست می‌آید.</p>
-            <div class="guide-points">
-              <span><b>۱</b> کد تدارکاتی: دقیقاً ۱۰ رقم</span>
-              <span><b>۲</b> شرح کالا و گروه کالا را وارد کنید</span>
-              <span><b>۳</b> تعداد موجودی باید عددی باشد</span>
-            </div>
-            <div class="format-badge">ثبت اطلاعات پایه کالا</div>
+            <p>کد ۱۰ رقمی، شرح، گروه و موجودی را وارد کنید؛ کد اختصاصی خودکار ساخته می‌شود.</p>
           </div>
         </section>
 
         <section class="import-panel manual-form-panel" aria-labelledby="manualFormTitle">
           <div class="panel-heading">
-            <span class="step-number">۱</span>
-            <div><h2 id="manualFormTitle">اطلاعات کالا</h2><p>چهار فیلد زیر را تکمیل کنید.</p></div>
+            <h2 id="manualFormTitle">اطلاعات کالا</h2>
           </div>
           <form class="manual-entry-form" id="manualEntryForm">
             <div class="manual-fields">
               <label class="manual-field" for="procurementCode">
                 <span>کد تدارکاتی</span>
-                <input id="procurementCode" name="procurementCode" type="text" inputmode="numeric" maxlength="10" placeholder="کد تدارکاتی ۱۰ رقمی" autocomplete="off">
+                <input id="procurementCode" name="procurementCode" type="text" inputmode="numeric" maxlength="10" placeholder="۱۰ رقم" autocomplete="off">
               </label>
               <label class="manual-field" for="productDescription">
                 <span>شرح کالا</span>
-                <input id="productDescription" name="description" type="text" placeholder="شرح کالا را وارد کنید" autocomplete="off">
+                <input id="productDescription" name="description" type="text" placeholder="شرح کالا" autocomplete="off">
               </label>
               <label class="manual-field" for="productGroup">
                 <span>گروه کالا</span>
-                <input id="productGroup" name="group" type="text" placeholder="گروه کالا را وارد کنید" autocomplete="off">
+                <input id="productGroup" name="group" type="text" placeholder="گروه کالا" autocomplete="off">
               </label>
               <label class="manual-field" for="productQuantity">
                 <span>تعداد موجودی</span>
-                <input id="productQuantity" name="quantity" type="number" min="0" step="1" placeholder="تعداد موجودی را وارد کنید">
+                <input id="productQuantity" name="quantity" type="number" min="0" step="1" placeholder="تعداد">
               </label>
             </div>
             <div class="manual-form-actions"><button class="primary-button" id="submitManualEntry" type="submit">تأیید و ورود کالا</button></div>

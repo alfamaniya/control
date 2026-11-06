@@ -4,7 +4,6 @@
   const rows = $("inventoryRows");
   const message = $("inventoryMessage");
   const tableWrap = $("inventoryTableWrap");
-  const empty = $("inventoryEmpty");
   const count = $("inventoryCount");
   const pagination = $("inventoryPagination");
   const pageSelect = $("inventoryPageSelect");
@@ -56,7 +55,6 @@
     message.textContent = "در حال دریافت اطلاعات موجودی…";
     tableWrap.hidden = true;
     pagination.hidden = true;
-    empty.hidden = true;
     try {
       if (!window.ControlDB) throw new Error("پایگاه داده محلی بارگذاری نشده است. صفحه را دوباره بارگذاری کنید.");
       const products = await window.ControlDB.getAll();
@@ -67,7 +65,6 @@
       if (!products.length) {
         currentPage = 1;
         message.hidden = true;
-        empty.hidden = false;
         return;
       }
       products.forEach((product, index) => {

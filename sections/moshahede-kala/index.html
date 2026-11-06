@@ -31,12 +31,14 @@
             <h1>مشاهده کالاها و موجودی</h1>
             <p>فهرست کامل کالاهای ثبت‌شده در موجودی سامانه</p>
           </div>
-          <div class="inventory-total"><strong id="inventoryCount">۰</strong><span>قلم کالا</span></div>
         </section>
         <section class="inventory-panel" aria-label="فهرست کل موجودی">
           <div class="inventory-panel-heading">
             <div><h2>کل موجودی</h2><p>اطلاعات کالاهای ذخیره‌شده در پایگاه داده محلی</p></div>
-            <button type="button" class="refresh-button" id="refreshInventory">↻ <span>بروزرسانی فهرست</span></button>
+            <div class="inventory-panel-actions">
+              <div class="inventory-total"><strong id="inventoryCount">۰</strong><span>قلم کالا</span></div>
+              <button type="button" class="refresh-button" id="refreshInventory">↻ <span>بروزرسانی فهرست</span></button>
+            </div>
           </div>
           <div id="inventoryMessage" class="inventory-message" role="status" aria-live="polite">در حال دریافت اطلاعات موجودی…</div>
           <div class="inventory-table-wrap" id="inventoryTableWrap" hidden>
@@ -50,11 +52,6 @@
             <div class="page-picker"><label for="inventoryPageSelect">صفحه</label><select id="inventoryPageSelect" aria-label="انتخاب شماره صفحه"></select><span id="inventoryPageSummary"></span></div>
             <button type="button" id="inventoryNext" class="page-button">بعدی</button>
           </nav>
-          <div class="inventory-empty" id="inventoryEmpty" hidden>
-            <span class="inventory-empty-icon">▤</span>
-            <strong>هنوز کالایی ثبت نشده است</strong>
-            <p>پس از ورود کالا از فایل، کپی از جدول یا ثبت دستی، فهرست موجودی در این قسمت نمایش داده می‌شود.</p>
-          </div>
         </section>
       </div>
     </main>
