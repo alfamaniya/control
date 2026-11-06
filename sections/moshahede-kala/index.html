@@ -45,6 +45,11 @@
               <tbody id="inventoryRows"></tbody>
             </table>
           </div>
+          <nav class="inventory-pagination" id="inventoryPagination" aria-label="صفحه‌بندی فهرست موجودی" hidden>
+            <button type="button" id="inventoryPrev" class="page-button" disabled>قبلی</button>
+            <div class="page-picker"><label for="inventoryPageSelect">صفحه</label><select id="inventoryPageSelect" aria-label="انتخاب شماره صفحه"></select><span id="inventoryPageSummary"></span></div>
+            <button type="button" id="inventoryNext" class="page-button">بعدی</button>
+          </nav>
           <div class="inventory-empty" id="inventoryEmpty" hidden>
             <span class="inventory-empty-icon">▤</span>
             <strong>هنوز کالایی ثبت نشده است</strong>
