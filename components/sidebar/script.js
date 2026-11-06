@@ -26,8 +26,46 @@
     ]},
     {number:"08",label:"درخت سامانه",icon:"⌘",path:"sections/derakht-samane/index.html"}
   ];
-  const current = window.location.pathname.replace(/\/$/,"");
-  const routePath = (path) => new URL(path, root).pathname.replace(/\/$/,"");
+  const current = window.location.pathname.replace(/\\/$/,"");
+  const routePath = (path) => new URL(path, root).pathname.replace(/\\/$/,"");
+  const currentItem = items.find((item) => routePath(item.path) === current || (item.children || []).some((child) => routePath(child[1]) === current));
+  const currentChild = currentItem && (currentItem.children || []).find((child) => routePath(child[1]) === current);
+  const pageTitle = currentChild ? currentChild[0] : (currentItem ? currentItem.label : (document.title.split("|")[0] || "داشبورد").trim());
+  const sectionTitle = currentItem ? currentItem.label : "داشبورد";
+
+  // عنوان صفحه و سکشن فعال را در همان هدر سراسری نمایش بده.
+  const brand = document.querySelector(".topbar .brand");
+  if (brand) {
+    brand.textContent = "";
+    brand.classList.add("brand-breadcrumb");
+    const section = document.createElement("span");
+    section.className = "topbar-section-title";
+    section.textContent = sectionTitle;
+    const separator = document.createElement("span");
+    separator.className = "topbar-title-separator";
+    separator.setAttribute("aria-hidden", "true");
+    separator.textContent = " / ";
+    const page = document.createElement("strong");
+    page.className = "topbar-page-title";
+    page.textContent = pageTitle;
+    brand.append(section, separator, page);
+    brand.setAttribute("aria-label", sectionTitle + "، " + pageTitle);
+  }
+
+  // سربرگ مستقل ابتدای صفحات تکراری است؛ عنوان آن به هدر اصلی منتقل شده است.
+  const pageContent = document.querySelector(".page-content");
+  if (pageContent) {
+    const heading = pageContent.querySelector("h1");
+    const headingSection = heading && heading.closest("section");
+    if (headingSection && !headingSection.classList.contains("guide-box") && !headingSection.classList.contains("command-hero")) {
+      const directSection = Array.from(pageContent.children).find((node) => node === headingSection || node.contains(headingSection));
+      if (directSection && directSection.tagName === "SECTION") directSection.remove();
+    } else if (heading && heading.closest(".command-hero")) {
+      heading.remove();
+      const heroDescription = pageContent.querySelector(".command-hero .hero-copy > p");
+      if (heroDescription) heroDescription.remove();
+    }
+  }
   const nav = document.createElement("aside");
   nav.className = "control-sidebar";
   nav.id = "sidebar";
