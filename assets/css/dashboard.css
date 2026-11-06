@@ -1,5 +1,5 @@
 /* داشبورد مرکز فرماندهی */
-.dashboard { display:grid; gap:22px; color:#17243b; }
+.dashboard { display:grid; gap:28px; color:#17243b; }
 .command-hero {
   position:relative; overflow:hidden; display:grid; grid-template-columns:minmax(0,1fr) auto;
   align-items:center; gap:22px; padding:28px 30px; border-radius:22px;
@@ -8,7 +8,8 @@
 }
 .command-hero::after { content:""; position:absolute; inset:0; opacity:.13; pointer-events:none; background-image:linear-gradient(rgba(255,255,255,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.13) 1px,transparent 1px); background-size:28px 28px; mask-image:linear-gradient(90deg,transparent,#000); }
 .hero-copy,.hero-side { position:relative; z-index:1; }
-.hero-kicker { display:flex; align-items:center; gap:9px; color:#9be9dc; font-size:.76rem; font-weight:800; letter-spacing:.04em; }
+.hero-copy { display:grid; align-content:start; gap:18px; }
+.hero-kicker { display:flex; align-items:center; gap:9px; color:#9be9dc; font-size:1.2rem; font-weight:800; letter-spacing:.02em; }
 .live-dot { width:8px; height:8px; border-radius:50%; background:#5ce0bd; box-shadow:0 0 0 5px rgba(92,224,189,.13),0 0 15px rgba(92,224,189,.8); }
 .command-hero h1 { margin:12px 0 8px; font-size:clamp(1.45rem,2.6vw,2.1rem); line-height:1.45; }
 .command-hero p { margin:0; max-width:660px; color:#c0d0df; font-size:.9rem; line-height:2; }
@@ -23,7 +24,7 @@
 .dash-section-head h2 { margin:0; color:#1b2d46; font-size:1.02rem; }
 .dash-section-head p { margin:5px 0 0; color:#8290a5; font-size:.76rem; }
 .dash-section-tag { color:#71839a; font-size:.72rem; white-space:nowrap; }
-.kpi-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+.kpi-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:14px; }
 .kpi-card { position:relative; overflow:hidden; min-height:132px; padding:18px; border:1px solid #e7edf4; border-radius:17px; background:#fff; box-shadow:0 7px 20px rgba(24,44,72,.045); }
 .kpi-card::after { content:""; position:absolute; left:-20px; bottom:-38px; width:100px; height:100px; border-radius:50%; background:var(--tint); opacity:.7; }
 .kpi-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
@@ -35,6 +36,7 @@
 .kpi-card.blue { --tone:#3b79c8;--tint:#eaf2ff; }
 .kpi-card.amber { --tone:#d28a20;--tint:#fff4df; }
 .kpi-card.coral { --tone:#d76d5c;--tint:#fff0ec; }
+.kpi-card.empty { --tone:#d76d5c;--tint:#fff0ec; }
 .dash-main-grid { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(270px,.85fr); gap:16px; align-items:stretch; }
 .dash-panel { min-width:0; padding:20px; border:1px solid #e7edf4; border-radius:18px; background:#fff; box-shadow:0 7px 20px rgba(24,44,72,.04); }
 .panel-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }

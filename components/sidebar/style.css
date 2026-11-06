@@ -114,18 +114,6 @@
 }
 .control-sidebar .nav-group-heading{display:flex;align-items:stretch;gap:4px}
 .control-sidebar .nav-group-heading>.nav-group-link{flex:1;min-width:0}
-.control-sidebar .nav-group-heading>.nav-chevron-toggle{
-  display:grid;place-items:center;flex:0 0 35px;width:35px;min-height:44px;
-  padding:0;border:1px solid rgba(154,177,201,.16);border-radius:10px;
-  color:#91a6bc;background:rgba(255,255,255,.025);cursor:pointer;
-  transition:background .18s ease,border-color .18s ease,color .18s ease;
-}
-.control-sidebar .nav-chevron-toggle:hover,
-.control-sidebar .nav-group.is-open .nav-chevron-toggle{
-  color:#6fe0ce;border-color:rgba(85,213,193,.35);background:rgba(39,181,165,.1);
-}
-.control-sidebar .nav-chevron{display:inline-block;font-size:1rem;line-height:1;transition:transform .2s ease}
-.control-sidebar .nav-group.is-open .nav-chevron{transform:rotate(180deg)}
 .control-sidebar .nav-submenu{
   display:grid;gap:3px;margin:2px 24px 7px 0;padding:3px 13px 3px 0;
   border-right:1px solid rgba(165,188,212,.22);
@@ -224,7 +212,6 @@
   .topbar .brand-breadcrumb .topbar-page-title{font-size:.82rem}
 }
 
-
 /* منوی کشویی ساده: باز و بسته شدن فقط با دکمه و کلیک بیرون */
 .control-sidebar{
   position:fixed;z-index:25;top:var(--header-height,72px);right:0;bottom:0;
@@ -282,4 +269,27 @@
 }
 @media(prefers-reduced-motion:reduce){
   .control-sidebar,.control-sidebar-backdrop{transition:none!important}
+}
+
+@media(max-height:700px){
+  .control-sidebar .sidebar-panel{padding:14px 14px 10px}
+  .sidebar-panel-head{min-height:45px;margin-bottom:8px;padding:0 3px 8px;gap:9px}
+  .sidebar-panel-logo{flex-basis:34px;width:34px;height:34px;border-radius:11px;font-size:1rem}
+  .sidebar-panel-title{gap:0}
+  .sidebar-panel-title strong{font-size:.78rem;line-height:1.35}
+  .sidebar-panel-title small{font-size:.6rem}
+  .sidebar-panel-nav{gap:4px;padding-bottom:6px}
+  .control-sidebar .nav-group{gap:2px}
+  .control-sidebar .nav-link{min-height:38px;gap:8px;padding:0 9px;border-radius:10px;font-size:.77rem}
+  .control-sidebar .nav-number{flex-basis:25px;width:25px;height:25px;border-radius:7px;font-size:.64rem}
+  .control-sidebar .nav-submenu{gap:1px;margin:1px 21px 4px 0;padding:2px 9px 2px 0}
+  .control-sidebar .nav-sublink{min-height:29px;padding:0 7px;border-radius:7px;font-size:.69rem;line-height:1.45}
+  .control-sidebar .nav-sublink::before{flex-basis:6px;width:6px;height:6px;margin-left:7px}
+  .sidebar-panel-foot{padding:7px 6px 0;font-size:.6rem;line-height:1.5}
+}
+@media(max-height:520px){
+  .sidebar-panel-title small,.sidebar-panel-foot{display:none}
+  .control-sidebar .sidebar-panel{padding-top:10px}
+  .sidebar-panel-head{min-height:39px;margin-bottom:6px;padding-bottom:6px}
+  .sidebar-panel-nav{padding-bottom:2px}
 }

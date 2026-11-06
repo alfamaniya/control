@@ -118,22 +118,14 @@
       group.className = "nav-group" + (isParent || activeChild ? " is-open" : "");
       const heading = document.createElement("div");
       heading.className = "nav-group-heading";
-      const expand = document.createElement("button");
-      expand.type = "button";
-      expand.className = "nav-chevron-toggle";
-      expand.setAttribute("aria-label","باز و بسته کردن زیرمجموعه‌های " + item.label);
-      expand.setAttribute("aria-expanded",String(isParent || activeChild));
-      const chevron = document.createElement("span");
-      chevron.className = "nav-chevron";
-      chevron.setAttribute("aria-hidden","true");
-      chevron.textContent = "⌄";
-      expand.append(chevron);
-      heading.append(link,expand);
       group.append(heading);
       const submenu = document.createElement("div");
       submenu.className = "nav-submenu";
+      submenu.id = "sidebar-submenu-" + item.number;
       submenu.hidden = !(isParent || activeChild);
       submenu.setAttribute("aria-label","زیرمجموعه‌های " + item.label);
+      link.setAttribute("aria-controls",submenu.id);
+      link.setAttribute("aria-expanded",String(isParent || activeChild));
       item.children.forEach(([text,path]) => {
         const child = document.createElement("a");
         child.className = "nav-sublink";
@@ -142,12 +134,23 @@
         if (routePath(path) === current) child.setAttribute("aria-current","page");
         submenu.append(child);
       });
+      heading.append(link);
       group.append(submenu);
-      expand.addEventListener("click",() => {
-        const open = !group.classList.contains("is-open");
+      const initiallyOpen = isParent || activeChild;
+      const setGroupOpen = (open) => {
         group.classList.toggle("is-open",open);
         submenu.hidden = !open;
-        expand.setAttribute("aria-expanded",String(open));
+        link.setAttribute("aria-expanded",String(open));
+      };
+      group.addEventListener("pointerenter",(event) => {
+        if (event.pointerType === "mouse") setGroupOpen(true);
+      });
+      group.addEventListener("pointerleave",(event) => {
+        if (event.pointerType === "mouse") setGroupOpen(initiallyOpen);
+      });
+      group.addEventListener("focusin",() => setGroupOpen(true));
+      group.addEventListener("focusout",(event) => {
+        if (!group.contains(event.relatedTarget)) setGroupOpen(initiallyOpen);
       });
     } else {
       group.append(link);

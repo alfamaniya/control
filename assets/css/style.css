@@ -237,3 +237,35 @@ table thead th.sort-active {
 .sidebar .nav-group.is-open .nav-group-link .nav-chevron{color:#6fe0ce;transform:rotate(180deg)}
 .sidebar .nav-group-link:hover .nav-chevron{color:#fff}
 .sidebar .nav-group .nav-submenu[hidden]{display:none}
+
+/* Shared accent for the right edge of content cards and panels */
+:is(
+  .command-hero,.kpi-card,.dash-panel,.activity-panel,
+  .entry-method-card,.guide-box,.import-panel,.upload-panel,.preview-panel,.discrepancies-panel,.manual-form-panel,
+  .reports-heading,.report-card,.general-report-heading,.general-report-card,
+  .management-heading,.management-panel,.management-empty,.product-result-card,.stock-selected-card,
+  .dispatch-search-card,.selected-product-card,.dispatch-list-card,.dispatch-modal,.dispatch-modal-card,
+  .inventory-heading,.inventory-panel,
+  .kardex-heading,.kardex-search-card,.kardex-product-card,.kardex-history-card,
+  .report-subpage-panel,.exit-search-card,.exit-results,.exit-list-card
+){
+  border-right:4px solid var(--box-accent,var(--accent))!important;
+  filter:drop-shadow(0 0 4px var(--box-glow,rgba(0,208,132,.65)));
+}
+:is(.command-hero,.guide-box,.reports-heading,.management-panel,.dispatch-list-card,.general-report-card,.exit-results){--box-accent:#00d084;--box-glow:rgba(0,208,132,.72)}
+:is(.kpi-card.teal,.entry-method-card,.import-panel,.manual-form-panel,.inventory-panel,.report-card,.kardex-search-card,.dispatch-search-card){--box-accent:#168bff;--box-glow:rgba(22,139,255,.72)}
+:is(.kpi-card.blue,.dash-main-grid .dash-panel:last-child,.general-report-heading,.management-heading,.kardex-heading,.product-result-card,.upload-panel,.dispatch-modal,.dispatch-modal-card){--box-accent:#ffd400;--box-glow:rgba(255,212,0,.78)}
+:is(.kpi-card.amber,.kpi-card.empty,.dash-main-grid .dash-panel:first-child,.inventory-heading,.preview-panel,.selected-product-card,.stock-selected-card,.kardex-product-card,.exit-search-card){--box-accent:#ff7a00;--box-glow:rgba(255,122,0,.72)}
+:is(.kpi-card.coral,.activity-panel,.management-empty,.discrepancies-panel,.general-report-card,.report-subpage-panel,.exit-list-card,.kardex-history-card){--box-accent:#ff1744;--box-glow:rgba(255,23,68,.72)}
+:is(.dashboard .kpi-card.teal){--box-accent:#168bff;--box-glow:rgba(22,139,255,.72)}
+:is(.dashboard .kpi-card.blue){--box-accent:#00d084;--box-glow:rgba(0,208,132,.72)}
+:is(.dashboard .kpi-card.amber){--box-accent:#ffd400;--box-glow:rgba(255,212,0,.78)}
+:is(.dashboard .kpi-card.coral){--box-accent:#ff1744;--box-glow:rgba(255,23,68,.72)}
+:is(.dashboard .kpi-card.empty){--box-accent:#ff7a00;--box-glow:rgba(255,122,0,.72)}
+:is(.dashboard .dash-main-grid .dash-panel:first-child){--box-accent:#00d084;--box-glow:rgba(0,208,132,.72)}
+:is(.dashboard .dash-main-grid .dash-panel:last-child){--box-accent:#168bff;--box-glow:rgba(22,139,255,.72)}
+:is(.dashboard .activity-panel){--box-accent:#ff1744!important;--box-glow:rgba(255,23,68,.72)!important}
+.dashboard .dash-bottom-grid .dash-panel{--box-accent:#ffd400;--box-glow:rgba(255,212,0,.78)}
+.entry-methods .entry-method-card:nth-child(2),.report-grid .report-card:nth-child(2){--box-accent:#ff1744;--box-glow:rgba(255,23,68,.72)}
+.entry-methods .entry-method-card:nth-child(3),.report-grid .report-card:nth-child(3){--box-accent:#ffd400;--box-glow:rgba(255,212,0,.78)}
+.entry-methods .entry-method-card:nth-child(4){--box-accent:#00d084;--box-glow:rgba(0,208,132,.72)}

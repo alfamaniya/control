@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#14243d">
   <title>مرکز فرماندهی | سامانه کنترل</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=20261105-3">
-  <link rel="stylesheet" href="components/sidebar/style.css?v=20261106-1">
+  <link rel="stylesheet" href="assets/css/style.css?v=20261106-3">
+  <link rel="stylesheet" href="components/sidebar/style.css?v=20261106-5">
   <link rel="stylesheet" href="assets/css/dashboard.css">
-  <script src="components/sidebar/script.js?v=20261106-5" defer></script>
+  <script src="components/sidebar/script.js?v=20261106-6" defer></script>
   <script src="assets/js/database.js" defer></script>
   <script src="assets/js/dashboard.js" defer></script>
 </head>
@@ -26,7 +26,7 @@
       <div class="page-content dashboard" id="dashboard">
         <section class="command-hero">
           <div class="hero-copy">
-            <div class="hero-kicker"><i class="live-dot"></i> مرکز فرماندهی عملیات · CONTROL ROOM</div>
+            <div class="hero-kicker"><i class="live-dot"></i> داشبورد</div>
             <h1>نمای کلی عملیات انبار</h1>
             <p>نمایش یکپارچه وضعیت موجودی، گردش کالا و فعالیت‌های ثبت‌شده؛ همه‌چیز در یک نگاه برای تصمیم‌گیری سریع‌تر.</p>
             <div class="hero-actions">
@@ -50,6 +50,7 @@
           <article class="kpi-card blue"><div class="kpi-top"><span class="kpi-label">مجموع موجودی فعلی</span><span class="kpi-icon">◫</span></div><div class="kpi-value" data-stock-total>—</div><div class="kpi-foot">مجموع تعداد واحدهای موجود</div></article>
           <article class="kpi-card amber"><div class="kpi-top"><span class="kpi-label">ورود در ۷ روز اخیر</span><span class="kpi-icon">↓</span></div><div class="kpi-value" data-in-count>—</div><div class="kpi-foot">شامل ورود و تعدیل مثبت</div></article>
           <article class="kpi-card coral"><div class="kpi-top"><span class="kpi-label">خروج در ۷ روز اخیر</span><span class="kpi-icon">↑</span></div><div class="kpi-value" data-out-count>—</div><div class="kpi-foot">شامل خروج و تعدیل منفی</div></article>
+          <article class="kpi-card empty"><div class="kpi-top"><span class="kpi-label">اقلام با موجودی صفر</span><span class="kpi-icon">!</span></div><div class="kpi-value" data-stock-empty>—</div><div class="kpi-foot">نیازمند تأمین موجودی</div></article>
         </section>
 
         <section class="dash-main-grid">
