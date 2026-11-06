@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#14243d">
-  <title>گزارش بر اساس شماره خروج</title>
+  <title>گزارش بر اساس شماره حواله مصرف</title>
   <link rel="stylesheet" href="../../../assets/css/style.css?v=20261105-3">
   <link rel="stylesheet" href="../../../components/sidebar/style.css?v=20261105-3">
   <link rel="stylesheet" href="../style.css">
@@ -30,49 +30,47 @@
           <span class="report-subpage-icon">▤</span>
           <div>
             <span class="report-eyebrow">بخش گزارش‌ها</span>
-            <h1>گزارش بر اساس شماره خروج</h1>
-            <p>شماره خروج را جست‌وجو و انتخاب کنید تا مشخصات خروج و تمام اقلام ارسال‌شده نمایش داده شوند.</p>
+            <h1>گزارش بر اساس شماره حواله مصرف</h1>
+            <p>شماره حواله را جست‌وجو و انتخاب کنید تا مشخصات حواله و تمام اقلام ارسال‌شده نمایش داده شوند.</p>
           </div>
         </section>
-
-        <section class="exit-search-card" aria-labelledby="exitSearchTitle">
-          <div class="exit-card-heading">
-            <div><h2 id="exitSearchTitle">جست‌وجوی خروج</h2><p>با وارد کردن بخشی از شماره خروج، فهرست خروج‌های ثبت‌شده نمایش داده می‌شود.</p></div>
-            <span class="exit-search-icon" aria-hidden="true">⌕</span>
+        <section class="voucher-search-card" aria-labelledby="voucherSearchTitle">
+          <div class="voucher-card-heading">
+            <div><h2 id="voucherSearchTitle">جست‌وجوی حواله مصرف</h2><p>با وارد کردن بخشی از شماره حواله، فهرست حواله‌های ثبت‌شده نمایش داده می‌شود.</p></div>
+            <span class="voucher-search-icon" aria-hidden="true">⌕</span>
           </div>
-          <div class="exit-search-control">
-            <label for="exitSearch">شماره خروج</label>
-            <div class="exit-input-wrap">
-              <input id="exitSearch" type="text" autocomplete="off" placeholder="شماره خروج را وارد کنید…" aria-autocomplete="list" aria-controls="exitSuggestions">
-              <div id="exitSuggestions" class="exit-suggestions" role="listbox" hidden></div>
+          <div class="voucher-search-control">
+            <label for="voucherSearch">شماره حواله مصرف</label>
+            <div class="voucher-input-wrap">
+              <input id="voucherSearch" type="text" autocomplete="off" placeholder="شماره حواله را وارد کنید…" aria-autocomplete="list" aria-controls="voucherSuggestions">
+              <div id="voucherSuggestions" class="voucher-suggestions" role="listbox" hidden></div>
             </div>
-            <button id="showExitReport" class="report-primary-button" type="button" disabled>نمایش گزارش</button>
+            <button id="showVoucherReport" class="report-primary-button" type="button" disabled>نمایش گزارش</button>
           </div>
-          <p id="exitMessage" class="report-message" role="status" aria-live="polite">در حال دریافت فهرست خروج‌ها…</p>
+          <p id="voucherMessage" class="report-message" role="status" aria-live="polite">در حال دریافت فهرست حواله‌ها…</p>
         </section>
-
-        <section class="exit-results" id="exitResults" hidden>
-          <div class="exit-section-heading"><div><h2>اطلاعات خروج</h2><p>مشخصات مشترک خروج انتخاب‌شده</p></div></div>
-          <div class="exit-meta-grid" id="exitMeta">
-            <div class="exit-meta-item"><span>شماره حواله</span><strong id="metaVoucher">—</strong></div>
-            <div class="exit-meta-item"><span>شماره خروج</span><strong id="metaExit">—</strong></div>
-            <div class="exit-meta-item"><span>محل ارسال</span><strong id="metaDestination">—</strong></div>
-            <div class="exit-meta-item"><span>تاریخ</span><strong id="metaDate">—</strong></div>
+        <section class="voucher-results" id="voucherResults" hidden>
+          <div class="voucher-section-heading"><div><h2>اطلاعات حواله</h2><p>مشخصات مشترک حواله انتخاب‌شده</p></div></div>
+          <div class="voucher-meta-grid" id="voucherMeta">
+            <div class="voucher-meta-item"><span>شماره حواله</span><strong id="metaVoucher">—</strong></div>
+            <div class="voucher-meta-item"><span>شماره خروج</span><strong id="metaExit">—</strong></div>
+            <div class="voucher-meta-item"><span>محل ارسال</span><strong id="metaDestination">—</strong></div>
+            <div class="voucher-meta-item"><span>تاریخ</span><strong id="metaDate">—</strong></div>
           </div>
-          <div class="exit-items-heading">
-            <div><h2>اقلام ارسال‌شده</h2><p id="exitItemsSummary">فهرست کامل اقلام خروج</p></div>
-            <span class="exit-items-count" id="exitItemsCount">۰ ردیف</span>
+          <div class="voucher-items-heading">
+            <div><h2>اقلام ارسال‌شده</h2><p id="voucherItemsSummary">فهرست کامل اقلام حواله</p></div>
+            <span class="voucher-items-count" id="voucherItemsCount">۰ ردیف</span>
           </div>
-          <div class="exit-table-wrap">
-            <table class="exit-items-table">
+          <div class="voucher-table-wrap">
+            <table class="voucher-items-table">
               <thead><tr><th>ردیف</th><th>کد اختصاصی</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>گروه کالا</th><th>تعداد ارسالی</th></tr></thead>
-              <tbody id="exitItemsRows"></tbody>
+              <tbody id="voucherItemsRows"></tbody>
             </table>
-            <div id="exitItemsEmpty" class="exit-empty" hidden>برای این خروج قلم ارسالی ثبت نشده است.</div>
+            <div id="voucherItemsEmpty" class="voucher-empty" hidden>برای این حواله قلم ارسالی ثبت نشده است.</div>
           </div>
-          <div class="exit-report-footer">
-            <div class="exit-total"><span>جمع کل تعداد</span><strong id="exitTotalQuantity">۰</strong></div>
-            <button id="exportExitReport" class="report-export-button" type="button"><span aria-hidden="true">⇩</span> خروجی اکسل</button>
+          <div class="voucher-report-footer">
+            <div class="voucher-total"><span>جمع کل تعداد</span><strong id="voucherTotalQuantity">۰</strong></div>
+            <button id="exportVoucherReport" class="report-export-button" type="button"><span aria-hidden="true">⇩</span> خروجی اکسل</button>
           </div>
         </section>
       </div>
