@@ -57,6 +57,18 @@
     throw new Error("ساخت شماره سند یکتا انجام نشد؛ دوباره تلاش کنید.");
   }
 
+  function createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, operation, baseDate = new Date()) {
+    const transactionNumber = createDocumentNumber("tr", usedTransactionNumbers, baseDate);
+    usedTransactionNumbers.add(transactionNumber);
+    let adjustmentNumber = "";
+    if (operation === "تعدیل مثبت" || operation === "تعدیل منفی") {
+      const prefix = operation === "تعدیل مثبت" ? "adjp" : "adjn";
+      adjustmentNumber = createDocumentNumber(prefix, usedAdjustmentNumbers, baseDate);
+      usedAdjustmentNumbers.add(adjustmentNumber);
+    }
+    return { transactionNumber, adjustmentNumber };
+  }
+
   async function migrateLegacyData(db) {
     let legacy = [];
     try {
@@ -126,6 +138,8 @@
     const usedEntryNumbers = new Set(existingMovements.map(item =>
       String(item.entryNumber || item.incomingNumber || item.receiptNumber || "")
     ).filter(Boolean));
+    const usedTransactionNumbers = new Set(existingMovements.map(item => String(item.transactionNumber || "")).filter(Boolean));
+    const usedAdjustmentNumbers = new Set(existingMovements.map(item => String(item.adjustmentNumber || "")).filter(Boolean));
     const registeredAt = new Date();
     const entryNumber = createDocumentNumber("in", usedEntryNumbers, registeredAt);
     const occurredAt = registeredAt.toISOString();
@@ -136,7 +150,9 @@
       if (!/^\d{10}$/.test(code) || existingKeys.has(code)) { skipped.push(item); continue; }
       const record = { ...item, procurementCode: code, internalCode: code.slice(0, 8), createdAt: item.createdAt || new Date().toISOString() };
       store.add(record);
+      const movementNumbers = createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, "ورود", registeredAt);
       kardexStore.add({
+        ...movementNumbers,
         procurementCode: code,
         operation: "ورود",
         description: record.description || "",
@@ -216,13 +232,17 @@
     const exitNumber = createDocumentNumber("out", usedExitNumbers, registeredAt);
     const voucherNumber = createDocumentNumber("vh", usedVoucherNumbers, registeredAt);
     const dispatch = { ...metadata, exitNumber, voucherNumber, items: actualItems, createdAt };
+    const usedTransactionNumbers = new Set(existingMovements.map(item => String(item.transactionNumber || "")).filter(Boolean));
+    const usedAdjustmentNumbers = new Set(existingMovements.map(item => String(item.adjustmentNumber || "")).filter(Boolean));
     const dispatchId = await new Promise((resolve, reject) => {
       const request = dispatchStore.add(dispatch);
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error || new Error("ثبت سابقه ارسال ناموفق بود."));
     });
     actualItems.forEach(item => {
+      const movementNumbers = createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, "خروج", registeredAt);
       kardexStore.add({
+        ...movementNumbers,
         dispatchId,
         procurementCode: item.procurementCode,
         operation: "خروج",
@@ -479,6 +499,13 @@
     const done = transactionDone(tx);
     const products = tx.objectStore(STORE);
     const history = tx.objectStore(KARDEX);
+    const existingMovements = await new Promise((resolve, reject) => {
+      const request = history.getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error || new Error("بررسی شماره تراکنش‌ها ناموفق بود."));
+    });
+    const usedTransactionNumbers = new Set(existingMovements.map(item => String(item.transactionNumber || "")).filter(Boolean));
+    const usedAdjustmentNumbers = new Set(existingMovements.map(item => String(item.adjustmentNumber || "")).filter(Boolean));
     const product = await new Promise((resolve, reject) => {
       const request = products.get(code);
       request.onsuccess = () => resolve(request.result || null);
@@ -501,7 +528,9 @@
     const operation = difference > 0 ? "تعدیل مثبت" : "تعدیل منفی";
     product.quantity = quantity;
     products.put(product);
+    const movementNumbers = createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, operation);
     history.add({
+      ...movementNumbers,
       procurementCode: code,
       operation,
       description: product.description || "",
@@ -528,12 +557,21 @@
       request.onerror = () => reject(request.error || new Error("خواندن کالاها برای حذف کلی ناموفق بود."));
     });
     const occurredAt = new Date().toISOString();
+    const existingMovements = await new Promise((resolve, reject) => {
+      const request = history.getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error || new Error("بررسی شماره تراکنش‌ها ناموفق بود."));
+    });
+    const usedTransactionNumbers = new Set(existingMovements.map(item => String(item.transactionNumber || "")).filter(Boolean));
+    const usedAdjustmentNumbers = new Set(existingMovements.map(item => String(item.adjustmentNumber || "")).filter(Boolean));
 
     products.forEach(product => {
       const stock = Math.max(0, Number(product.quantity) || 0);
       if (!stock) return;
       const code = String(product.procurementCode || "");
+      const movementNumbers = createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, "تعدیل منفی", new Date(occurredAt));
       history.add({
+        ...movementNumbers,
         procurementCode: code,
         operation: "تعدیل منفی",
         description: product.description || "",
