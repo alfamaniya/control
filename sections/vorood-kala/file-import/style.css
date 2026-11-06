@@ -22,3 +22,7 @@
 .visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 @media(max-width:760px){.guide-box{padding:17px}.import-panel{padding:16px}.selected-file-row,.preview-footer{align-items:stretch;flex-direction:column}.selected-file-row .primary-button,.preview-footer .primary-button{width:100%}.result-stats{grid-template-columns:1fr}.panel-heading-between{align-items:flex-start}.guide-points{display:grid;gap:5px}}
 @media(max-width:420px){.guide-box{gap:10px}.guide-icon{flex-basis:32px;width:32px;height:32px}.guide-content h1{font-size:16px}.dropzone{min-height:180px}}
+/* فهرست کالاهای شناسایی‌شده در محدوده‌ای مستقل با اسکرول داخلی */
+.preview-panel .table-wrap{max-height:min(52vh,480px);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;}
+.preview-panel .goods-table thead th{position:sticky;top:0;z-index:2;box-shadow:0 1px 0 #e8edf3;}
+@media(max-width:760px){.preview-panel .table-wrap{max-height:55vh;}}
