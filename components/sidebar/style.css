@@ -55,16 +55,17 @@
 }
 .sidebar-rail-link:hover{color:#fff;background:rgba(255,255,255,.09);transform:translateY(-1px)}
 .sidebar-rail-link.active{
-  color:#75ead7;border-color:rgba(85,230,209,.3);
-  background:linear-gradient(145deg,rgba(39,181,165,.25),rgba(39,181,165,.1));
-  box-shadow:inset 0 0 0 1px rgba(85,230,209,.08),0 0 15px rgba(39,181,165,.12);
+  color:#253047;border-color:rgba(255,190,76,.8);
+  background:linear-gradient(135deg,#ffe36e 0%,#ffb13b 52%,#f28a24 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.48),0 5px 16px rgba(239,151,38,.28);
 }
 .sidebar-rail-link.active::before{
   content:"";position:absolute;right:-1px;width:3px;height:25px;
-  border-radius:3px;background:#5ce0ca;box-shadow:0 0 9px rgba(92,224,202,.7);
+  border-radius:3px;background:linear-gradient(180deg,#ffe875 0%,#ffb23f 55%,#f0781d 100%);
+  box-shadow:0 0 9px rgba(255,166,49,.65);
 }
 .sidebar-rail-icon{font-family:Tahoma,"Segoe UI",sans-serif;font-size:1.3rem;line-height:1}
-.sidebar-rail-link[aria-current=page] .sidebar-rail-icon{filter:drop-shadow(0 0 5px rgba(111,240,220,.5))}
+.sidebar-rail-link[aria-current=page] .sidebar-rail-icon{color:#253047;filter:drop-shadow(0 1px 1px rgba(255,255,255,.35))}
 .sidebar-panel{
   position:absolute;top:0;right:calc(var(--sidebar-rail-width) + 10px);bottom:0;width:var(--sidebar-panel-width);
   display:flex;flex-direction:column;min-height:0;padding:19px 15px 15px;
