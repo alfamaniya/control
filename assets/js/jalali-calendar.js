@@ -100,10 +100,36 @@
   }
 
   function toJalaali(date) {
+    // از تقویم فارسی داخلی مرورگر برای تبدیل میلادی به شمسی استفاده می‌کنیم.
+    // این مسیر از محاسبه دستی ماه جلوگیری می‌کند و برای انتخاب «امروز» معتبر است.
     const gy = date.getFullYear();
     const gm = date.getMonth() + 1;
     const gd = date.getDate();
-    return d2j(g2d(gy, gm, gd));
+    try {
+      const stableDate = new Date(Date.UTC(gy, gm - 1, gd, 12));
+      const parts = new Intl.DateTimeFormat("en-US-u-ca-persian", {
+        timeZone: "UTC", year: "numeric", month: "numeric", day: "numeric"
+      }).formatToParts(stableDate);
+      const values = {};
+      parts.forEach((part) => {
+        if (part.type === "year" || part.type === "month" || part.type === "day") {
+          values[part.type] = Number(part.value);
+        }
+      });
+      if (Number.isInteger(values.year) && Number.isInteger(values.month) &&
+          Number.isInteger(values.day) && values.month >= 1 && values.month <= 12 &&
+          values.day >= 1 && values.day <= 31) {
+        return { jy: values.year, jm: values.month, jd: values.day };
+      }
+    } catch (_) {
+      // مرورگرهای قدیمی: از الگوریتم داخلی قبلی استفاده می‌شود.
+    }
+    const result = d2j(g2d(gy, gm, gd));
+    if (!Number.isInteger(result.jm) || result.jm < 1 || result.jm > 12 ||
+        !Number.isInteger(result.jd) || result.jd < 1 || result.jd > 31) {
+      throw new Error("تبدیل تاریخ میلادی به شمسی نامعتبر است");
+    }
+    return result;
   }
 
   function toGregorian(jy, jm, jd) {
