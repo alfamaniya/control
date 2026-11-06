@@ -6,6 +6,7 @@
   const tableWrap = $("inventoryTableWrap");
   const empty = $("inventoryEmpty");
   const count = $("inventoryCount");
+  let lastInventorySignature = "";
 
   function faNumber(value) {
     return String(value).replace(/\d/g, digit => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)]);
@@ -27,6 +28,8 @@
     try {
       if (!window.ControlDB) throw new Error("پایگاه داده محلی بارگذاری نشده است. صفحه را دوباره بارگذاری کنید.");
       const products = await window.ControlDB.getAll();
+      const signature = JSON.stringify(products.map(product => [product.procurementCode, product.quantity, product.description, product.group]));
+      lastInventorySignature = signature;
       count.textContent = faNumber(products.length);
       rows.innerHTML = "";
       if (!products.length) {
@@ -54,5 +57,21 @@
   }
 
   $("refreshInventory").addEventListener("click", loadInventory);
+
+  // موجودی ممکن است از صفحه یا زبانه دیگری تغییر کند؛ در بازگشت کاربر و به‌صورت دوره‌ای تازه‌خوانی شود.
+  window.addEventListener("focus", loadInventory);
+  window.addEventListener("pageshow", loadInventory);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) loadInventory();
+  });
+  window.setInterval(async () => {
+    if (document.hidden || !window.ControlDB) return;
+    try {
+      const products = await window.ControlDB.getAll();
+      const signature = JSON.stringify(products.map(product => [product.procurementCode, product.quantity, product.description, product.group]));
+      if (signature !== lastInventorySignature) loadInventory();
+    } catch (_) { /* خطا در تازه‌سازی دوره‌ای در نوبت بعد دوباره بررسی می‌شود */ }
+  }, 5000);
+
   loadInventory();
 })();
