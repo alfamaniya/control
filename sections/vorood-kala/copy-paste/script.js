@@ -56,7 +56,7 @@
       [["ثبت‌شده",outcome.added.length],["ثبت‌نشده",allIssues.length],["بررسی‌شده",parsed.length]].forEach(([label,n])=>{const card=document.createElement("div");card.className="result-stat";const strong=document.createElement("strong");strong.textContent=n;const span=document.createElement("span");span.textContent=label;card.append(strong,span);$("resultStats").appendChild(card)});
       $("discrepancyRows").innerHTML="";$("discrepancyCount").textContent=allIssues.length+" ردیف";$("noDiscrepancies").hidden=allIssues.length!==0;document.querySelector("#resultPanel .table-wrap").hidden=allIssues.length===0;
       allIssues.forEach(x=>{const tr=document.createElement("tr");[x.rowNumber,x.internalCode||"—",x.code||"—",x.description||"—",x.quantityRaw||"—",x.group||"—",x.reasons.join("؛ ")].forEach(v=>cell(tr,v));$("discrepancyRows").appendChild(tr)});
-      result.hidden=false;say("ثبت اطلاعات انجام شد.","success");result.scrollIntoView({behavior:"smooth",block:"start"});
+      result.hidden=false;say("ثبت اطلاعات انجام شد. شماره ورود: "+outcome.entryNumber,"success");result.scrollIntoView({behavior:"smooth",block:"start"});
     }catch(e){confirm.disabled=false;say(e.message||"ثبت اطلاعات انجام نشد. فضای ذخیره‌سازی مرورگر را بررسی کنید.","error")}
   });
 })();
