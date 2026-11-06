@@ -131,7 +131,7 @@
     itemsSheet["!cols"] = [{wch:8},{wch:16},{wch:18},{wch:36},{wch:22},{wch:14}];
     window.XLSX.utils.book_append_sheet(workbook, headerSheet, "اطلاعات حواله");
     window.XLSX.utils.book_append_sheet(workbook, itemsSheet, "اقلام ارسال");
-    const safeNumber = String(selectedMetadata.voucherNumber || "حواله").replace(/[\\\\/:*?"<>|]/g, "-");
+    const safeNumber = String(selectedMetadata.voucherNumber || "حواله").replace(/[^۰-۹0-9a-zA-Z_-]/g, "-");
     window.XLSX.writeFile(workbook, "گزارش-حواله-مصرف-" + safeNumber + ".xlsx");
   }
   async function loadDispatches() {
@@ -167,6 +167,12 @@
   });
   document.addEventListener("click", event => {
     if (!event.target.closest(".voucher-input-wrap")) suggestions.hidden = true;
+  });
+  document.addEventListener("click", event => {
+    if (!event.target.closest(".voucher-items-table thead th")) return;
+    Array.from(rows.rows).forEach((row, index) => {
+      if (row.cells[0]) row.cells[0].textContent = fa(index + 1);
+    });
   });
   showButton.addEventListener("click", renderReport);
   $("exportVoucherReport").addEventListener("click", exportReport);
