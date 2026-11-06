@@ -69,6 +69,36 @@
     return { transactionNumber, adjustmentNumber };
   }
 
+  async function backfillMovementNumbers(db) {
+    const tx = db.transaction([KARDEX, META], "readwrite");
+    const done = transactionDone(tx);
+    const history = tx.objectStore(KARDEX);
+    const meta = tx.objectStore(META);
+    const [marker, movements] = await Promise.all([
+      new Promise((resolve, reject) => {
+        const request = meta.get("movement-numbers-backfilled-v1");
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error || new Error("بررسی وضعیت شماره‌گذاری سوابق ناموفق بود."));
+      }),
+      new Promise((resolve, reject) => {
+        const request = history.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error || new Error("خواندن سوابق برای شماره‌گذاری ناموفق بود."));
+      })
+    ]);
+    if (!marker) {
+      const usedTransactionNumbers = new Set(movements.map(item => String(item.transactionNumber || "")).filter(Boolean));
+      const usedAdjustmentNumbers = new Set(movements.map(item => String(item.adjustmentNumber || "")).filter(Boolean));
+      movements.forEach(movement => {
+        if (movement.transactionNumber && (movement.operation !== "تعدیل مثبت" && movement.operation !== "تعدیل منفی" || movement.adjustmentNumber)) return;
+        const numbers = createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, movement.operation || "");
+        history.put({ ...movement, ...numbers });
+      });
+      meta.put({ key: "movement-numbers-backfilled-v1", value: true, migratedAt: new Date().toISOString() });
+    }
+    await done;
+  }
+
   async function migrateLegacyData(db) {
     let legacy = [];
     try {
@@ -100,6 +130,7 @@
   async function ready() {
     const db = await openDatabase();
     await migrateLegacyData(db);
+    await backfillMovementNumbers(db);
     return db;
   }
 
