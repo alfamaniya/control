@@ -288,6 +288,19 @@
     }).sort((a, b) => Date.parse(a.occurredAt) - Date.parse(b.occurredAt));
   }
 
+  async function getAllDispatches() {
+    const db = await ready();
+    const tx = db.transaction(DISPATCHES, "readonly");
+    const done = transactionDone(tx);
+    const request = tx.objectStore(DISPATCHES).getAll();
+    const records = await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error || new Error("خواندن حواله‌های ثبت‌شده ناموفق بود."));
+    });
+    await done;
+    return records.sort((a, b) => Date.parse(b.createdAt || b.dispatchedAt || 0) - Date.parse(a.createdAt || a.dispatchedAt || 0));
+  }
+
   async function deleteProduct(procurementCode) {
     const code = String(procurementCode || "");
     if (!/^\d{10}$/.test(code)) throw new Error("کد تدارکاتی کالا معتبر نیست.");
@@ -393,5 +406,5 @@
     return products.length;
   }
 
-  window.ControlDB = Object.freeze({ getAll, addMany, createDispatch, getKardex, getReportTransactions, deleteProduct, deleteAllProducts, adjustStock });
+  window.ControlDB = Object.freeze({ getAll, addMany, createDispatch, getKardex, getReportTransactions, getAllDispatches, deleteProduct, deleteAllProducts, adjustStock });
 })();
