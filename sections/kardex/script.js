@@ -149,14 +149,7 @@
   }
   async function selectProduct(product) {
     selectedProduct = product;
-    documentSearch.addEventListener("input", () => {
-    selectedCard.hidden = true;
-    historyCard.hidden = true;
-    startEmpty.hidden = true;
-    showMessage("");
-    searchDocuments(documentSearch.value);
-  });
-  fields.forEach(field => {
+    fields.forEach(field => {
       field.input.value = "";
       field.list.innerHTML = "";
       field.list.hidden = true;
@@ -173,6 +166,13 @@
       showMessage(error.message || "دریافت سوابق کاردکس ناموفق بود.", true);
     }
   }
+  documentSearch.addEventListener("input", () => {
+    selectedCard.hidden = true;
+    historyCard.hidden = true;
+    startEmpty.hidden = true;
+    showMessage("");
+    searchDocuments(documentSearch.value);
+  });
   fields.forEach(field => {
     field.input.addEventListener("input", () => {
       selectedProduct = null;
