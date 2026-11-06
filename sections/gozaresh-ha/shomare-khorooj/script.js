@@ -1,20 +1,23 @@
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
-  const searchInput = $("exitSearch");
-  const suggestions = $("exitSuggestions");
-  const showButton = $("showExitReport");
-  const results = $("exitResults");
-  const message = $("exitMessage");
-  const rows = $("exitItemsRows");
   const fa = value => String(value ?? "").replace(/\d/g, digit => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)]);
   const digits = value => String(value ?? "").replace(/[۰-۹]/g, digit => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit))).replace(/[٠-٩]/g, digit => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit))).trim();
+  const listView = $("exitListView");
+  const detailView = $("exitResults");
+  const listRows = $("exitListRows");
+  const message = $("exitMessage");
+  const pageInput = $("exitPageInput");
+  const pageLabel = $("exitPageLabel");
+  const prevButton = $("exitPrevPage");
+  const nextButton = $("exitNextPage");
+  const PAGE_SIZE = 20;
   let dispatches = [];
-  let exitOptions = [];
-  let selectedExit = "";
-  let selectedDispatches = [];
-  let selectedItems = [];
+  let exitRecords = [];
+  let currentPage = 1;
+  let currentPageRecords = [];
   let selectedMetadata = null;
+  let selectedItems = [];
 
   function setMessage(text, error = false) {
     message.textContent = text;
@@ -26,66 +29,77 @@
     if (!Number.isFinite(date.getTime())) return "—";
     return new Intl.DateTimeFormat("fa-IR-u-ca-persian", { year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
   }
-  function normalizeExit(value) { return digits(value).replace(/\s+/g, "").toLocaleLowerCase("fa"); }
+  function timestamp(value) {
+    const time = Date.parse(value || "");
+    return Number.isFinite(time) ? time : 0;
+  }
+  function normalizeExit(value) {
+    return digits(value).replace(/\s+/g, "").toLocaleLowerCase("fa");
+  }
   function addCell(row, value, className = "") {
     const cell = document.createElement("td");
     cell.textContent = value === null || value === undefined || value === "" ? "—" : String(value);
     if (className) cell.className = className;
     row.appendChild(cell);
   }
-  function renderSuggestions(query) {
-    suggestions.innerHTML = "";
-    const term = normalizeExit(query);
-    if (!term) { suggestions.hidden = true; return; }
-    const matches = exitOptions.filter(item => normalizeExit(item.number).includes(term)).slice(0, 12);
-    if (!matches.length) {
-      const empty = document.createElement("div");
-      empty.className = "exit-suggestion-empty";
-      empty.textContent = "شماره خروجی با این مشخصات پیدا نشد.";
-      suggestions.appendChild(empty);
-    } else {
-      matches.forEach(item => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "exit-suggestion";
-        button.setAttribute("role", "option");
-        const number = document.createElement("strong");
-        number.textContent = item.number;
-        const detail = document.createElement("small");
-        detail.textContent = "شماره حواله: " + (item.voucherNumber || "—") + " | محل ارسال: " + (item.destination || "—") + " | تاریخ: " + formatDate(item.createdAt);
-        button.append(number, detail);
-        button.addEventListener("click", () => {
-          selectedExit = item.number;
-          searchInput.value = item.number;
-          suggestions.hidden = true;
-          showButton.disabled = false;
-          results.hidden = true;
-          setMessage("شماره خروج انتخاب شد. برای مشاهده اطلاعات، دکمه نمایش گزارش را بزنید.");
-        });
-        suggestions.appendChild(button);
-      });
-    }
-    suggestions.hidden = false;
+  function buildExitRecords(records) {
+    const grouped = new Map();
+    records.forEach(dispatch => {
+      const number = String(dispatch.exitNumber || "").trim();
+      const key = normalizeExit(number);
+      if (!key) return;
+      const existing = grouped.get(key);
+      if (!existing || timestamp(dispatch.createdAt || dispatch.dispatchedAt) > timestamp(existing.createdAt || existing.dispatchedAt)) {
+        grouped.set(key, dispatch);
+      }
+    });
+    return Array.from(grouped.values()).sort((a, b) =>
+      timestamp(b.createdAt || b.dispatchedAt) - timestamp(a.createdAt || a.dispatchedAt)
+    );
   }
-  function renderReport() {
-    const key = normalizeExit(selectedExit);
-    selectedDispatches = dispatches.filter(item => normalizeExit(item.exitNumber) === key);
-    if (!selectedDispatches.length) {
-      results.hidden = true;
-      setMessage("خروج انتخاب‌شده در اطلاعات ثبت‌شده پیدا نشد.", true);
-      return false;
-    }
-    selectedMetadata = selectedDispatches[0];
-    selectedItems = selectedDispatches.flatMap(dispatch => (Array.isArray(dispatch.items) ? dispatch.items : []).map(item => ({
-      ...item,
-      dispatchDate: dispatch.createdAt || dispatch.dispatchedAt || "",
-      dispatchExitNumber: dispatch.exitNumber || "",
-      dispatchDestination: dispatch.destination || dispatch.destinationSub || ""
-    })));
-    $("metaExit").textContent = selectedMetadata.exitNumber || "—";
-    $("metaVoucher").textContent = selectedMetadata.voucherNumber || "—";
-    $("metaDestination").textContent = selectedMetadata.destination || selectedMetadata.destinationSub || "—";
-    $("metaDate").textContent = formatDate(selectedMetadata.createdAt || selectedMetadata.dispatchedAt);
+  function renderList() {
+    const total = exitRecords.length;
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    currentPage = Math.min(Math.max(1, currentPage), totalPages);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    currentPageRecords = exitRecords.slice(start, start + PAGE_SIZE);
+    listRows.innerHTML = "";
+
+    currentPageRecords.forEach((record, index) => {
+      const row = document.createElement("tr");
+      row.className = "exit-list-row";
+      row.tabIndex = 0;
+      row.setAttribute("role", "button");
+      row.setAttribute("aria-label", "نمایش جزئیات خروج " + (record.exitNumber || ""));
+      row.dataset.recordIndex = String(index);
+      addCell(row, fa(start + index + 1), "exit-row-number");
+      addCell(row, record.exitNumber || "—", "exit-row-code");
+      addCell(row, record.voucherNumber || "—");
+      addCell(row, formatDate(record.createdAt || record.dispatchedAt));
+      addCell(row, record.destination || record.destinationSub || "—");
+      listRows.appendChild(row);
+    });
+
+    $("exitListTotal").textContent = fa(total) + " خروج";
+    pageLabel.textContent = "صفحه " + fa(currentPage) + " از " + fa(totalPages);
+    pageInput.value = String(currentPage);
+    pageInput.max = String(totalPages);
+    prevButton.disabled = currentPage <= 1 || total === 0;
+    nextButton.disabled = currentPage >= totalPages || total === 0;
+    $("exitListEmpty").hidden = total > 0;
+    $("exitPagination").hidden = total === 0;
+    if (total) setMessage("برای مشاهده اقلام هر خروج، ردیف موردنظر را انتخاب کنید.");
+    else setMessage("هنوز هیچ خروجی در سامانه ثبت نشده است.");
+  }
+  function openDetails(record) {
+    if (!record) return;
+    selectedMetadata = record;
+    selectedItems = Array.isArray(record.items) ? record.items : [];
+    $("metaExit").textContent = record.exitNumber || "—";
+    $("metaVoucher").textContent = record.voucherNumber || "—";
+    $("metaDestination").textContent = record.destination || record.destinationSub || "—";
+    $("metaDate").textContent = formatDate(record.createdAt || record.dispatchedAt);
+    const rows = $("exitItemsRows");
     rows.innerHTML = "";
     selectedItems.forEach((item, index) => {
       const row = document.createElement("tr");
@@ -99,13 +113,31 @@
     });
     const total = selectedItems.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
     $("exitItemsCount").textContent = fa(selectedItems.length) + " ردیف";
-    $("exitItemsSummary").textContent = "تمام اقلام ثبت‌شده برای شماره خروج انتخاب‌شده";
+    $("exitItemsSummary").textContent = "تمام اقلام ثبت‌شده برای شماره خروج " + (record.exitNumber || "");
     $("exitTotalQuantity").textContent = fa(total);
     $("exitItemsEmpty").hidden = selectedItems.length > 0;
     $("exportExitReport").disabled = selectedItems.length === 0;
-    results.hidden = false;
+    listView.hidden = true;
+    detailView.hidden = false;
     setMessage(selectedItems.length ? "" : "برای این خروج اطلاعات مشترک ثبت شده، اما قلمی برای آن ذخیره نشده است.");
-    return true;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function closeDetails() {
+    detailView.hidden = true;
+    listView.hidden = false;
+    renderList();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function goToPage(value) {
+    const totalPages = Math.max(1, Math.ceil(exitRecords.length / PAGE_SIZE));
+    const page = Number(digits(value));
+    if (!Number.isInteger(page) || page < 1 || page > totalPages) {
+      pageInput.value = String(currentPage);
+      setMessage("شماره صفحه باید بین ۱ تا " + fa(totalPages) + " باشد.", true);
+      return;
+    }
+    currentPage = page;
+    renderList();
   }
   function exportReport() {
     if (!selectedMetadata || !selectedItems.length) return;
@@ -136,45 +168,41 @@
   }
   async function loadDispatches() {
     try {
-      if (!window.ControlDB || typeof window.ControlDB.getAllDispatches !== "function") throw new Error("دسترسی به پایگاه داده محلی ممکن نیست. صفحه را دوباره بارگذاری کنید.");
+      if (!window.ControlDB || typeof window.ControlDB.getAllDispatches !== "function") {
+        throw new Error("دسترسی به پایگاه داده محلی ممکن نیست. صفحه را دوباره بارگذاری کنید.");
+      }
       dispatches = await window.ControlDB.getAllDispatches();
-      const seen = new Set();
-      exitOptions = dispatches.filter(item => {
-        const number = String(item.exitNumber || "").trim();
-        const key = normalizeExit(number);
-        if (!key || seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      }).map(item => ({
-        number: String(item.exitNumber).trim(),
-        exitNumber: item.exitNumber || "",
-        destination: item.destination || item.destinationSub || "",
-        createdAt: item.createdAt || item.dispatchedAt || ""
-      }));
-      setMessage(exitOptions.length ? "شماره خروج موردنظر را جست‌وجو و انتخاب کنید." : "هنوز هیچ خروجی در سامانه ثبت نشده است.");
+      exitRecords = buildExitRecords(dispatches);
+      renderList();
     } catch (error) {
       setMessage(error.message || "دریافت فهرست خروج‌ها ناموفق بود.", true);
+      $("exitListEmpty").hidden = false;
+      $("exitPagination").hidden = true;
     }
   }
-  searchInput.addEventListener("input", () => {
-    selectedExit = "";
-    showButton.disabled = true;
-    results.hidden = true;
-    renderSuggestions(searchInput.value);
+
+  listRows.addEventListener("click", event => {
+    const row = event.target.closest("tr[data-record-index]");
+    if (!row) return;
+    openDetails(currentPageRecords[Number(row.dataset.recordIndex)]);
   });
-  searchInput.addEventListener("focus", () => {
-    if (searchInput.value.trim()) renderSuggestions(searchInput.value);
+  listRows.addEventListener("keydown", event => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const row = event.target.closest("tr[data-record-index]");
+    if (!row) return;
+    event.preventDefault();
+    openDetails(currentPageRecords[Number(row.dataset.recordIndex)]);
   });
-  document.addEventListener("click", event => {
-    if (!event.target.closest(".exit-input-wrap")) suggestions.hidden = true;
+  prevButton.addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderList(); } });
+  nextButton.addEventListener("click", () => {
+    const totalPages = Math.max(1, Math.ceil(exitRecords.length / PAGE_SIZE));
+    if (currentPage < totalPages) { currentPage++; renderList(); }
   });
-  document.addEventListener("click", event => {
-    if (!event.target.closest(".exit-items-table thead th")) return;
-    Array.from(rows.rows).forEach((row, index) => {
-      if (row.cells[0]) row.cells[0].textContent = fa(index + 1);
-    });
+  $("exitGoPage").addEventListener("click", () => goToPage(pageInput.value));
+  pageInput.addEventListener("keydown", event => {
+    if (event.key === "Enter") goToPage(pageInput.value);
   });
-  showButton.addEventListener("click", renderReport);
+  $("backToExitList").addEventListener("click", closeDetails);
   $("exportExitReport").addEventListener("click", exportReport);
   loadDispatches();
 })();
