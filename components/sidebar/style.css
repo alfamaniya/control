@@ -15,12 +15,12 @@
   color:#dce7f3;
   background:transparent;
   border-radius:22px;
-  transition:width .28s ease;
+  transition:width .32s cubic-bezier(.2,.75,.25,1);
 }
 .sidebar-rail{
   position:absolute;
-  inset:0;
-  width:100%;
+  top:0;right:0;bottom:0;left:auto;
+  width:var(--sidebar-rail-width);
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -66,7 +66,7 @@
 .sidebar-rail-icon{font-family:Tahoma,"Segoe UI",sans-serif;font-size:1.3rem;line-height:1}
 .sidebar-rail-link[aria-current=page] .sidebar-rail-icon{filter:drop-shadow(0 0 5px rgba(111,240,220,.5))}
 .sidebar-panel{
-  position:absolute;top:0;right:calc(100% + 10px);bottom:0;width:var(--sidebar-panel-width);
+  position:absolute;top:0;right:calc(var(--sidebar-rail-width) + 10px);bottom:0;width:var(--sidebar-panel-width);
   display:flex;flex-direction:column;min-height:0;padding:19px 15px 15px;
   color:#d9e4f1;background:linear-gradient(165deg,#172b47 0%,#102039 100%);
   border:1px solid rgba(255,255,255,.07);border-radius:22px;
@@ -74,6 +74,16 @@
   overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;
   transform:translateX(10px);
   transition:opacity .22s ease,visibility .22s ease,transform .28s cubic-bezier(.2,.75,.25,1);
+}
+/* پنل عنوان‌ها در امتداد نوار آیکون‌ها باز می‌شود و عرض کل سایدبار را افزایش می‌دهد */
+.control-sidebar:focus-within,
+.control-sidebar.panel-pinned{
+  width:calc(var(--sidebar-rail-width) + 10px + var(--sidebar-panel-width));
+}
+@media (hover:hover) and (pointer:fine){
+  .control-sidebar:hover{
+    width:calc(var(--sidebar-rail-width) + 10px + var(--sidebar-panel-width));
+  }
 }
 .control-sidebar:hover .sidebar-panel,
 .control-sidebar:focus-within .sidebar-panel,
