@@ -209,7 +209,7 @@
         quantityRaw: String(item.quantity), group: item.group, reasons: ["این کد هنگام تأیید، در موجودی ثبت شده بود"]
       })));
       renderResult(outcome.added.length, finalIssues);
-      showMessage("اطلاعات با موفقیت در پایگاه داده محلی ذخیره شد.", "success");
+      showMessage("اطلاعات با موفقیت ذخیره شد. شماره ورود: " + outcome.entryNumber, "success");
       resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
       confirmButton.disabled = false;
