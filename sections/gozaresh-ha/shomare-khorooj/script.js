@@ -41,7 +41,7 @@
     if (!matches.length) {
       const empty = document.createElement("div");
       empty.className = "exit-suggestion-empty";
-      empty.textContent = "خروج‌ای با این شماره پیدا نشد.";
+      empty.textContent = "شماره خروجی با این مشخصات پیدا نشد.";
       suggestions.appendChild(empty);
     } else {
       matches.forEach(item => {
@@ -84,7 +84,6 @@
     })));
     $("metaExit").textContent = selectedMetadata.exitNumber || "—";
     $("metaVoucher").textContent = selectedMetadata.voucherNumber || "—";
-    $("metaExit").textContent = selectedMetadata.exitNumber || "—";
     $("metaDestination").textContent = selectedMetadata.destination || selectedMetadata.destinationSub || "—";
     $("metaDate").textContent = formatDate(selectedMetadata.createdAt || selectedMetadata.dispatchedAt);
     rows.innerHTML = "";
