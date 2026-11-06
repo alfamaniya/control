@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="../../../components/sidebar/style.css?v=20261105-3">
   <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="style.css">
+  <script src="../../../assets/js/jalali-calendar.js" defer></script>
   <script src="script.js" defer></script>
   <script src="../../../components/sidebar/script.js?v=20261105-2" defer></script>
 </head>
@@ -29,6 +30,22 @@
             <span class="report-eyebrow">بخش گزارش‌ها</span>
             <h1>گزارش بر اساس تاریخ</h1>
             <p>تهیه و مشاهده گزارش‌ها بر پایه بازه زمانی شمسی.</p>
+          </div>
+        </section>
+        <section class="date-range-card" aria-labelledby="dateRangeTitle">
+          <div class="date-range-card-head">
+            <h2 id="dateRangeTitle">انتخاب بازه زمانی</h2>
+            <p>تاریخ شروع و پایان گزارش را مشخص کنید.</p>
+          </div>
+          <div class="date-range-fields">
+            <div class="date-field">
+              <label for="reportStartDate">از تاریخ</label>
+              <input id="reportStartDate" name="startDate" type="text" data-jalali-calendar placeholder="انتخاب تاریخ شروع" readonly autocomplete="off">
+            </div>
+            <div class="date-field">
+              <label for="reportEndDate">تا تاریخ</label>
+              <input id="reportEndDate" name="endDate" type="text" data-jalali-calendar placeholder="انتخاب تاریخ پایان" readonly autocomplete="off">
+            </div>
           </div>
         </section>
       </div>
