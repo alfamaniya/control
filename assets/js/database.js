@@ -57,14 +57,25 @@
     throw new Error("ساخت شماره سند یکتا انجام نشد؛ دوباره تلاش کنید.");
   }
 
-  function createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, operation, baseDate = new Date()) {
-    const transactionNumber = createDocumentNumber("tr", usedTransactionNumbers, baseDate);
-    usedTransactionNumbers.add(transactionNumber);
+  function createMovementNumbers(usedTransactionNumbers, usedAdjustmentNumbers, operation) {
+    const nextNumber = (prefix, usedNumbers) => {
+      let highest = 0;
+      usedNumbers.forEach(value => {
+        const match = String(value).match(new RegExp("^" + prefix + "(\\d+)$", "i"));
+        if (match) highest = Math.max(highest, Number(match[1]) || 0);
+      });
+      let candidate;
+      do {
+        highest += 1;
+        candidate = prefix + String(highest).padStart(8, "0");
+      } while (usedNumbers.has(candidate));
+      usedNumbers.add(candidate);
+      return candidate;
+    };
+    const transactionNumber = nextNumber("TR", usedTransactionNumbers);
     let adjustmentNumber = "";
     if (operation === "تعدیل مثبت" || operation === "تعدیل منفی") {
-      const prefix = operation === "تعدیل مثبت" ? "adjp" : "adjn";
-      adjustmentNumber = createDocumentNumber(prefix, usedAdjustmentNumbers, baseDate);
-      usedAdjustmentNumbers.add(adjustmentNumber);
+      adjustmentNumber = nextNumber("ADJ", usedAdjustmentNumbers);
     }
     return { transactionNumber, adjustmentNumber };
   }
