@@ -198,6 +198,11 @@
       }
 
       function render() {
+        // وضعیت ماه را هنگام بازرندر اعتبارسنجی می‌کنیم تا عنوان ماه هرگز undefined نشود.
+        if (!view || !Number.isInteger(view.jy) || !Number.isInteger(view.jm) || view.jm < 1 || view.jm > 12) {
+          const current = toJalaali(new Date());
+          view = { jy: current.jy, jm: current.jm, jd: 1 };
+        }
         const firstDay = toGregorian(view.jy, view.jm, 1).getDay();
         const offset = (firstDay + 1) % 7;
         const count = monthLength(view.jy, view.jm);
@@ -212,7 +217,7 @@
         prev.addEventListener("click", () => { view.jm--; if (view.jm < 1) { view.jm = 12; view.jy--; } render(); });
         const title = document.createElement("div");
         title.className = "jalali-calendar-title";
-        title.textContent = MONTHS[view.jm - 1] + " " + toFa(view.jy);
+        title.textContent = (MONTHS[view.jm - 1] || "ماه") + " " + toFa(view.jy);
         const next = document.createElement("button");
         next.type = "button"; next.className = "jalali-calendar-nav"; next.textContent = "›";
         next.setAttribute("aria-label", "ماه بعد");
@@ -275,7 +280,12 @@
 
       function open() {
         const parsed = parseValue(input.value);
-        if (parsed) view = { jy: parsed.jy, jm: parsed.jm, jd: 1 };
+        if (parsed) {
+          view = { jy: parsed.jy, jm: parsed.jm, jd: 1 };
+        } else {
+          const current = toJalaali(new Date());
+          view = { jy: current.jy, jm: current.jm, jd: 1 };
+        }
         render(); pop.hidden = false; input.setAttribute("aria-expanded", "true"); position();
       }
 
