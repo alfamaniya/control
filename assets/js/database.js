@@ -126,8 +126,9 @@
     const usedEntryNumbers = new Set(existingMovements.map(item =>
       String(item.entryNumber || item.incomingNumber || item.receiptNumber || "")
     ).filter(Boolean));
-    const entryNumber = createDocumentNumber("in", usedEntryNumbers);
-    const occurredAt = new Date().toISOString();
+    const registeredAt = new Date();
+    const entryNumber = createDocumentNumber("in", usedEntryNumbers, registeredAt);
+    const occurredAt = registeredAt.toISOString();
     const added = [];
     const skipped = [];
     for (const item of items) {
@@ -202,7 +203,8 @@
       try { await done; } catch (_) { /* لغو عمدی تراکنش */ }
       throw new Error("هیچ‌یک از کالاهای انتخاب‌شده موجودی قابل ارسال ندارند. فهرست را بررسی کنید.");
     }
-    const createdAt = new Date().toISOString();
+    const registeredAt = new Date();
+    const createdAt = registeredAt.toISOString();
     const usedExitNumbers = new Set([
       ...existingDispatches.map(item => item.exitNumber || ""),
       ...existingMovements.map(item => item.exitNumber || "")
@@ -211,8 +213,8 @@
       ...existingDispatches.map(item => item.voucherNumber || ""),
       ...existingMovements.map(item => item.voucherNumber || "")
     ].filter(Boolean));
-    const exitNumber = createDocumentNumber("out", usedExitNumbers);
-    const voucherNumber = createDocumentNumber("vh", usedVoucherNumbers);
+    const exitNumber = createDocumentNumber("out", usedExitNumbers, registeredAt);
+    const voucherNumber = createDocumentNumber("vh", usedVoucherNumbers, registeredAt);
     const dispatch = { ...metadata, exitNumber, voucherNumber, items: actualItems, createdAt };
     const dispatchId = await new Promise((resolve, reject) => {
       const request = dispatchStore.add(dispatch);
