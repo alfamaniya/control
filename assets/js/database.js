@@ -200,6 +200,15 @@
     ]);
     await done;
     const code = String(procurementCode);
+    const dispatchMap = new Map(dispatches.map(dispatch => [String(dispatch.id), dispatch]));
+    const enrichedMovements = movements.map(item => {
+      const dispatch = item.dispatchId === undefined ? null : dispatchMap.get(String(item.dispatchId));
+      return {
+        ...item,
+        entryNumber: item.entryNumber || item.incomingNumber || item.receiptNumber || "",
+        exitNumber: item.exitNumber || (dispatch && dispatch.exitNumber) || ""
+      };
+    });
     const knownDispatchIds = new Set(movements.map(item => item.dispatchId).filter(value => value !== undefined));
     const legacyDispatchMovements = [];
     dispatches.forEach(dispatch => {
@@ -213,11 +222,12 @@
           quantityOut: Math.max(0, Number(item.quantity) || 0),
           stockAfter: null,
           occurredAt: dispatch.createdAt || dispatch.dispatchedAt || "",
-          source: "legacy-dispatch"
+          source: "legacy-dispatch",
+          exitNumber: dispatch.exitNumber || ""
         });
       });
     });
-    return movements.filter(item => String(item.procurementCode) === code)
+    return enrichedMovements.filter(item => String(item.procurementCode) === code)
       .concat(legacyDispatchMovements)
       .sort((a, b) => {
         const timeA = Date.parse(a.occurredAt || "");
