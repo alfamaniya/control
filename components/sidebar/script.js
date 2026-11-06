@@ -62,10 +62,6 @@
         if (directSection.classList.contains("inventory-heading")) directSection.remove();
         else directSection.remove();
       }
-    } else if (heading && heading.closest(".command-hero")) {
-      heading.remove();
-      const heroDescription = pageContent.querySelector(".command-hero .hero-copy > p");
-      if (heroDescription) heroDescription.remove();
     }
   }
   const nav = document.createElement("aside");
@@ -149,8 +145,8 @@
       };
       const setGroupOpen = (open) => {
         group.classList.toggle("is-open",open);
-        if (isMobileViewport()) group.append(submenu);
-        else submenuLayer.append(submenu);
+        const targetParent = isMobileViewport() ? group : submenuLayer;
+        if (submenu.parentElement !== targetParent) targetParent.append(submenu);
         submenu.hidden = !open;
         link.setAttribute("aria-expanded",String(open));
         if (open && !isMobileViewport()) positionSubmenu();
@@ -224,10 +220,10 @@
     if (toggle) toggle.setAttribute("aria-expanded",String(nav.classList.contains("is-open")));
     submenuGroups.forEach(({group,submenu,initiallyOpen,setGroupOpen}) => {
       if (isMobileViewport()) {
-        group.append(submenu);
+        if (submenu.parentElement !== group) group.append(submenu);
         if (submenu.hidden) setGroupOpen(initiallyOpen);
       } else {
-        submenuLayer.append(submenu);
+        if (submenu.parentElement !== submenuLayer) submenuLayer.append(submenu);
         if (!submenu.hidden) setGroupOpen(true);
       }
     });
