@@ -7,7 +7,7 @@
   const faDate = (date, options = {}) => new Intl.DateTimeFormat("fa-IR-u-ca-persian", options).format(date);
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[char]));
   const dayStart = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const setText = (selector, value) => { const el = $(selector); if (el) el.textContent = value; };
+  const setText = (selector, value) => { root.querySelectorAll(selector).forEach((el) => { el.textContent = value; }); };
 
   function updateClock() {
     const now = new Date();
