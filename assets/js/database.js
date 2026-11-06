@@ -40,6 +40,23 @@
     });
   }
 
+  function createDocumentNumber(prefix, usedNumbers, baseDate = new Date()) {
+    let candidateDate = new Date(baseDate.getTime());
+    const formatter = new Intl.DateTimeFormat("fa-IR-u-ca-persian-nu-latn", {
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
+    });
+    for (let attempt = 0; attempt < 10000; attempt += 1) {
+      const parts = Object.fromEntries(formatter.formatToParts(candidateDate).map(part => [part.type, part.value]));
+      const pad = value => String(value).padStart(2, "0");
+      const number = prefix + String(parts.year).padStart(4, "0") +
+        pad(parts.month) + pad(parts.day) + pad(parts.hour) + pad(parts.minute) + pad(parts.second);
+      if (!usedNumbers.has(number)) return number;
+      candidateDate = new Date(candidateDate.getTime() + 1000);
+    }
+    throw new Error("ساخت شماره سند یکتا انجام نشد؛ دوباره تلاش کنید.");
+  }
+
   async function migrateLegacyData(db) {
     let legacy = [];
     try {
@@ -93,11 +110,24 @@
     const done = transactionDone(tx);
     const store = tx.objectStore(STORE);
     const kardexStore = tx.objectStore(KARDEX);
-    const existingKeys = await new Promise((resolve, reject) => {
-      const request = store.getAllKeys();
-      request.onsuccess = () => resolve(new Set(request.result.map(String)));
-      request.onerror = () => reject(request.error || new Error("بررسی کالاهای تکراری انجام نشد."));
-    });
+    const keysRequest = store.getAllKeys();
+    const movementsRequest = kardexStore.getAll();
+    const [keys, existingMovements] = await Promise.all([
+      new Promise((resolve, reject) => {
+        keysRequest.onsuccess = () => resolve(keysRequest.result || []);
+        keysRequest.onerror = () => reject(keysRequest.error || new Error("بررسی کالاهای تکراری انجام نشد."));
+      }),
+      new Promise((resolve, reject) => {
+        movementsRequest.onsuccess = () => resolve(movementsRequest.result || []);
+        movementsRequest.onerror = () => reject(movementsRequest.error || new Error("بررسی شماره‌های ورود قبلی انجام نشد."));
+      })
+    ]);
+    const existingKeys = new Set(keys.map(String));
+    const usedEntryNumbers = new Set(existingMovements.map(item =>
+      String(item.entryNumber || item.incomingNumber || item.receiptNumber || "")
+    ).filter(Boolean));
+    const entryNumber = createDocumentNumber("in", usedEntryNumbers);
+    const occurredAt = new Date().toISOString();
     const added = [];
     const skipped = [];
     for (const item of items) {
@@ -112,14 +142,15 @@
         quantityIn: Math.max(0, Number(record.quantity) || 0),
         quantityOut: 0,
         stockAfter: Math.max(0, Number(record.quantity) || 0),
-        occurredAt: new Date().toISOString(),
+        entryNumber,
+        occurredAt,
         source: record.source || "initial-import"
       });
       existingKeys.add(code);
       added.push(record);
     }
     await done;
-    return { added, skipped };
+    return { added, skipped, entryNumber: added.length ? entryNumber : "" };
   }
 
   async function createDispatch(items, metadata) {
@@ -129,11 +160,23 @@
     const productStore = tx.objectStore(STORE);
     const dispatchStore = tx.objectStore(DISPATCHES);
     const kardexStore = tx.objectStore(KARDEX);
-    const products = await new Promise((resolve, reject) => {
-      const request = productStore.getAll();
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error || new Error("بررسی موجودی کالاها ناموفق بود."));
-    });
+    const productsRequest = productStore.getAll();
+    const dispatchesRequest = dispatchStore.getAll();
+    const movementsRequest = kardexStore.getAll();
+    const [products, existingDispatches, existingMovements] = await Promise.all([
+      new Promise((resolve, reject) => {
+        productsRequest.onsuccess = () => resolve(productsRequest.result || []);
+        productsRequest.onerror = () => reject(productsRequest.error || new Error("بررسی موجودی کالاها ناموفق بود."));
+      }),
+      new Promise((resolve, reject) => {
+        dispatchesRequest.onsuccess = () => resolve(dispatchesRequest.result || []);
+        dispatchesRequest.onerror = () => reject(dispatchesRequest.error || new Error("بررسی شماره خروج و حواله‌های قبلی ناموفق بود."));
+      }),
+      new Promise((resolve, reject) => {
+        movementsRequest.onsuccess = () => resolve(movementsRequest.result || []);
+        movementsRequest.onerror = () => reject(movementsRequest.error || new Error("بررسی سوابق شماره اسناد ناموفق بود."));
+      })
+    ]);
     const productMap = new Map(products.map(product => [String(product.procurementCode), product]));
     const actualItems = [];
     for (const requested of items) {
@@ -160,7 +203,17 @@
       throw new Error("هیچ‌یک از کالاهای انتخاب‌شده موجودی قابل ارسال ندارند. فهرست را بررسی کنید.");
     }
     const createdAt = new Date().toISOString();
-    const dispatch = { ...metadata, items: actualItems, createdAt };
+    const usedExitNumbers = new Set([
+      ...existingDispatches.map(item => item.exitNumber || ""),
+      ...existingMovements.map(item => item.exitNumber || "")
+    ].filter(Boolean));
+    const usedVoucherNumbers = new Set([
+      ...existingDispatches.map(item => item.voucherNumber || ""),
+      ...existingMovements.map(item => item.voucherNumber || "")
+    ].filter(Boolean));
+    const exitNumber = createDocumentNumber("out", usedExitNumbers);
+    const voucherNumber = createDocumentNumber("vh", usedVoucherNumbers);
+    const dispatch = { ...metadata, exitNumber, voucherNumber, items: actualItems, createdAt };
     const dispatchId = await new Promise((resolve, reject) => {
       const request = dispatchStore.add(dispatch);
       request.onsuccess = () => resolve(request.result);
@@ -174,12 +227,14 @@
         quantityIn: 0,
         quantityOut: item.quantity,
         stockAfter: item.stockAfter,
+        exitNumber,
+        voucherNumber,
         occurredAt: createdAt,
         source: "dispatch"
       });
     });
     await done;
-    return { id: dispatchId, items: actualItems };
+    return { id: dispatchId, items: actualItems, exitNumber, voucherNumber };
   }
 
   async function getKardex(procurementCode) {
@@ -206,7 +261,8 @@
       return {
         ...item,
         entryNumber: item.entryNumber || item.incomingNumber || item.receiptNumber || "",
-        exitNumber: item.exitNumber || (dispatch && dispatch.exitNumber) || ""
+        exitNumber: item.exitNumber || (dispatch && dispatch.exitNumber) || "",
+        voucherNumber: item.voucherNumber || (dispatch && dispatch.voucherNumber) || ""
       };
     });
     const knownDispatchIds = new Set(movements.map(item => item.dispatchId).filter(value => value !== undefined));
@@ -223,7 +279,8 @@
           stockAfter: null,
           occurredAt: dispatch.createdAt || dispatch.dispatchedAt || "",
           source: "legacy-dispatch",
-          exitNumber: dispatch.exitNumber || ""
+          exitNumber: dispatch.exitNumber || "",
+          voucherNumber: dispatch.voucherNumber || ""
         });
       });
     });
