@@ -413,15 +413,24 @@
 
   async function deleteAllProducts() {
     const db = await ready();
-    const tx = db.transaction(STORES.products, "readwrite");
+    const tx = db.transaction([STORES.products, STORES.documents, STORES.ledger, STORES.meta], "readwrite");
     const done = transactionDone(tx);
     const products = tx.objectStore(STORES.products);
     const rows = await requestResult(products.getAll());
-    rows.forEach(product => {
-      product.active = 0;
+    for (const product of rows) {
+      const previous = Number(product.qty) || 0;
+      if (previous > 0) {
+        const doc = await createDocument(tx, "adjust", { note: "غیرفعال‌سازی گروهی کالا" });
+        tx.objectStore(STORES.ledger).add({
+          docId: doc.id, supplyCode: product.supplyCode, delta: -previous,
+          type: "adjust", docDate: doc.docDate, balanceBefore: previous,
+          balanceAfter: 0, description: product.description, group: product.group
+        });
+      }
       product.qty = 0;
+      product.active = 0;
       products.put(product);
-    });
+    }
     await done;
     return rows.length;
   }
