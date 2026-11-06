@@ -3,7 +3,7 @@
 
   // نسخه جدید پایگاه داده؛ دیتابیس قبلی عمداً دست‌نخورده باقی می‌ماند.
   const DB_NAME = "control-offline-db-v2";
-  const DB_VERSION = 1;
+  const DB_VERSION = 2;
   const STORES = Object.freeze({
     products: "products",
     documents: "documents",
@@ -77,6 +77,10 @@
           store.createIndex("docId", "docId", { unique: false });
           store.createIndex("docDate", "docDate", { unique: false });
           store.createIndex("type", "type", { unique: false });
+        }
+        if (db.objectStoreNames.contains(STORES.documents)) {
+          store = request.transaction.objectStore(STORES.documents);
+          if (!store.indexNames.contains("voucherNo")) store.createIndex("voucherNo", "voucherNo", { unique: true });
         }
         if (!db.objectStoreNames.contains(STORES.destinations)) {
           store = db.createObjectStore(STORES.destinations, { keyPath: "id", autoIncrement: true });
