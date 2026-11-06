@@ -122,7 +122,8 @@
     const match = toEn(value || "").trim().match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
     if (!match) return null;
     const jy = Number(match[1]), jm = Number(match[2]), jd = Number(match[3]);
-    if (jm < 1 || jm > 12 || jd < 1) return null;
+    // اعتبارسنجی سخت‌گیرانه: هیچ ماهی خارج از ۱ تا ۱۲ و هیچ روزی خارج از ماه پذیرفته نشود.
+    if (!Number.isInteger(jy) || jy < 1 || !Number.isInteger(jm) || jm < 1 || jm > 12 || !Number.isInteger(jd) || jd < 1) return null;
     try {
       if (jd > monthLength(jy, jm)) return null;
     } catch (_) {
@@ -157,7 +158,7 @@
       .jalali-calendar-day:disabled{cursor:default;opacity:.25}
       .jalali-calendar-actions{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #edf1f5}
       .jalali-calendar-today,.jalali-calendar-clear{padding:6px 10px;border-radius:8px;background:#f1f5f9;color:#42536b;font-size:11px}
-      [data-jalali-calendar]{cursor:pointer}
+      [data-jalali-calendar]{cursor:pointer;direction:ltr;unicode-bidi:isolate;text-align:right;font-variant-numeric:tabular-nums}
       [data-jalali-calendar]:focus{outline:2px solid rgba(8,127,131,.28);outline-offset:2px}
     `;
     document.head.appendChild(style);
@@ -170,6 +171,12 @@
       input.dataset.jalaliReady = "true";
       if (input.tagName === "INPUT") {
         input.readOnly = true;
+        // تاریخ شامل چند گروه عددی و جداکننده / است؛ در زمینه RTL ترتیب گروه‌ها ممکن است وارونه دیده شود.
+        // جهت LTR همراه با راست‌چین‌بودن، ترتیب سال/ماه/روز را ثابت نگه می‌دارد.
+        input.setAttribute("dir", "ltr");
+        input.style.direction = "ltr";
+        input.style.unicodeBidi = "isolate";
+        input.style.textAlign = "right";
         input.setAttribute("autocomplete", "off");
         input.setAttribute("aria-haspopup", "dialog");
       }
