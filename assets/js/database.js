@@ -83,6 +83,7 @@
           store.createIndex("parent_name", ["parentId", "name"], { unique: true });
         }
         if (!db.objectStoreNames.contains(STORES.meta)) db.createObjectStore(STORES.meta, { keyPath: "key" });
+        request.transaction.objectStore(STORES.meta).put({ key: "schemaVersion", value: DB_VERSION });
       };
       request.onsuccess = () => {
         const db = request.result;
@@ -210,7 +211,7 @@
       const qty = Number(item && item.quantity);
       const description = String(item && item.description || "").trim();
       const group = String(item && item.group || "").trim();
-      if (!validSupplyCode(code) || !description || !group || !Number.isSafeInteger(qty) || qty < 0 || existing.has(code)) {
+      if (!validSupplyCode(code) || !description || !group || !Number.isFinite(qty) || qty < 0 || existing.has(code)) {
         skipped.push(item);
         continue;
       }
