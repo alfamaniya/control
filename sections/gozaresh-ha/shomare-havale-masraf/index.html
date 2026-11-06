@@ -9,6 +9,9 @@
   <link rel="stylesheet" href="../../../components/sidebar/style.css?v=20261105-3">
   <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="style.css">
+  <script src="../../../assets/js/database.js" defer></script>
+  <script src="../../../assets/libs/xlsx.full.min.js" defer></script>
+  <script src="../../../assets/js/table-sort.js" defer></script>
   <script src="script.js" defer></script>
   <script src="../../../components/sidebar/script.js?v=20261105-2" defer></script>
 </head>
@@ -28,7 +31,48 @@
           <div>
             <span class="report-eyebrow">بخش گزارش‌ها</span>
             <h1>گزارش بر اساس شماره حواله مصرف</h1>
-            <p>جست‌وجو و مشاهده گزارش با شماره حواله مصرف.</p>
+            <p>شماره حواله را جست‌وجو و انتخاب کنید تا مشخصات حواله و تمام اقلام ارسال‌شده نمایش داده شوند.</p>
+          </div>
+        </section>
+
+        <section class="voucher-search-card" aria-labelledby="voucherSearchTitle">
+          <div class="voucher-card-heading">
+            <div><h2 id="voucherSearchTitle">جست‌وجوی حواله مصرف</h2><p>با وارد کردن بخشی از شماره حواله، فهرست حواله‌های ثبت‌شده نمایش داده می‌شود.</p></div>
+            <span class="voucher-search-icon" aria-hidden="true">⌕</span>
+          </div>
+          <div class="voucher-search-control">
+            <label for="voucherSearch">شماره حواله مصرف</label>
+            <div class="voucher-input-wrap">
+              <input id="voucherSearch" type="text" autocomplete="off" placeholder="شماره حواله را وارد کنید…" aria-autocomplete="list" aria-controls="voucherSuggestions">
+              <div id="voucherSuggestions" class="voucher-suggestions" role="listbox" hidden></div>
+            </div>
+            <button id="showVoucherReport" class="report-primary-button" type="button" disabled>نمایش گزارش</button>
+          </div>
+          <p id="voucherMessage" class="report-message" role="status" aria-live="polite">در حال دریافت فهرست حواله‌ها…</p>
+        </section>
+
+        <section class="voucher-results" id="voucherResults" hidden>
+          <div class="voucher-section-heading"><div><h2>اطلاعات حواله</h2><p>مشخصات مشترک حواله انتخاب‌شده</p></div></div>
+          <div class="voucher-meta-grid" id="voucherMeta">
+            <div class="voucher-meta-item"><span>شماره حواله</span><strong id="metaVoucher">—</strong></div>
+            <div class="voucher-meta-item"><span>شماره خروج</span><strong id="metaExit">—</strong></div>
+            <div class="voucher-meta-item"><span>محل ارسال</span><strong id="metaDestination">—</strong></div>
+            <div class="voucher-meta-item"><span>تاریخ</span><strong id="metaDate">—</strong></div>
+          </div>
+          <div class="voucher-items-heading">
+            <div><h2>اقلام ارسال‌شده</h2><p id="voucherItemsSummary">فهرست کامل اقلام حواله</p></div>
+            <span class="voucher-items-count" id="voucherItemsCount">۰ ردیف</span>
+          </div>
+          <div class="voucher-table-wrap">
+            <table class="voucher-items-table">
+              <thead><tr><th>ردیف</th><th>کد اختصاصی</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>گروه کالا</th><th>تعداد ارسالی</th></tr></thead>
+              <tbody id="voucherItemsRows"></tbody>
+            </table>
+            <div id="voucherItemsEmpty" class="voucher-empty" hidden>برای این حواله قلم ارسالی ثبت نشده است.</div>
+          </div>
+          <div class="voucher-report-footer">
+            <div class="voucher-total"><span>جمع کل تعداد</span><strong id="voucherTotalQuantity">۰</strong></div>
+            <button id="exportVoucherReport" class="report-export-button" type="button"><span aria-hidden="true">⇩</span> خروجی اکسل</button>
           </div>
         </section>
       </div>
