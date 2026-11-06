@@ -229,7 +229,7 @@
           docId: document.id, supplyCode: product.supplyCode, delta: product.qty,
           type: "opening", docDate: document.docDate, balanceBefore: 0,
           balanceAfter: product.qty, description: product.description, group: product.group,
-          source: product.source || item.source || "initial-import"
+          source: product.source || "initial-import"
         });
       }
     }
