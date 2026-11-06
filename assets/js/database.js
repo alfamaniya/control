@@ -118,7 +118,8 @@
   function movementForUI(line, document, product) {
     const amount = Math.abs(Number(line.delta) || 0);
     const issue = line.delta < 0;
-    const operation = typeNames[line.type] || line.type || "";
+    const operation = line.type === "adjust" ? (line.delta > 0 ? "تعدیل مثبت" : "تعدیل منفی") :
+      (line.type === "opening" || line.type === "receipt" ? "ورود" : line.type === "issue" ? "خروج" : typeNames[line.type] || line.type || "");
     return {
       id: line.id,
       transactionNumber: "TR" + String(line.id).padStart(8, "0"),
@@ -141,7 +142,7 @@
       destination: document.destinationName || "",
       destinationSub: document.destinationSub || "",
       dispatchId: line.type === "issue" ? document.id : "",
-      source: document.note || ""
+      source: line.source || document.note || ""
     };
   }
 
@@ -227,7 +228,8 @@
         ledger.add({
           docId: document.id, supplyCode: product.supplyCode, delta: product.qty,
           type: "opening", docDate: document.docDate, balanceBefore: 0,
-          balanceAfter: product.qty, description: product.description, group: product.group
+          balanceAfter: product.qty, description: product.description, group: product.group,
+          source: product.source || item.source || "initial-import"
         });
       }
     }
