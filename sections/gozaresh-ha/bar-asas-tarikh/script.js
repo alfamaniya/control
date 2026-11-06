@@ -71,7 +71,8 @@
         normalizeText(item.description).includes(productTerm);
       const documentMatch = !documentTerm ||
         normalizeText(item.entryNumber).includes(documentTerm) ||
-        normalizeText(item.exitNumber).includes(documentTerm);
+        normalizeText(item.exitNumber).includes(documentTerm) ||
+        normalizeText(item.voucherNumber).includes(documentTerm);
       const groupMatch = !groupTerm || String(item.group || "") === groupTerm;
       const timestamp = Date.parse(item.occurredAt);
       const dateMatch = (from === null || timestamp >= from) && (to === null || timestamp <= to);
