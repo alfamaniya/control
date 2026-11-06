@@ -347,6 +347,8 @@
       const occurredAt = movement.occurredAt || (dispatch && (dispatch.createdAt || dispatch.dispatchedAt)) || "";
       return {
         occurredAt,
+        transactionNumber: movement.transactionNumber || "",
+        adjustmentNumber: movement.adjustmentNumber || "",
         operation: movement.operation || "",
         procurementCode: String(movement.procurementCode || ""),
         description: movement.description || (dispatchItem && dispatchItem.description) || (product && product.description) || "",
