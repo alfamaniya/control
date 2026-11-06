@@ -9,6 +9,12 @@
   <link rel="stylesheet" href="../../../components/sidebar/style.css?v=20261105-3">
   <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="style.css">
+  <script src="../../../assets/js/database.js" defer></script>
+  <script src="../../../assets/libs/xlsx.full.min.js" defer></script>
+  <script src="../../../assets/js/table-sort.js" defer></script>
+  <script src="../../../assets/js/database.js" defer></script>
+  <script src="../../../assets/libs/xlsx.full.min.js" defer></script>
+  <script src="../../../assets/js/table-sort.js" defer></script>
   <script src="script.js" defer></script>
   <script src="../../../components/sidebar/script.js?v=20261105-2" defer></script>
 </head>
@@ -24,11 +30,51 @@
       <div class="page-content report-subpage">
         <a class="back-link" href="../index.html">بازگشت به گزارش‌ها</a>
         <section class="report-subpage-panel">
-          <span class="report-subpage-icon">⇧</span>
+          <span class="report-subpage-icon">▤</span>
           <div>
             <span class="report-eyebrow">بخش گزارش‌ها</span>
             <h1>گزارش بر اساس شماره خروج</h1>
-            <p>جست‌وجو و مشاهده گزارش با شماره خروج.</p>
+            <p>شماره خروج را جست‌وجو و انتخاب کنید تا مشخصات خروج و تمام اقلام ارسال‌شده نمایش داده شوند.</p>
+          </div>
+        </section>
+        <section class="exit-search-card" aria-labelledby="exitSearchTitle">
+          <div class="exit-card-heading">
+            <div><h2 id="exitSearchTitle">جست‌وجوی خروج</h2><p>با وارد کردن بخشی از شماره خروج، فهرست خروج‌های ثبت‌شده نمایش داده می‌شود.</p></div>
+            <span class="exit-search-icon" aria-hidden="true">⌕</span>
+          </div>
+          <div class="exit-search-control">
+            <label for="exitSearch">شماره خروج</label>
+            <div class="exit-input-wrap">
+              <input id="exitSearch" type="text" autocomplete="off" placeholder="شماره خروج را وارد کنید…" aria-autocomplete="list" aria-controls="exitSuggestions">
+              <div id="exitSuggestions" class="exit-suggestions" role="listbox" hidden></div>
+            </div>
+            <button id="showExitReport" class="report-primary-button" type="button" disabled>نمایش گزارش</button>
+          </div>
+          <p id="exitMessage" class="report-message" role="status" aria-live="polite">در حال دریافت فهرست خروج‌ها…</p>
+        </section>
+        <section class="exit-results" id="exitResults" hidden>
+          <div class="exit-section-heading"><div><h2>اطلاعات خروج</h2><p>مشخصات مشترک خروج انتخاب‌شده</p></div></div>
+          <div class="exit-meta-grid" id="exitMeta">
+            <div class="exit-meta-item"><span>شماره خروج</span><strong id="metaExit">—</strong></div>
+            <div class="exit-meta-item"><span>شماره حواله</span><strong id="metaVoucher">—</strong></div>
+            <div class="exit-meta-item"><span>شماره حواله</span><strong id="metaVoucher">—</strong></div>
+            <div class="exit-meta-item"><span>محل ارسال</span><strong id="metaDestination">—</strong></div>
+            <div class="exit-meta-item"><span>تاریخ</span><strong id="metaDate">—</strong></div>
+          </div>
+          <div class="exit-items-heading">
+            <div><h2>اقلام ارسال‌شده</h2><p id="exitItemsSummary">فهرست کامل اقلام خروج</p></div>
+            <span class="exit-items-count" id="exitItemsCount">۰ ردیف</span>
+          </div>
+          <div class="exit-table-wrap">
+            <table class="exit-items-table">
+              <thead><tr><th>ردیف</th><th>کد اختصاصی</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>گروه کالا</th><th>تعداد ارسالی</th></tr></thead>
+              <tbody id="exitItemsRows"></tbody>
+            </table>
+            <div id="exitItemsEmpty" class="exit-empty" hidden>برای این خروج قلم ارسالی ثبت نشده است.</div>
+          </div>
+          <div class="exit-report-footer">
+            <div class="exit-total"><span>جمع کل تعداد</span><strong id="exitTotalQuantity">۰</strong></div>
+            <button id="exportExitReport" class="report-export-button" type="button"><span aria-hidden="true">⇩</span> خروجی اکسل</button>
           </div>
         </section>
       </div>
