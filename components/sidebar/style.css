@@ -238,3 +238,63 @@
   .topbar .brand-breadcrumb .topbar-section-title{font-size:.72rem}
   .topbar .brand-breadcrumb .topbar-page-title{font-size:.82rem}
 }
+
+
+/* منوی کشویی ساده: باز و بسته شدن فقط با دکمه و کلیک بیرون */
+.control-sidebar{
+  position:fixed;z-index:25;top:var(--header-height,72px);right:0;bottom:0;
+  width:min(var(--sidebar-panel-width,300px),calc(100vw - 24px));
+  height:auto;margin:0;border-radius:0;background:transparent;
+  transform:translateX(100%);visibility:hidden;pointer-events:none;
+  transition:transform .28s cubic-bezier(.2,.75,.25,1),visibility .28s ease;
+}
+.control-sidebar.is-open{
+  transform:translateX(0);visibility:visible;pointer-events:auto;
+}
+.control-sidebar .sidebar-rail{display:none!important}
+.control-sidebar .sidebar-panel{
+  position:absolute;inset:0;width:100%;height:100%;display:flex;
+  padding:22px 17px 16px;border:0;border-radius:0;
+  opacity:1;visibility:visible;pointer-events:auto;transform:none;
+  box-shadow:-12px 8px 32px rgba(8,22,41,.2);
+  overflow:hidden;
+}
+.control-sidebar .nav-link.active{
+  color:#253047;
+  background:linear-gradient(100deg,#ffe36e 0%,#ffb13b 58%,#f28a24 100%);
+  box-shadow:inset -3px 0 0 #f0781d,0 4px 13px rgba(239,151,38,.2);
+}
+.control-sidebar .nav-link.active .nav-number{
+  color:#253047;border-color:rgba(151,91,20,.3);
+  background:rgba(255,255,255,.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.45);
+}
+.control-sidebar .nav-sublink[aria-current=page]{
+  color:#ffd078;background:rgba(255,177,59,.12);font-weight:700;
+}
+.control-sidebar .nav-sublink[aria-current=page]::before{
+  border-color:#ffbd59;background:#ffbd59;
+  box-shadow:0 0 5px rgba(255,189,89,.85),0 0 10px rgba(255,165,54,.45);
+}
+.control-sidebar-backdrop{
+  display:block;position:fixed;z-index:20;inset:var(--header-height,72px) 0 0;
+  background:rgba(10,24,43,.34);opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .22s ease,visibility .22s ease;
+}
+.control-sidebar.is-open~.control-sidebar-backdrop,
+.app-shell:has(.control-sidebar.is-open) .control-sidebar-backdrop{
+  opacity:1;visibility:visible;pointer-events:auto;
+}
+.app-shell .main-content{margin-right:0!important;transition:none}
+.sidebar-demo-content{margin-right:0!important}
+@media(max-width:768px){
+  .control-sidebar{
+    top:var(--header-height,72px);right:0;bottom:0;width:min(340px,calc(100vw - 28px));
+    height:auto;max-height:none;transform:translateX(100%);
+  }
+  .control-sidebar.is-open{transform:translateX(0)}
+  .control-sidebar .sidebar-panel{display:flex;inset:0;width:100%;height:100%;padding:18px 15px}
+  .control-sidebar-backdrop{inset:var(--header-height,72px) 0 0}
+}
+@media(prefers-reduced-motion:reduce){
+  .control-sidebar,.control-sidebar-backdrop{transition:none!important}
+}
