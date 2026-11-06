@@ -142,7 +142,7 @@
   }
   previous.addEventListener("click", () => { if (currentPage > 1) { currentPage -= 1; renderPage(); } });
   next.addEventListener("click", () => {
-    if (currentPage < Math.ceil(transactions.length / PAGE_SIZE)) { currentPage += 1; renderPage(); }
+    if (currentPage < Math.ceil(filteredTransactions.length / PAGE_SIZE)) { currentPage += 1; renderPage(); }
   });
   pageSelect.addEventListener("change", () => {
     currentPage = Number(pageSelect.value) || 1;
