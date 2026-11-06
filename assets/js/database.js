@@ -120,7 +120,8 @@
     const amount = Math.abs(Number(line.delta) || 0);
     const issue = line.delta < 0;
     const operation = line.type === "adjust" ? (line.delta > 0 ? "تعدیل مثبت" : "تعدیل منفی") :
-      (line.type === "opening" || line.type === "receipt" ? "ورود" : line.type === "issue" ? "خروج" : typeNames[line.type] || line.type || "");
+      (line.type === "opening" || line.type === "receipt" || (line.type === "reversal" && line.delta > 0) ? "ورود" :
+        line.type === "issue" || (line.type === "reversal" && line.delta < 0) ? "خروج" : typeNames[line.type] || line.type || "");
     return {
       id: line.id,
       transactionNumber: "TR" + String(line.id).padStart(8, "0"),
@@ -179,6 +180,8 @@
       destinationName: options.destinationName || "",
       destinationSub: options.destinationSub || "",
       dispatchRef: options.dispatchRef || "",
+      reversalOf: options.reversalOf ?? null,
+      replaces: options.replaces ?? null,
       note: options.note || "",
       opId: options.opId || uid(),
       status: "active"
