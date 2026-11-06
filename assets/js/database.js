@@ -298,6 +298,80 @@
     }).sort((a, b) => Date.parse(a.occurredAt) - Date.parse(b.occurredAt));
   }
 
+  async function getAllTransactions() {
+    const db = await ready();
+    const tx = db.transaction([KARDEX, DISPATCHES, STORE], "readonly");
+    const done = transactionDone(tx);
+    const requests = [
+      tx.objectStore(KARDEX).getAll(),
+      tx.objectStore(DISPATCHES).getAll(),
+      tx.objectStore(STORE).getAll()
+    ];
+    const [movements, dispatches, products] = await Promise.all(requests.map(request => new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error || new Error("خواندن تراکنش‌های گزارش کلی ناموفق بود."));
+    })));
+    await done;
+
+    const productMap = new Map(products.map(product => [String(product.procurementCode), product]));
+    const dispatchMap = new Map(dispatches.map(dispatch => [String(dispatch.id), dispatch]));
+    const knownDispatchIds = new Set(movements.map(item => item.dispatchId).filter(value => value !== undefined));
+    const records = movements.map(movement => {
+      const dispatch = movement.dispatchId === undefined ? null : dispatchMap.get(String(movement.dispatchId));
+      const dispatchItem = dispatch && (dispatch.items || []).find(item => String(item.procurementCode) === String(movement.procurementCode));
+      const product = productMap.get(String(movement.procurementCode));
+      return {
+        ...movement,
+        occurredAt: movement.occurredAt || (dispatch && (dispatch.createdAt || dispatch.dispatchedAt)) || "",
+        operation: movement.operation || "",
+        internalCode: movement.internalCode || (dispatchItem && dispatchItem.internalCode) || (product && product.internalCode) || String(movement.procurementCode || "").slice(0, 8),
+        procurementCode: String(movement.procurementCode || ""),
+        description: movement.description || (dispatchItem && dispatchItem.description) || (product && product.description) || "",
+        group: movement.group || (dispatchItem && dispatchItem.group) || (product && product.group) || "",
+        quantity: Math.max(0, Number(movement.quantityIn) || 0) || Math.max(0, Number(movement.quantityOut) || 0),
+        destination: movement.destination || (dispatch && dispatch.destination) || "",
+        destinationSub: movement.destinationSub || (dispatch && dispatch.destinationSub) || "",
+        voucherNumber: movement.voucherNumber || (dispatch && dispatch.voucherNumber) || "",
+        exitNumber: movement.exitNumber || (dispatch && dispatch.exitNumber) || "",
+        entryNumber: movement.entryNumber || movement.incomingNumber || movement.receiptNumber || "",
+        dispatchedAt: movement.dispatchedAt || (dispatch && dispatch.dispatchedAt) || "",
+        dispatchId: movement.dispatchId ?? (dispatch && dispatch.id) ?? "",
+        source: movement.source || "",
+        previousStock: movement.previousStock ?? "",
+        stockAfter: movement.stockAfter ?? (dispatchItem && dispatchItem.stockAfter) ?? ""
+      };
+    });
+
+    dispatches.forEach(dispatch => {
+      if (knownDispatchIds.has(dispatch.id)) return;
+      (dispatch.items || []).forEach(item => records.push({
+        occurredAt: dispatch.createdAt || dispatch.dispatchedAt || "",
+        operation: "خروج",
+        internalCode: item.internalCode || String(item.procurementCode || "").slice(0, 8),
+        procurementCode: String(item.procurementCode || ""),
+        description: item.description || "",
+        group: item.group || "",
+        quantity: Math.max(0, Number(item.quantity) || 0),
+        quantityIn: 0,
+        quantityOut: Math.max(0, Number(item.quantity) || 0),
+        stockAfter: item.stockAfter ?? "",
+        destination: dispatch.destination || "",
+        destinationSub: dispatch.destinationSub || "",
+        voucherNumber: dispatch.voucherNumber || "",
+        exitNumber: dispatch.exitNumber || "",
+        entryNumber: "",
+        dispatchedAt: dispatch.dispatchedAt || "",
+        dispatchId: dispatch.id,
+        source: "legacy-dispatch",
+        previousStock: ""
+      }));
+    });
+
+    return records.filter(record => Number.isFinite(Date.parse(record.occurredAt)))
+      .sort((a, b) => Date.parse(a.occurredAt) - Date.parse(b.occurredAt) ||
+        String(a.procurementCode).localeCompare(String(b.procurementCode), "en"));
+  }
+
   async function getAllDispatches() {
     const db = await ready();
     const tx = db.transaction(DISPATCHES, "readonly");
@@ -416,5 +490,5 @@
     return products.length;
   }
 
-  window.ControlDB = Object.freeze({ getAll, addMany, createDispatch, getKardex, getReportTransactions, getAllDispatches, deleteProduct, deleteAllProducts, adjustStock });
+  window.ControlDB = Object.freeze({ getAll, addMany, createDispatch, getKardex, getReportTransactions, getAllTransactions, getAllDispatches, deleteProduct, deleteAllProducts, adjustStock });
 })();
