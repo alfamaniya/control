@@ -20,7 +20,7 @@
   ];
   const WEEKDAYS = ["ش", "ی", "د", "س", "چ", "پ", "ج"];
   const pad = (value) => String(value).padStart(2, "0");
-  const toFa = (value) => String(value).replace(/\\d/g, (d) => DIGITS[Number(d)]);
+  const toFa = (value) => String(value).replace(/\d/g, (d) => DIGITS[Number(d)]);
   const toEn = (value) => String(value).replace(/[۰-۹]/g, (d) => String(DIGITS.indexOf(d)))
     .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
 
@@ -119,7 +119,7 @@
   }
 
   function parseValue(value) {
-    const match = toEn(value || "").trim().match(/^(\\d{4})[\\/-](\\d{1,2})[\\/-](\\d{1,2})$/);
+    const match = toEn(value || "").trim().match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
     if (!match) return null;
     const jy = Number(match[1]), jm = Number(match[2]), jd = Number(match[3]);
     if (jm < 1 || jm > 12 || jd < 1 || jd > monthLength(jy, jm)) return null;
