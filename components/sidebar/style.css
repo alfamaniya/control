@@ -209,3 +209,32 @@
 @media(prefers-reduced-motion:reduce){
   .control-sidebar,.sidebar-panel,.control-sidebar-backdrop,.sidebar-rail-link{transition:none!important}
 }
+
+
+/* عنوان مسیر جاری در هدر مشترک */
+.topbar .brand.brand-breadcrumb{
+  min-width:0;
+  flex-wrap:wrap;
+  gap:7px;
+  font-size:.94rem;
+}
+.topbar .brand-breadcrumb .topbar-section-title{
+  color:#7b899d;
+  font-size:.82rem;
+  font-weight:600;
+}
+.topbar .brand-breadcrumb .topbar-title-separator{
+  color:#c2ccd7;
+  font-weight:500;
+}
+.topbar .brand-breadcrumb .topbar-page-title{
+  min-width:0;
+  color:#1b2d48;
+  font-size:.96rem;
+  font-weight:850;
+}
+@media(max-width:560px){
+  .topbar .brand.brand-breadcrumb{gap:4px;font-size:.82rem}
+  .topbar .brand-breadcrumb .topbar-section-title{font-size:.72rem}
+  .topbar .brand-breadcrumb .topbar-page-title{font-size:.82rem}
+}
