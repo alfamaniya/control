@@ -31,25 +31,39 @@
           <div>
             <span class="report-eyebrow">بخش گزارش‌ها</span>
             <h1>گزارش بر اساس شماره خروج</h1>
-            <p>شماره خروج را جست‌وجو و انتخاب کنید تا مشخصات خروج و تمام اقلام ارسال‌شده نمایش داده شوند.</p>
+            <p>فهرست خروج‌های ثبت‌شده را مشاهده کنید و برای دیدن اقلام هر خروج، ردیف موردنظر را انتخاب کنید.</p>
           </div>
         </section>
-        <section class="exit-search-card" aria-labelledby="exitSearchTitle">
-          <div class="exit-card-heading">
-            <div><h2 id="exitSearchTitle">جست‌وجوی خروج</h2><p>با وارد کردن بخشی از شماره خروج، فهرست خروج‌های ثبت‌شده نمایش داده می‌شود.</p></div>
-            <span class="exit-search-icon" aria-hidden="true">⌕</span>
+
+        <section class="exit-list-card" id="exitListView" aria-labelledby="exitListTitle">
+          <div class="exit-list-heading">
+            <div><h2 id="exitListTitle">فهرست خروج‌ها</h2><p>در هر صفحه ۲۰ خروج نمایش داده می‌شود؛ برای مشاهده جزئیات روی ردیف موردنظر بزنید.</p></div>
+            <span class="exit-list-total" id="exitListTotal">۰ خروج</span>
           </div>
-          <div class="exit-search-control">
-            <label for="exitSearch">شماره خروج</label>
-            <div class="exit-input-wrap">
-              <input id="exitSearch" type="text" autocomplete="off" placeholder="شماره خروج را وارد کنید…" aria-autocomplete="list" aria-controls="exitSuggestions">
-              <div id="exitSuggestions" class="exit-suggestions" role="listbox" hidden></div>
+          <div class="exit-list-table-wrap">
+            <table class="exit-list-table">
+              <thead><tr><th>ردیف</th><th>شماره خروج</th><th>شماره حواله</th><th>تاریخ</th><th>محل ارسال</th></tr></thead>
+              <tbody id="exitListRows"></tbody>
+            </table>
+            <div id="exitListEmpty" class="exit-empty" hidden>هنوز هیچ خروجی در سامانه ثبت نشده است.</div>
+          </div>
+          <div class="exit-pagination" id="exitPagination">
+            <button type="button" id="exitPrevPage" class="exit-page-button">قبلی</button>
+            <div class="exit-page-status">
+              <span id="exitPageLabel">صفحه ۱ از ۱</span>
+              <label for="exitPageInput">رفتن به صفحه</label>
+              <div class="exit-page-jump"><input id="exitPageInput" type="number" min="1" step="1" inputmode="numeric" aria-label="شماره صفحه"><button type="button" id="exitGoPage" class="exit-page-go">برو</button></div>
             </div>
-            <button id="showExitReport" class="report-primary-button" type="button" disabled>نمایش گزارش</button>
+            <button type="button" id="exitNextPage" class="exit-page-button">بعدی</button>
           </div>
-          <p id="exitMessage" class="report-message" role="status" aria-live="polite">در حال دریافت فهرست خروج‌ها…</p>
+          <p id="exitMessage" class="report-message" role="status" aria-live="polite" hidden></p>
         </section>
+
         <section class="exit-results" id="exitResults" hidden>
+          <div class="exit-detail-top">
+            <button id="backToExitList" class="exit-back-button" type="button"><span aria-hidden="true">→</span> بازگشت به فهرست خروج‌ها</button>
+            <span class="exit-detail-caption">جزئیات خروج انتخاب‌شده</span>
+          </div>
           <div class="exit-section-heading"><div><h2>اطلاعات خروج</h2><p>مشخصات مشترک خروج انتخاب‌شده</p></div></div>
           <div class="exit-meta-grid" id="exitMeta">
             <div class="exit-meta-item"><span>شماره خروج</span><strong id="metaExit">—</strong></div>
