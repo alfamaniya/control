@@ -158,6 +158,8 @@
       else if (isOutgoing) tr.classList.add("kardex-row-out");
       const dateTime = formatDateTime(movement.occurredAt);
       cell(tr, fa(index + 1));
+      cell(tr, movement.transactionNumber || "—", "kardex-code");
+      cell(tr, movement.adjustmentNumber || "—", "kardex-code");
       cell(tr, referenceLabel(movement), "kardex-reference");
       cell(tr, movement.operation === "ورود" || movement.operation === "تعدیل مثبت" ? (movement.entryNumber || movement.incomingNumber || movement.receiptNumber || "—") : "—", "kardex-code");
       cell(tr, movement.operation === "خروج" || movement.operation === "تعدیل منفی" ? (movement.exitNumber || "—") : "—", "kardex-code");
