@@ -6,6 +6,9 @@
     { input: $("searchProcurementCode"), list: $("procurementSuggestions"), key: "procurementCode" },
     { input: $("searchDescription"), list: $("descriptionSuggestions"), key: "description" }
   ];
+  const documentSearch = $("searchDocumentNumber");
+  const documentSuggestions = $("documentSuggestions");
+  let documentSearchSequence = 0;
   const selectedCard = $("selectedProductCard");
   const historyCard = $("kardexHistoryCard");
   const startEmpty = $("kardexStartEmpty");
@@ -80,6 +83,50 @@
     }).format(date);
     return { date: parts, time };
   }
+  async function searchDocuments(query) {
+    const term = normalized(query);
+    const sequence = ++documentSearchSequence;
+    documentSuggestions.innerHTML = "";
+    if (!term) { documentSuggestions.hidden = true; return; }
+    try {
+      const transactions = await window.ControlDB.getAllTransactions();
+      if (sequence !== documentSearchSequence) return;
+      const matches = transactions.filter(item =>
+        [item.entryNumber, item.exitNumber, item.voucherNumber].some(value => normalized(value).includes(term))
+      ).slice(0, 20);
+      if (!matches.length) {
+        const emptyOption = document.createElement("div");
+        emptyOption.className = "kardex-suggestion-empty";
+        emptyOption.textContent = "سندی با این شماره پیدا نشد.";
+        documentSuggestions.appendChild(emptyOption);
+      } else {
+        matches.forEach(item => {
+          const option = document.createElement("button");
+          option.type = "button";
+          option.className = "kardex-suggestion";
+          const title = document.createElement("strong");
+          const documentNumber = [item.entryNumber, item.exitNumber, item.voucherNumber].find(value => normalized(value).includes(term));
+          const documentType = item.entryNumber && normalized(item.entryNumber).includes(term) ? "شماره ورود" :
+            item.exitNumber && normalized(item.exitNumber).includes(term) ? "شماره خروج" : "شماره حواله مصرف";
+          title.textContent = documentType + ": " + documentNumber;
+          const meta = document.createElement("small");
+          meta.textContent = (item.description || "بدون شرح") + " | کد تدارکاتی: " + item.procurementCode;
+          option.append(title, meta);
+          option.addEventListener("click", () => {
+            documentSuggestions.hidden = true;
+            const product = inventory.find(entry => String(entry.procurementCode) === String(item.procurementCode)) ||
+              { ...item, quantity: item.stockAfter ?? 0 };
+            selectProduct(product);
+          });
+          documentSuggestions.appendChild(option);
+        });
+      }
+      documentSuggestions.hidden = false;
+    } catch (error) {
+      showMessage(error.message || "جست‌وجوی شماره سند ناموفق بود.", true);
+    }
+  }
+
   async function renderHistory(product) {
     rows.innerHTML = "";
     const movements = await window.ControlDB.getKardex(product.procurementCode);
@@ -91,6 +138,7 @@
       cell(tr, fa(index + 1));
       cell(tr, movement.operation === "ورود" || movement.operation === "تعدیل مثبت" ? (movement.entryNumber || movement.incomingNumber || movement.receiptNumber || "—") : "—", "kardex-code");
       cell(tr, movement.operation === "خروج" || movement.operation === "تعدیل منفی" ? (movement.exitNumber || "—") : "—", "kardex-code");
+      cell(tr, movement.voucherNumber || "—", "kardex-code");
       cell(tr, dateTime.date);
       cell(tr, dateTime.time, "kardex-time");
       cell(tr, movement.quantityIn ? fa(movement.quantityIn) : "—", "quantity-in");
@@ -101,7 +149,14 @@
   }
   async function selectProduct(product) {
     selectedProduct = product;
-    fields.forEach(field => {
+    documentSearch.addEventListener("input", () => {
+    selectedCard.hidden = true;
+    historyCard.hidden = true;
+    startEmpty.hidden = true;
+    showMessage("");
+    searchDocuments(documentSearch.value);
+  });
+  fields.forEach(field => {
       field.input.value = "";
       field.list.innerHTML = "";
       field.list.hidden = true;
@@ -129,7 +184,10 @@
     });
   });
   document.addEventListener("click", event => {
-    if (!event.target.closest(".autocomplete-wrap")) fields.forEach(field => { field.list.hidden = true; });
+    if (!event.target.closest(".autocomplete-wrap")) {
+      fields.forEach(field => { field.list.hidden = true; });
+      documentSuggestions.hidden = true;
+    }
   });
   async function loadInventory() {
     try {
