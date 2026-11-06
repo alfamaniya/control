@@ -6,13 +6,13 @@
   <meta name="theme-color" content="#14243d">
   <title>مشاهده کالاها و موجودی</title>
   <link rel="stylesheet" href="../../assets/css/style.css?v=20261105-3">
-  <link rel="stylesheet" href="../../components/sidebar/style.css?v=20261106-1">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../../components/sidebar/style.css?v=20261106-2">
+  <link rel="stylesheet" href="style.css?v=20261106-1">
 
   <script src="../../assets/js/database.js" defer></script>
   <script src="../../assets/js/table-sort.js" defer></script>
   <script src="script.js?v=20261106-2" defer></script>
-  <script src="../../components/sidebar/script.js?v=20261105-2" defer></script>
+  <script src="../../components/sidebar/script.js?v=20261106-5" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -48,9 +48,13 @@
             </table>
           </div>
           <nav class="inventory-pagination" id="inventoryPagination" aria-label="صفحه‌بندی فهرست موجودی" hidden>
-            <button type="button" id="inventoryPrev" class="page-button" disabled>قبلی</button>
-            <div class="page-picker"><label for="inventoryPageSelect">صفحه</label><select id="inventoryPageSelect" aria-label="انتخاب شماره صفحه"></select><span id="inventoryPageSummary"></span></div>
-            <button type="button" id="inventoryNext" class="page-button">بعدی</button>
+            <button type="button" id="inventoryPrev" class="page-button" disabled><span class="page-button-icon" aria-hidden="true">›</span><span>قبلی</span></button>
+            <div class="page-picker">
+              <label for="inventoryPageSelect">صفحه</label>
+              <select id="inventoryPageSelect" aria-label="انتخاب شماره صفحه"></select>
+              <span id="inventoryPageSummary" aria-live="polite"></span>
+            </div>
+            <button type="button" id="inventoryNext" class="page-button"><span>بعدی</span><span class="page-button-icon" aria-hidden="true">‹</span></button>
           </nav>
         </section>
       </div>

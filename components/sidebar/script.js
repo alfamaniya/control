@@ -23,8 +23,7 @@
     {number:"07",label:"تنظیمات و مدیریت",icon:"⚙",path:"sections/modiriat/index.html",children:[
       ["مدیریت حذف کالا","sections/modiriat/manage-products/index.html"],
       ["مدیریت موجودی کالاها","sections/modiriat/manage-stock/index.html"]
-    ]},
-    {number:"08",label:"درخت سامانه",icon:"⌘",path:"sections/derakht-samane/index.html"}
+    ]}
   ];
   const current = window.location.pathname.endsWith("/") ? window.location.pathname.slice(0,-1) : window.location.pathname;
   const routePath = (path) => { const pathname = new URL(path, root).pathname; return pathname.endsWith("/") ? pathname.slice(0,-1) : pathname; };

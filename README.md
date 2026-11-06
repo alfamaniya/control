@@ -64,7 +64,6 @@
 - `assets/js/app.js`: رفتار عمومی رابط
 - `assets/js/database.js`: لایه ذخیره‌سازی محلی IndexedDB
 - `assets/js/jalali-calendar.js`: تقویم
-- `sections/derakht-samane/`: درخت افقی سامانه با سه فایل مستقل `index.html`، `style.css` و `script.js`. شمسی
 - `assets/js/table-sort.js`: مرتب‌سازی مشترک جدول‌ها
 - `assets/libs/`: کتابخانه‌های محلی
 - `sections/vorood-kala/`: بخش ورود کالا و روش‌های ورود از فایل، کپی و پیست و ثبت دستی
