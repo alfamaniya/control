@@ -141,7 +141,7 @@
       quantity: amount,
       stockAfter: line.balanceAfter ?? "",
       previousStock: line.balanceBefore ?? "",
-      occurredAt: document.createdAt,
+      occurredAt: new Date(document.createdAt).toISOString(),
       docDate: document.docDate,
       entryNumber: (["opening", "receipt"].includes(line.type) || (line.type === "reversal" && line.delta > 0)) ? document.docNo : "",
       exitNumber: (line.type === "issue" || (line.type === "reversal" && line.delta < 0)) ? document.docNo : "",
