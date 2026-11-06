@@ -7,7 +7,7 @@
   const results = $("voucherResults");
   const message = $("voucherMessage");
   const rows = $("voucherItemsRows");
-  const fa = value => String(value ?? "").replace(/\\d/g, digit => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)]);
+  const fa = value => String(value ?? "").replace(/\d/g, digit => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)]);
   const digits = value => String(value ?? "").replace(/[۰-۹]/g, digit => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit))).replace(/[٠-٩]/g, digit => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit))).trim();
   let dispatches = [];
   let voucherOptions = [];
@@ -26,7 +26,7 @@
     if (!Number.isFinite(date.getTime())) return "—";
     return new Intl.DateTimeFormat("fa-IR-u-ca-persian", { year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
   }
-  function normalizeVoucher(value) { return digits(value).replace(/\\s+/g, "").toLocaleLowerCase("fa"); }
+  function normalizeVoucher(value) { return digits(value).replace(/\s+/g, "").toLocaleLowerCase("fa"); }
   function addCell(row, value, className = "") {
     const cell = document.createElement("td");
     cell.textContent = value === null || value === undefined || value === "" ? "—" : String(value);
