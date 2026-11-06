@@ -67,6 +67,7 @@
           store.createIndex("opId", "opId", { unique: true });
           store.createIndex("docDate", "docDate", { unique: false });
           store.createIndex("dispatchRef", "dispatchRef", { unique: false });
+          store.createIndex("voucherNo", "voucherNo", { unique: true });
           store.createIndex("destinationId", "destinationId", { unique: false });
           store.createIndex("reversalOf", "reversalOf", { unique: false });
         }
@@ -141,7 +142,8 @@
       entryNumber: (["opening", "receipt"].includes(line.type) || (line.type === "reversal" && line.delta > 0)) ? document.docNo : "",
       exitNumber: (line.type === "issue" || (line.type === "reversal" && line.delta < 0)) ? document.docNo : "",
       reversalNumber: line.type === "reversal" ? document.docNo : "",
-      voucherNumber: document.dispatchRef || "",
+      voucherNumber: document.voucherNo || document.dispatchRef || "",
+      dispatchedAt: line.type === "issue" ? new Date(document.createdAt).toISOString() : "",
       destination: document.destinationName || "",
       destinationSub: document.destinationSub || "",
       dispatchId: line.type === "issue" ? document.id : "",
@@ -180,6 +182,7 @@
       destinationName: options.destinationName || "",
       destinationSub: options.destinationSub || "",
       dispatchRef: options.dispatchRef || "",
+      ...(options.voucherNo ? { voucherNo: options.voucherNo } : {}),
       reversalOf: options.reversalOf ?? null,
       replaces: options.replaces ?? null,
       note: options.note || "",
@@ -284,10 +287,11 @@
     if (!destinationName) throw new Error("محل ارسال الزامی است.");
     const destination = await ensureDestination(tx, destinationName, "");
     const subDestination = destinationSub ? await ensureDestination(tx, destinationSub, destinationName) : null;
+    const voucherNo = await nextDocumentNumber(tx.objectStore(STORES.meta), "voucher");
     const doc = await createDocument(tx, "issue", {
       destinationId: subDestination ? subDestination.id : destination.id,
-      destinationName, destinationSub,
-      dispatchRef: metadata.voucherNumber || metadata.dispatchRef || "",
+      destinationName, destinationSub, voucherNo,
+      dispatchRef: metadata.dispatchRef || "",
       note: metadata.note || ""
     });
     const actualItems = [];
@@ -309,7 +313,7 @@
     await done;
     return {
       id: doc.id, items: actualItems, exitNumber: doc.docNo,
-      voucherNumber: doc.dispatchRef, createdAt: new Date(doc.createdAt).toISOString(),
+      voucherNumber: doc.voucherNo || doc.dispatchRef, createdAt: new Date(doc.createdAt).toISOString(),
       destination: destinationName, destinationSub
     };
   }
@@ -442,7 +446,7 @@
     return data.documents.filter(d => d.type === "issue").map(doc => ({
       ...doc,
       exitNumber: doc.docNo,
-      voucherNumber: doc.dispatchRef || "",
+      voucherNumber: doc.voucherNo || doc.dispatchRef || "",
       createdAt: new Date(doc.createdAt).toISOString(),
       destination: doc.destinationName || "",
       destinationSub: doc.destinationSub || "",
