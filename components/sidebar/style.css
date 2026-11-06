@@ -116,16 +116,16 @@
   font-weight:600;text-decoration:none;transition:background .18s ease,color .18s ease,transform .18s ease;
 }
 .control-sidebar .nav-link:hover{color:#fff;background:rgba(255,255,255,.07);transform:translateX(-2px)}
-.control-sidebar .nav-link.active{color:#fff;background:linear-gradient(100deg,rgba(39,181,165,.23),rgba(39,181,165,.09));box-shadow:inset -3px 0 0 #27b5a5}
+.control-sidebar .nav-link.active{color:#253047;background:linear-gradient(100deg,#ffe36e 0%,#ffb13b 58%,#f28a24 100%);box-shadow:inset -3px 0 0 #f0781d,0 4px 13px rgba(239,151,38,.2)}
 .control-sidebar .nav-number{
   display:inline-grid;place-items:center;flex:0 0 29px;width:29px;height:29px;
   border:1px solid rgba(154,177,201,.28);border-radius:9px;color:#8fa2b9;
   background:rgba(255,255,255,.045);font:800 .7rem "Segoe UI",Tahoma,sans-serif;
 }
 .control-sidebar .nav-link.active .nav-number{
-  color:#dffff9;border-color:#55e6d1;
-  background:linear-gradient(145deg,rgba(39,181,165,.42),rgba(39,181,165,.18));
-  box-shadow:0 0 6px rgba(55,226,203,.5),0 0 13px rgba(39,181,165,.32);
+  color:#253047;border-color:rgba(151,91,20,.3);
+  background:rgba(255,255,255,.3);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45);
 }
 .control-sidebar .nav-group-heading{display:flex;align-items:stretch;gap:4px}
 .control-sidebar .nav-group-heading>.nav-group-link{flex:1;min-width:0}
