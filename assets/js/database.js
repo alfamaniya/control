@@ -207,41 +207,52 @@
     const done = transactionDone(tx);
     const products = tx.objectStore(STORES.products);
     const ledger = tx.objectStore(STORES.ledger);
-    const existing = new Set((await requestResult(products.getAllKeys())).map(String));
-    const valid = [];
+    const storedProducts = await requestResult(products.getAll());
+    const stored = new Map(storedProducts.map(product => [product.supplyCode, product]));
+    const accepted = [];
     const skipped = [];
     for (const item of items) {
       const code = normalizeCode(item && item.procurementCode);
       const qty = Number(item && item.quantity);
       const description = String(item && item.description || "").trim();
       const group = String(item && item.group || "").trim();
-      if (!validSupplyCode(code) || !description || !group || !Number.isFinite(qty) || qty < 0 || existing.has(code)) {
+      const previous = stored.get(code);
+      if (!validSupplyCode(code) || !description || !group || !Number.isFinite(qty) || qty < 0 || (previous && previous.active !== 0)) {
         skipped.push(item);
         continue;
       }
-      existing.add(code);
-      valid.push({
+      const product = {
         supplyCode: code, procurementCode: code.slice(0, 8), description, group,
-        qty, active: 1, createdAt: Date.now(), source: item.source || "initial-import"
-      });
+        qty, active: 1, createdAt: previous ? previous.createdAt : Date.now(),
+        source: item.source || "initial-import"
+      };
+      accepted.push({ product, reactivated: Boolean(previous) });
+      stored.set(code, product);
     }
-    let document = null;
-    if (valid.some(p => p.qty > 0)) document = await createDocument(tx, "opening", { note: "ثبت اولیه کالا" });
-    for (const product of valid) {
-      products.add(product);
-      if (product.qty > 0) {
-        ledger.add({
-          docId: document.id, supplyCode: product.supplyCode, delta: product.qty,
-          type: "opening", docDate: document.docDate, balanceBefore: 0,
-          balanceAfter: product.qty, description: product.description, group: product.group,
-          source: product.source || "initial-import"
-        });
-      }
+    const newProducts = accepted.filter(item => !item.reactivated);
+    const restoredProducts = accepted.filter(item => item.reactivated);
+    const openingItems = newProducts.filter(item => item.product.qty > 0);
+    const receiptItems = restoredProducts.filter(item => item.product.qty > 0);
+    const openingDoc = openingItems.length ? await createDocument(tx, "opening", { note: "ثبت اولیه کالا" }) : null;
+    const receiptDoc = receiptItems.length ? await createDocument(tx, "receipt", { note: "فعال‌سازی مجدد کالا" }) : null;
+
+    for (const item of accepted) {
+      const product = item.product;
+      products.put(product);
+      if (product.qty <= 0) continue;
+      const document = item.reactivated ? receiptDoc : openingDoc;
+      ledger.add({
+        docId: document.id, supplyCode: product.supplyCode, delta: product.qty,
+        type: item.reactivated ? "receipt" : "opening", docDate: document.docDate,
+        balanceBefore: 0, balanceAfter: product.qty,
+        description: product.description, group: product.group,
+        source: product.source
+      });
     }
     await done;
     return {
-      added: valid.map(productForUI), skipped,
-      entryNumber: document ? document.docNo : ""
+      added: accepted.map(item => productForUI(item.product)), skipped,
+      entryNumber: openingDoc ? openingDoc.docNo : receiptDoc ? receiptDoc.docNo : ""
     };
   }
 
