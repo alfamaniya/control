@@ -10,7 +10,7 @@
   const next = $("nextPage");
   const pageSelect = $("pageSelect");
   const pageCountLabel = $("pageCountLabel");
-  const PAGE_SIZE = 50;
+  const PAGE_SIZE = 20;
   let transactions = [];
   let currentPage = 1;
 
