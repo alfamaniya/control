@@ -1,20 +1,18 @@
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
-  const searchInput = $("exitSearch");
-  const suggestions = $("exitSuggestions");
-  const showButton = $("showExitReport");
-  const results = $("exitResults");
-  const message = $("exitMessage");
-  const rows = $("exitItemsRows");
   const fa = value => String(value ?? "").replace(/\d/g, digit => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)]);
   const digits = value => String(value ?? "").replace(/[۰-۹]/g, digit => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit))).replace(/[٠-٩]/g, digit => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit))).trim();
-  let dispatches = [];
-  let exitOptions = [];
-  let selectedExit = "";
-  let selectedDispatches = [];
-  let selectedItems = [];
-  let selectedMetadata = null;
+  const listView = $("voucherListView");
+  const detailView = $("voucherResults");
+  const listRows = $("voucherListRows");
+  const message = $("voucherMessage");
+  const pageInput = $("voucherPageInput");
+  const pageLabel = $("voucherPageLabel");
+  const prevButton = $("voucherPrevPage");
+  const nextButton = $("voucherNextPage");
+  const PAGE_SIZE = 20;
+  let dispatches = [], voucherRecords = [], currentPage = 1, currentPageRecords = [], selectedMetadata = null, selectedItems = [];
 
   function setMessage(text, error = false) {
     message.textContent = text;
@@ -26,66 +24,75 @@
     if (!Number.isFinite(date.getTime())) return "—";
     return new Intl.DateTimeFormat("fa-IR-u-ca-persian", { year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
   }
-  function normalizeExit(value) { return digits(value).replace(/\s+/g, "").toLocaleLowerCase("fa"); }
+  function timestamp(value) {
+    const time = Date.parse(value || "");
+    return Number.isFinite(time) ? time : 0;
+  }
+  function normalizeVoucher(value) {
+    return digits(value).replace(/\s+/g, "").toLocaleLowerCase("fa");
+  }
   function addCell(row, value, className = "") {
     const cell = document.createElement("td");
     cell.textContent = value === null || value === undefined || value === "" ? "—" : String(value);
     if (className) cell.className = className;
     row.appendChild(cell);
   }
-  function renderSuggestions(query) {
-    suggestions.innerHTML = "";
-    const term = normalizeExit(query);
-    if (!term) { suggestions.hidden = true; return; }
-    const matches = exitOptions.filter(item => normalizeExit(item.number).includes(term)).slice(0, 12);
-    if (!matches.length) {
-      const empty = document.createElement("div");
-      empty.className = "exit-suggestion-empty";
-      empty.textContent = "خروج‌ای با این شماره پیدا نشد.";
-      suggestions.appendChild(empty);
-    } else {
-      matches.forEach(item => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "exit-suggestion";
-        button.setAttribute("role", "option");
-        const number = document.createElement("strong");
-        number.textContent = item.number;
-        const detail = document.createElement("small");
-        detail.textContent = "شماره خروج: " + (item.voucherNumber || "—") + " | محل ارسال: " + (item.destination || "—") + " | تاریخ: " + formatDate(item.createdAt);
-        button.append(number, detail);
-        button.addEventListener("click", () => {
-          selectedExit = item.number;
-          searchInput.value = item.number;
-          suggestions.hidden = true;
-          showButton.disabled = false;
-          results.hidden = true;
-          setMessage("شماره خروج انتخاب شد. برای مشاهده اطلاعات، دکمه نمایش گزارش را بزنید.");
-        });
-        suggestions.appendChild(button);
-      });
-    }
-    suggestions.hidden = false;
+  function buildVoucherRecords(records) {
+    const grouped = new Map();
+    records.forEach(dispatch => {
+      const number = String(dispatch.voucherNumber || "").trim();
+      const key = normalizeVoucher(number);
+      if (!key) return;
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key).push(dispatch);
+    });
+    return Array.from(grouped.values()).map(group => {
+      const latest = group.reduce((current, item) =>
+        timestamp(item.createdAt || item.dispatchedAt) > timestamp(current.createdAt || current.dispatchedAt) ? item : current
+      );
+      return { ...latest, voucherNumber: String(latest.voucherNumber || group[0].voucherNumber || "").trim(), dispatches: group };
+    }).sort((a, b) => timestamp(b.createdAt || b.dispatchedAt) - timestamp(a.createdAt || a.dispatchedAt));
   }
-  function renderReport() {
-    const key = normalizeExit(selectedExit);
-    selectedDispatches = dispatches.filter(item => normalizeExit(item.exitNumber) === key);
-    if (!selectedDispatches.length) {
-      results.hidden = true;
-      setMessage("خروج انتخاب‌شده در اطلاعات ثبت‌شده پیدا نشد.", true);
-      return false;
-    }
-    selectedMetadata = selectedDispatches[0];
-    selectedItems = selectedDispatches.flatMap(dispatch => (Array.isArray(dispatch.items) ? dispatch.items : []).map(item => ({
-      ...item,
-      dispatchDate: dispatch.createdAt || dispatch.dispatchedAt || "",
-      dispatchExitNumber: dispatch.exitNumber || "",
-      dispatchDestination: dispatch.destination || dispatch.destinationSub || ""
-    })));
-    $("metaExit").textContent = selectedMetadata.exitNumber || "—";
-    $("metaVoucher").textContent = selectedMetadata.voucherNumber || "—";
-    $("metaDestination").textContent = selectedMetadata.destination || selectedMetadata.destinationSub || "—";
-    $("metaDate").textContent = formatDate(selectedMetadata.createdAt || selectedMetadata.dispatchedAt);
+  function renderList() {
+    const total = voucherRecords.length;
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    currentPage = Math.min(Math.max(1, currentPage), totalPages);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    currentPageRecords = voucherRecords.slice(start, start + PAGE_SIZE);
+    listRows.innerHTML = "";
+    currentPageRecords.forEach((record, index) => {
+      const row = document.createElement("tr");
+      row.className = "exit-list-row";
+      row.tabIndex = 0;
+      row.setAttribute("role", "button");
+      row.setAttribute("aria-label", "نمایش جزئیات حواله " + (record.voucherNumber || ""));
+      row.dataset.recordIndex = String(index);
+      addCell(row, fa(start + index + 1), "exit-row-number");
+      addCell(row, record.voucherNumber || "—", "exit-row-code");
+      addCell(row, record.exitNumber || "—");
+      addCell(row, formatDate(record.createdAt || record.dispatchedAt));
+      addCell(row, record.destination || record.destinationSub || "—");
+      listRows.appendChild(row);
+    });
+    $("voucherListTotal").textContent = fa(total) + " حواله";
+    pageLabel.textContent = "صفحه " + fa(currentPage) + " از " + fa(totalPages);
+    pageInput.value = String(currentPage);
+    pageInput.max = String(totalPages);
+    prevButton.disabled = currentPage <= 1 || total === 0;
+    nextButton.disabled = currentPage >= totalPages || total === 0;
+    $("voucherListEmpty").hidden = total > 0;
+    $("voucherPagination").hidden = total === 0;
+    setMessage(total ? "برای مشاهده اقلام هر حواله، ردیف موردنظر را انتخاب کنید." : "هنوز هیچ حواله مصرفی در سامانه ثبت نشده است.");
+  }
+  function openDetails(record) {
+    if (!record) return;
+    selectedMetadata = record;
+    selectedItems = record.dispatches.flatMap(dispatch => Array.isArray(dispatch.items) ? dispatch.items : []);
+    $("metaVoucher").textContent = record.voucherNumber || "—";
+    $("metaExit").textContent = record.exitNumber || "—";
+    $("metaDestination").textContent = record.destination || record.destinationSub || "—";
+    $("metaDate").textContent = formatDate(record.createdAt || record.dispatchedAt);
+    const rows = $("voucherItemsRows");
     rows.innerHTML = "";
     selectedItems.forEach((item, index) => {
       const row = document.createElement("tr");
@@ -98,21 +105,39 @@
       rows.appendChild(row);
     });
     const total = selectedItems.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
-    $("exitItemsCount").textContent = fa(selectedItems.length) + " ردیف";
-    $("exitItemsSummary").textContent = "تمام اقلام ثبت‌شده برای شماره خروج انتخاب‌شده";
-    $("exitTotalQuantity").textContent = fa(total);
-    $("exitItemsEmpty").hidden = selectedItems.length > 0;
-    $("exportExitReport").disabled = selectedItems.length === 0;
-    results.hidden = false;
-    setMessage(selectedItems.length ? "" : "برای این خروج اطلاعات مشترک ثبت شده، اما قلمی برای آن ذخیره نشده است.");
-    return true;
+    $("voucherItemsCount").textContent = fa(selectedItems.length) + " ردیف";
+    $("voucherItemsSummary").textContent = "تمام اقلام ثبت‌شده برای شماره حواله " + (record.voucherNumber || "");
+    $("voucherTotalQuantity").textContent = fa(total);
+    $("voucherItemsEmpty").hidden = selectedItems.length > 0;
+    $("exportVoucherReport").disabled = selectedItems.length === 0;
+    listView.hidden = true;
+    detailView.hidden = false;
+    setMessage(selectedItems.length ? "" : "برای این حواله اطلاعات مشترک ثبت شده، اما قلمی برای آن ذخیره نشده است.");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function closeDetails() {
+    detailView.hidden = true;
+    listView.hidden = false;
+    renderList();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function goToPage(value) {
+    const totalPages = Math.max(1, Math.ceil(voucherRecords.length / PAGE_SIZE));
+    const page = Number(digits(value));
+    if (!Number.isInteger(page) || page < 1 || page > totalPages) {
+      pageInput.value = String(currentPage);
+      setMessage("شماره صفحه باید بین ۱ تا " + fa(totalPages) + " باشد.", true);
+      return;
+    }
+    currentPage = page;
+    renderList();
   }
   function exportReport() {
     if (!selectedMetadata || !selectedItems.length) return;
     if (!window.XLSX) { setMessage("کتابخانه ساخت فایل اکسل بارگذاری نشده است.", true); return; }
     const headerData = [{
-      "شماره خروج": selectedMetadata.exitNumber || "",
       "شماره حواله": selectedMetadata.voucherNumber || "",
+      "شماره خروج": selectedMetadata.exitNumber || "",
       "محل ارسال": selectedMetadata.destination || selectedMetadata.destinationSub || "",
       "تاریخ": formatDate(selectedMetadata.createdAt || selectedMetadata.dispatchedAt)
     }];
@@ -129,52 +154,42 @@
     headerSheet["!cols"] = [{wch:20},{wch:20},{wch:30},{wch:16}];
     const itemsSheet = window.XLSX.utils.json_to_sheet(itemData);
     itemsSheet["!cols"] = [{wch:8},{wch:16},{wch:18},{wch:36},{wch:22},{wch:14}];
-    window.XLSX.utils.book_append_sheet(workbook, headerSheet, "اطلاعات خروج");
+    window.XLSX.utils.book_append_sheet(workbook, headerSheet, "اطلاعات حواله");
     window.XLSX.utils.book_append_sheet(workbook, itemsSheet, "اقلام ارسال");
-    const safeNumber = String(selectedMetadata.exitNumber || "خروج").replace(/[^۰-۹0-9a-zA-Z_-]/g, "-");
-    window.XLSX.writeFile(workbook, "گزارش-خروج-مصرف-" + safeNumber + ".xlsx");
+    const safeNumber = String(selectedMetadata.voucherNumber || "حواله").replace(/[^۰-۹0-9a-zA-Z_-]/g, "-");
+    window.XLSX.writeFile(workbook, "گزارش-بر-اساس-شماره-حواله-" + safeNumber + ".xlsx");
   }
   async function loadDispatches() {
     try {
       if (!window.ControlDB || typeof window.ControlDB.getAllDispatches !== "function") throw new Error("دسترسی به پایگاه داده محلی ممکن نیست. صفحه را دوباره بارگذاری کنید.");
       dispatches = await window.ControlDB.getAllDispatches();
-      const seen = new Set();
-      exitOptions = dispatches.filter(item => {
-        const number = String(item.exitNumber || "").trim();
-        const key = normalizeExit(number);
-        if (!key || seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      }).map(item => ({
-        number: String(item.exitNumber).trim(),
-        voucherNumber: item.voucherNumber || "",
-        destination: item.destination || item.destinationSub || "",
-        createdAt: item.createdAt || item.dispatchedAt || ""
-      }));
-      setMessage(exitOptions.length ? "شماره خروج موردنظر را جست‌وجو و انتخاب کنید." : "هنوز هیچ خروجی در سامانه ثبت نشده است.");
+      voucherRecords = buildVoucherRecords(dispatches);
+      renderList();
     } catch (error) {
-      setMessage(error.message || "دریافت فهرست خروج‌ها ناموفق بود.", true);
+      setMessage(error.message || "دریافت فهرست حواله‌ها ناموفق بود.", true);
+      $("voucherListEmpty").hidden = false;
+      $("voucherPagination").hidden = true;
     }
   }
-  searchInput.addEventListener("input", () => {
-    selectedExit = "";
-    showButton.disabled = true;
-    results.hidden = true;
-    renderSuggestions(searchInput.value);
+  listRows.addEventListener("click", event => {
+    const row = event.target.closest("tr[data-record-index]");
+    if (row) openDetails(currentPageRecords[Number(row.dataset.recordIndex)]);
   });
-  searchInput.addEventListener("focus", () => {
-    if (searchInput.value.trim()) renderSuggestions(searchInput.value);
+  listRows.addEventListener("keydown", event => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const row = event.target.closest("tr[data-record-index]");
+    if (!row) return;
+    event.preventDefault();
+    openDetails(currentPageRecords[Number(row.dataset.recordIndex)]);
   });
-  document.addEventListener("click", event => {
-    if (!event.target.closest(".exit-input-wrap")) suggestions.hidden = true;
+  prevButton.addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderList(); } });
+  nextButton.addEventListener("click", () => {
+    const totalPages = Math.max(1, Math.ceil(voucherRecords.length / PAGE_SIZE));
+    if (currentPage < totalPages) { currentPage++; renderList(); }
   });
-  document.addEventListener("click", event => {
-    if (!event.target.closest(".exit-items-table thead th")) return;
-    Array.from(rows.rows).forEach((row, index) => {
-      if (row.cells[0]) row.cells[0].textContent = fa(index + 1);
-    });
-  });
-  showButton.addEventListener("click", renderReport);
-  $("exportExitReport").addEventListener("click", exportReport);
+  $("voucherGoPage").addEventListener("click", () => goToPage(pageInput.value));
+  pageInput.addEventListener("keydown", event => { if (event.key === "Enter") goToPage(pageInput.value); });
+  $("backToVoucherList").addEventListener("click", closeDetails);
+  $("exportVoucherReport").addEventListener("click", exportReport);
   loadDispatches();
 })();
