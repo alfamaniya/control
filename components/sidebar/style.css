@@ -76,21 +76,6 @@
   transform:translateX(10px);
   transition:opacity .22s ease,visibility .22s ease,transform .28s cubic-bezier(.2,.75,.25,1);
 }
-/* پنل عنوان‌ها در امتداد نوار آیکون‌ها باز می‌شود و عرض کل سایدبار را افزایش می‌دهد */
-.control-sidebar:focus-within,
-.control-sidebar.panel-pinned{
-  width:calc(var(--sidebar-rail-width) + 10px + var(--sidebar-panel-width));
-}
-@media (hover:hover) and (pointer:fine){
-  .control-sidebar:hover{
-    width:calc(var(--sidebar-rail-width) + 10px + var(--sidebar-panel-width));
-  }
-}
-.control-sidebar:hover .sidebar-panel,
-.control-sidebar:focus-within .sidebar-panel,
-.control-sidebar.panel-pinned .sidebar-panel{
-  opacity:1;visibility:visible;pointer-events:auto;transform:translateX(0);
-}
 .sidebar-panel-head{
   display:flex;align-items:center;gap:11px;flex:0 0 auto;
   min-height:59px;margin-bottom:14px;padding:0 5px 14px;
