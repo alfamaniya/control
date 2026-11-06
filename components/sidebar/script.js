@@ -26,8 +26,8 @@
     ]},
     {number:"08",label:"درخت سامانه",icon:"⌘",path:"sections/derakht-samane/index.html"}
   ];
-  const current = window.location.pathname.replace(/\\/$/,"");
-  const routePath = (path) => new URL(path, root).pathname.replace(/\\/$/,"");
+  const current = window.location.pathname.endsWith("/") ? window.location.pathname.slice(0,-1) : window.location.pathname;
+  const routePath = (path) => { const pathname = new URL(path, root).pathname; return pathname.endsWith("/") ? pathname.slice(0,-1) : pathname; };
   const currentItem = items.find((item) => routePath(item.path) === current || (item.children || []).some((child) => routePath(child[1]) === current));
   const currentChild = currentItem && (currentItem.children || []).find((child) => routePath(child[1]) === current);
   const pageTitle = currentChild ? currentChild[0] : (currentItem ? currentItem.label : (document.title.split("|")[0] || "داشبورد").trim());
