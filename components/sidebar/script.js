@@ -74,17 +74,6 @@
   nav.id = "sidebar";
   nav.setAttribute("aria-label","منوی اصلی سامانه");
 
-  const rail = document.createElement("div");
-  rail.className = "sidebar-rail";
-  const logo = document.createElement("a");
-  logo.className = "sidebar-rail-brand";
-  logo.href = url("index.html");
-  logo.textContent = "ک";
-  logo.setAttribute("aria-label","داشبورد سامانه کنترل");
-  rail.append(logo);
-  const railNav = document.createElement("nav");
-  railNav.className = "sidebar-rail-nav";
-  railNav.setAttribute("aria-label","دسترسی سریع");
   const panel = document.createElement("section");
   panel.className = "sidebar-panel";
   panel.setAttribute("aria-label","فهرست بخش‌ها");
@@ -124,18 +113,7 @@
       link.classList.add("active");
       if (isParent) link.setAttribute("aria-current","page");
     }
-    const railLink = document.createElement("a");
-    railLink.className = "sidebar-rail-link" + (isParent || activeChild ? " active" : "");
-    railLink.href = url(item.path);
-    railLink.title = item.label;
-    railLink.setAttribute("aria-label",item.label);
-    if (isParent) railLink.setAttribute("aria-current","page");
-    const icon = document.createElement("span");
-    icon.className = "sidebar-rail-icon";
-    icon.setAttribute("aria-hidden","true");
-    icon.textContent = item.icon;
-    railLink.append(icon);
-    railNav.append(railLink);
+
 
     if (item.children) {
       group.className = "nav-group" + (isParent || activeChild ? " is-open" : "");
@@ -177,13 +155,12 @@
     }
     panelNav.append(group);
   });
-  rail.append(railNav);
   panel.append(panelNav);
   const foot = document.createElement("div");
   foot.className = "sidebar-panel-foot";
   foot.textContent = "سامانه کنترل مصرف و ارسال کالا";
   panel.append(foot);
-  nav.append(rail,panel);
+  nav.append(panel);
   mount.replaceWith(nav);
 
   const backdrop = document.createElement("div");
@@ -193,20 +170,17 @@
   const toggle = document.getElementById("sidebarToggle") || document.querySelector(".sidebar-menu-toggle");
   const mobile = () => window.matchMedia("(max-width: 768px)").matches;
   const setOpen = (open) => {
-    if (mobile()) nav.classList.toggle("mobile-open",open);
-    else nav.classList.toggle("panel-pinned",open);
+    nav.classList.toggle("is-open",open);
     if (toggle) toggle.setAttribute("aria-expanded",String(open));
   };
   if (toggle) toggle.addEventListener("click",() => {
-    const open = mobile() ? nav.classList.contains("mobile-open") : nav.classList.contains("panel-pinned");
+    const open = nav.classList.contains("is-open");
     setOpen(!open);
   });
   backdrop.addEventListener("click",() => setOpen(false));
   document.addEventListener("keydown",(event) => {if(event.key === "Escape") setOpen(false);});
   window.addEventListener("resize",() => {
-    if (!mobile()) nav.classList.remove("mobile-open");
-    else nav.classList.remove("panel-pinned");
-    if (toggle) toggle.setAttribute("aria-expanded",String(mobile() ? nav.classList.contains("mobile-open") : nav.classList.contains("panel-pinned")));
+    if (toggle) toggle.setAttribute("aria-expanded",String(nav.classList.contains("is-open")));
   });
   if (toggle) toggle.setAttribute("aria-expanded","false");
 })();
