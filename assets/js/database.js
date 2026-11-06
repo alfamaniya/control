@@ -137,8 +137,9 @@
       previousStock: line.balanceBefore ?? "",
       occurredAt: document.createdAt,
       docDate: document.docDate,
-      entryNumber: ["opening", "receipt"].includes(line.type) ? document.docNo : "",
-      exitNumber: line.type === "issue" ? document.docNo : "",
+      entryNumber: (["opening", "receipt"].includes(line.type) || (line.type === "reversal" && line.delta > 0)) ? document.docNo : "",
+      exitNumber: (line.type === "issue" || (line.type === "reversal" && line.delta < 0)) ? document.docNo : "",
+      reversalNumber: line.type === "reversal" ? document.docNo : "",
       voucherNumber: document.dispatchRef || "",
       destination: document.destinationName || "",
       destinationSub: document.destinationSub || "",
@@ -299,6 +300,91 @@
     };
   }
 
+  async function createReceipt(items, metadata = {}) {
+    if (!Array.isArray(items) || !items.length) throw new Error("حداقل یک قلم برای ورود انتخاب کنید.");
+    const db = await ready();
+    const tx = db.transaction([STORES.products, STORES.documents, STORES.ledger, STORES.meta], "readwrite");
+    const done = transactionDone(tx);
+    const products = tx.objectStore(STORES.products);
+    const allProducts = await requestResult(products.getAll());
+    const map = new Map(allProducts.map(p => [p.supplyCode, p]));
+    const combined = new Map();
+    for (const item of items) {
+      const code = normalizeCode(item && item.procurementCode);
+      const amount = Number(item && item.quantity);
+      if (!validSupplyCode(code) || !Number.isSafeInteger(amount) || amount <= 0) throw new Error("کد یا تعداد یکی از اقلام ورود معتبر نیست.");
+      combined.set(code, (combined.get(code) || 0) + amount);
+    }
+    const prepared = [];
+    for (const [code, amount] of combined) {
+      const product = map.get(code);
+      if (!product || product.active === 0) throw new Error("یکی از کالاها وجود ندارد یا غیرفعال است: " + code);
+      prepared.push({ product, amount });
+    }
+    const doc = await createDocument(tx, "receipt", { note: metadata.note || "ورود کالا", opId: metadata.opId });
+    const actualItems = [];
+    for (const { product, amount } of prepared) {
+      const before = Number(product.qty) || 0;
+      product.qty = before + amount;
+      products.put(product);
+      tx.objectStore(STORES.ledger).add({
+        docId: doc.id, supplyCode: product.supplyCode, delta: amount,
+        type: "receipt", docDate: doc.docDate, balanceBefore: before,
+        balanceAfter: product.qty, description: product.description, group: product.group,
+        source: metadata.source || "receipt"
+      });
+      actualItems.push({ procurementCode: product.supplyCode, internalCode: product.procurementCode,
+        description: product.description, group: product.group, quantity: amount, stockAfter: product.qty });
+    }
+    await done;
+    return { id: doc.id, entryNumber: doc.docNo, items: actualItems, createdAt: new Date(doc.createdAt).toISOString() };
+  }
+
+  async function reverseDocument(documentId, options = {}) {
+    const id = Number(documentId);
+    if (!Number.isSafeInteger(id) || id <= 0) throw new Error("شناسه سند معتبر نیست.");
+    const db = await ready();
+    const tx = db.transaction([STORES.products, STORES.documents, STORES.ledger, STORES.meta], "readwrite");
+    const done = transactionDone(tx);
+    const documents = tx.objectStore(STORES.documents);
+    const original = await requestResult(documents.get(id));
+    if (!original) throw new Error("سند موردنظر پیدا نشد.");
+    if (original.status !== "active") throw new Error("این سند قبلاً معکوس یا غیرفعال شده است.");
+    const originalLines = await requestResult(tx.objectStore(STORES.ledger).index("docId").getAll(id));
+    if (!originalLines.length) throw new Error("برای این سند گردش قابل معکوس‌سازی وجود ندارد.");
+    const products = tx.objectStore(STORES.products);
+    const prepared = [];
+    for (const line of originalLines) {
+      const product = await requestResult(products.get(line.supplyCode));
+      if (!product) throw new Error("کالای متناظر با یکی از اقلام سند پیدا نشد: " + line.supplyCode);
+      const before = Number(product.qty) || 0;
+      const delta = -Number(line.delta || 0);
+      if (before + delta < 0) throw new Error("معکوس‌سازی باعث موجودی منفی می‌شود؛ ابتدا خروج‌های وابسته را معکوس کنید.");
+      prepared.push({ line, product, before, delta });
+    }
+    const reversal = await createDocument(tx, "reversal", {
+      note: options.note || "معکوس‌سازی سند " + original.docNo,
+      reversalOf: original.id,
+      opId: options.opId
+    });
+    for (const item of prepared) {
+      item.product.qty = item.before + item.delta;
+      products.put(item.product);
+      tx.objectStore(STORES.ledger).add({
+        docId: reversal.id, supplyCode: item.line.supplyCode, delta: item.delta,
+        type: "reversal", docDate: reversal.docDate,
+        balanceBefore: item.before, balanceAfter: item.product.qty,
+        description: item.line.description || item.product.description,
+        group: item.line.group || item.product.group,
+        source: "reversal"
+      });
+    }
+    original.status = "reversed";
+    documents.put(original);
+    await done;
+    return { id: reversal.id, reversalNumber: reversal.docNo, reversalOf: original.id };
+  }
+
   async function readLedgerAndDocuments() {
     const db = await ready();
     const tx = db.transaction([STORES.ledger, STORES.documents, STORES.products], "readonly");
@@ -451,7 +537,7 @@
   }
 
   window.ControlDB = Object.freeze({
-    getAll, addMany, createDispatch, getKardex, getReportTransactions,
+    getAll, addMany, createReceipt, createDispatch, reverseDocument, getKardex, getReportTransactions,
     getAllTransactions, getAllDispatches, deleteProduct, deleteAllProducts, adjustStock
   });
 })();
