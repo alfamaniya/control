@@ -91,13 +91,40 @@
     rows.innerHTML = "";
     dispatchItems.forEach((item, index) => {
       const row = document.createElement("tr");
-      const values = [fa(index + 1), item.procurementCode.slice(0, 8), item.procurementCode, item.description || "—", fa(item.quantity)];
+      const values = [fa(index + 1), item.procurementCode.slice(0, 8), item.procurementCode, item.description || "—"];
       values.forEach((value, cellIndex) => {
         const cell = document.createElement("td");
         cell.textContent = value;
         if (cellIndex === 1 || cellIndex === 2) cell.className = "code-cell";
         row.appendChild(cell);
       });
+
+      const quantityCell = document.createElement("td");
+      const quantityEditor = document.createElement("input");
+      const product = inventory.find(entry => entry.procurementCode === item.procurementCode);
+      quantityEditor.type = "number";
+      quantityEditor.inputMode = "numeric";
+      quantityEditor.min = "1";
+      quantityEditor.step = "1";
+      quantityEditor.max = String(product ? stockOf(product) : item.quantity);
+      quantityEditor.value = String(item.quantity);
+      quantityEditor.className = "summary-quantity-input";
+      quantityEditor.setAttribute("aria-label", "ویرایش تعداد ارسالی " + (item.description || item.procurementCode));
+      quantityEditor.addEventListener("change", () => {
+        const nextQuantity = Math.floor(numberOf(quantityEditor.value));
+        const maximum = product ? stockOf(product) : item.quantity;
+        if (nextQuantity < 1 || nextQuantity > maximum) {
+          showMessage("تعداد باید حداقل یک و حداکثر برابر موجودی کالا باشد.", true);
+          quantityEditor.value = String(item.quantity);
+          return;
+        }
+        item.quantity = nextQuantity;
+        renderItems();
+        showMessage("تعداد کالای «" + (item.description || item.procurementCode) + "» به " + fa(nextQuantity) + " تغییر کرد.");
+      });
+      quantityCell.appendChild(quantityEditor);
+      row.appendChild(quantityCell);
+
       const actionCell = document.createElement("td");
       const remove = document.createElement("button");
       remove.type = "button";
