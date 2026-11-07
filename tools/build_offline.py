@@ -74,11 +74,11 @@ data=json.dumps(pages,ensure_ascii=False,separators=(",",":")).replace("</","<\\
 css="\n".join(uniq).replace("</style","<\\/style")
 html='''<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#14243d"><title>سامانه کنترل مصرف و ارسال کالا | نسخه مستقل آفلاین</title><style>'''+css+'''</style><style>html,body{min-height:100%;margin:0}#offline-root{min-height:100vh}.offline-build-note{position:fixed;z-index:99999;bottom:8px;left:8px;padding:4px 8px;border-radius:8px;background:#14243d;color:#fff;font:11px sans-serif;opacity:.72;pointer-events:none}</style></head><body><div id="offline-root"></div><div class="offline-build-note">نسخه مستقل آفلاین</div><script>const OFFLINE_PAGES='''+data+''';
 const root=document.getElementById("offline-root");
-function currentRoute(){let p=decodeURIComponent(location.hash.replace(/^#\\/?/,""));if(!p)p="index.html";p="/"+p.replace(/^\\/+ /,"");if(!OFFLINE_PAGES[p])p="/index.html";return p;}
+function currentRoute(){let p=decodeURIComponent(location.hash.replace(/^#\\/?/,""));if(!p)p="index.html";p="/"+p.replace(/^\\/+/, "");if(!OFFLINE_PAGES[p])p="/index.html";return p;}
 function renderRoute(){const route=currentRoute();window.__CONTROL_ROUTE__=route;const page=OFFLINE_PAGES[route];root.innerHTML=page.body;document.querySelectorAll("script[data-offline-page]").forEach(n=>n.remove());for(const code of page.scripts){const s=document.createElement("script");s.dataset.offlinePage="1";s.textContent=code+"\\n//# sourceURL=offline-page-script.js";document.body.appendChild(s);}window.scrollTo(0,0);}
 window.addEventListener("hashchange",renderRoute);renderRoute();</script></body></html>'''
 OUT.parent.mkdir(parents=True,exist_ok=True)
 OUT.write_text(html,encoding="utf-8")
 if re.search(r'<(?:script|link)\b[^>]*(?:src|href)\s*=\s*["\']https?://',html,re.I): raise RuntimeError("Remote executable dependency found")
-if "assets/js/database.js" not in json.dumps(pages): raise RuntimeError("Database script not bundled")
+if "indexedDB" not in html: raise RuntimeError("IndexedDB database implementation not bundled")
 print(f"Built {OUT.relative_to(ROOT)}: {len(pages)} pages, {len(uniq)} stylesheets, {OUT.stat().st_size:,} bytes")
