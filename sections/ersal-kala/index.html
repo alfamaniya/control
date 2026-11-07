@@ -76,8 +76,8 @@
       <div class="modal-heading"><div><h2 id="dispatchModalTitle">اطلاعات ارسال</h2><p>مشخصات مقصد و اسناد ارسال را وارد کنید.</p></div><button type="button" class="modal-close" id="closeDispatchModal" aria-label="بستن">×</button></div>
       <form id="dispatchForm">
         <div class="modal-fields">
-          <div class="search-field"><label for="destination">محل ارسال</label><input id="destination" name="destination" type="text" required placeholder="محل ارسال را وارد کنید"></div>
-          <div class="search-field"><label for="destinationSub">زیرمجموعه محل ارسال</label><input id="destinationSub" name="destinationSub" type="text" placeholder="زیرمجموعه یا واحد مقصد"></div>
+          <div class="search-field"><label for="destination">محل ارسال</label><select id="destination" name="destinationId" required><option value="">ابتدا محل ارسال را انتخاب کنید</option></select></div>
+          <div class="search-field"><label for="destinationSub">زیرمجموعه محل ارسال</label><select id="destinationSub" name="destinationSubId" disabled><option value="">بدون زیرمجموعه</option></select></div>
           <div class="document-number-info"><strong>شماره‌گذاری خودکار اسناد</strong><span>شماره خروج و شماره حواله مصرف پس از ثبت، بر اساس تاریخ و ساعت خورشیدی ساخته می‌شوند.</span></div>
         </div>
         <div class="modal-actions"><button type="button" class="secondary-button" id="cancelDispatch">انصراف</button><button type="submit" class="primary-button" id="submitDispatch">ثبت ارسال</button></div>
