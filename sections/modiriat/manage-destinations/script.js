@@ -96,7 +96,6 @@
   async function load() {
     try {
       destinations = await window.ControlDB.getDestinations();
-      refreshParentOptions();
       render();
     } catch (error) {
       showMessage(error.message || "دریافت محل‌های ارسال ناموفق بود.", true);
