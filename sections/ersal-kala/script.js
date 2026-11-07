@@ -12,6 +12,10 @@
   const confirmButton = $("openDispatchConfirm");
   const modal = $("dispatchModal");
   const form = $("dispatchForm");
+  const inventoryRows = $("inventoryRows");
+  const inventoryMessage = $("inventoryListMessage");
+  const inventoryTableWrap = $("inventoryTableWrap");
+  const inventoryCount = $("inventoryCount");
   let inventory = [];
   let selectedProduct = null;
   let dispatchItems = [];
@@ -109,17 +113,68 @@
     empty.hidden = dispatchItems.length > 0;
     count.textContent = fa(dispatchItems.length) + " کالا";
     confirmButton.disabled = dispatchItems.length === 0;
+    renderInventory();
+  }
+
+  function renderInventory() {
+    if (!inventoryRows) return;
+    const codeTerm = digits(procurementSearch.value).trim();
+    const descriptionTerm = descriptionSearch.value.trim().toLocaleLowerCase("fa");
+    const filtered = inventory.filter(product => {
+      const codeMatch = !codeTerm || digits(product.procurementCode).includes(codeTerm);
+      const descriptionMatch = !descriptionTerm || String(product.description || "").toLocaleLowerCase("fa").includes(descriptionTerm);
+      return codeMatch && descriptionMatch;
+    });
+    inventoryRows.innerHTML = "";
+    filtered.forEach((product, index) => {
+      const row = document.createElement("tr");
+      const values = [fa(index + 1), String(product.procurementCode || "").slice(0, 8), product.procurementCode, product.description || "—", product.group || "—"];
+      values.forEach((value, cellIndex) => {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        if (cellIndex === 1 || cellIndex === 2) cell.className = "code-cell";
+        row.appendChild(cell);
+      });
+      const stockCell = document.createElement("td");
+      const reserved = dispatchItems.find(item => item.procurementCode === product.procurementCode)?.quantity || 0;
+      stockCell.textContent = fa(stockOf(product)) + (reserved ? " (قابل ارسال: " + fa(Math.max(0, stockOf(product) - reserved)) + ")" : "");
+      stockCell.className = "inventory-stock-cell";
+      row.appendChild(stockCell);
+      const actionCell = document.createElement("td");
+      const choose = document.createElement("button");
+      choose.type = "button";
+      choose.className = "inventory-choose-button";
+      choose.textContent = "انتخاب برای ارسال";
+      choose.disabled = stockOf(product) - reserved < 1;
+      choose.addEventListener("click", () => {
+        chooseProduct(product);
+        selectedBox.scrollIntoView({behavior:"smooth",block:"nearest"});
+      });
+      actionCell.appendChild(choose);
+      row.appendChild(actionCell);
+      inventoryRows.appendChild(row);
+    });
+    inventoryCount.textContent = fa(inventory.length) + " قلم کالا";
+    inventoryMessage.hidden = inventory.length > 0;
+    inventoryMessage.textContent = inventory.length ? "" : "هنوز کالایی در موجودی ثبت نشده است.";
+    inventoryTableWrap.hidden = inventory.length === 0;
+    if (inventory.length && filtered.length === 0) {
+      inventoryMessage.hidden = false;
+      inventoryMessage.textContent = "با عبارت جست‌وجوشده کالایی پیدا نشد.";
+    }
   }
 
   procurementSearch.addEventListener("input", () => {
     selectedProduct = null;
     selectedBox.hidden = true;
     renderSuggestions(procurementSearch.value, "procurementSuggestions", "code");
+    renderInventory();
   });
   descriptionSearch.addEventListener("input", () => {
     selectedProduct = null;
     selectedBox.hidden = true;
     renderSuggestions(descriptionSearch.value, "descriptionSuggestions", "description");
+    renderInventory();
   });
   document.addEventListener("click", event => {
     if (!event.target.closest(".autocomplete-wrap")) {
@@ -204,10 +259,17 @@
     try {
       if (!window.ControlDB) throw new Error("پایگاه داده محلی بارگذاری نشده است.");
       inventory = await window.ControlDB.getAll();
+      renderInventory();
     } catch (error) {
       showMessage(error.message || "دریافت موجودی ناموفق بود.", true);
+      if (inventoryMessage) {
+        inventoryMessage.hidden = false;
+        inventoryMessage.className = "inventory-list-message error";
+        inventoryMessage.textContent = error.message || "دریافت فهرست موجودی ناموفق بود.";
+      }
     }
   }
 
+  $("refreshInventory").addEventListener("click", loadInventory);
   loadInventory();
 })();
