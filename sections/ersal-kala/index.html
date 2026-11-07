@@ -54,6 +54,19 @@
           </div>
           <div class="dispatch-actions"><button id="openDispatchConfirm" class="primary-button" type="button" disabled>تأیید و ادامه</button></div>
         </section>
+        <section class="inventory-list-card" aria-label="فهرست کل کالاها و موجودی">
+          <div class="section-heading inventory-list-heading">
+            <div><h2>فهرست کل کالاها و موجودی</h2><span id="inventoryCount">۰ قلم کالا</span></div>
+            <button type="button" class="refresh-button" id="refreshInventory">↻ به‌روزرسانی فهرست</button>
+          </div>
+          <div id="inventoryListMessage" class="inventory-list-message" role="status" aria-live="polite">در حال دریافت فهرست کالاها…</div>
+          <div class="table-scroll" id="inventoryTableWrap" hidden>
+            <table class="inventory-dispatch-table">
+              <thead><tr><th>ردیف</th><th>کد اختصاصی</th><th>کد تدارکاتی</th><th>شرح کالا</th><th>گروه کالا</th><th>موجودی</th><th>عملیات</th></tr></thead>
+              <tbody id="inventoryRows"></tbody>
+            </table>
+          </div>
+        </section>
       </div>
     </main>
   </div>
