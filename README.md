@@ -1,3 +1,4 @@
+https://github.com/alfamaniya/control/actions/workflows/email-offline.yml
 # سامانه کنترل
 
 سامانه مدیریت کالا با رابط فارسی و راست‌چین، با هدف ارائه و اجرای آزمایشی در محیط سازمانی.
