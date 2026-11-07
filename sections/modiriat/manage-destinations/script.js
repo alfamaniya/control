@@ -20,8 +20,8 @@
   function refreshParentOptions(selected = 0) {
     parentSelect.innerHTML = "";
     const rootOption = document.createElement("option");
-    rootOption.value = "0";
-    rootOption.textContent = "بدون محل اصلی (محل اصلی)";
+    rootOption.value = "";
+    rootOption.textContent = "انتخاب محل اصلی (اختیاری)";
     parentSelect.appendChild(rootOption);
     destinations.filter(item => !Number(item.parentId || 0)).forEach(item => {
       if (Number(item.id) === editingId) return;
@@ -30,7 +30,7 @@
       option.textContent = item.name;
       parentSelect.appendChild(option);
     });
-    parentSelect.value = String(selected || 0);
+    parentSelect.value = selected ? String(selected) : "";
   }
 
   function actionButton(label, action, id, extraClass = "") {
@@ -46,7 +46,8 @@
   function render() {
     list.innerHTML = "";
     const roots = destinations.filter(item => !Number(item.parentId || 0));
-    $("destinationCount").textContent = fa(destinations.length);
+    const count = $("destinationCount");
+    if (count) count.textContent = fa(destinations.length);
     if (!roots.length) {
       const empty = document.createElement("div");
       empty.className = "management-empty";
