@@ -27,10 +27,10 @@
           <div><span class="management-eyebrow">تنظیمات و مدیریت</span><h1>مدیریت محل ارسال</h1><p>محل‌های اصلی و زیرمجموعه‌ها را تعریف کنید؛ این فهرست در فرم ثبت ارسال استفاده می‌شود.</p></div>
         </section>
         <section class="management-panel">
-          <div class="management-panel-heading"><div><h2 id="destinationFormTitle">افزودن محل جدید</h2><p>برای ثبت محل اصلی، گزینه «بدون محل اصلی» را انتخاب کنید.</p></div></div>
+          <div class="management-panel-heading"><div><h2 id="destinationFormTitle">افزودن محل جدید</h2><p>نام محل اصلی و در صورت نیاز نام زیرمجموعه را وارد کنید.</p></div></div>
           <form id="destinationForm" class="destination-form">
-            <div class="destination-field"><label for="destinationName">نام محل ارسال</label><input id="destinationName" name="name" type="text" maxlength="100" required placeholder="مثلاً: انبار مرکزی"></div>
-            <div class="destination-field"><label for="destinationParent">محل اصلی / زیرمجموعه</label><select id="destinationParent" name="parentId"><option value="0">بدون محل اصلی (محل اصلی)</option></select></div>
+            <div class="destination-field"><label for="destinationMainName">نام محل اصلی</label><input id="destinationMainName" name="mainName" type="text" maxlength="100" placeholder="نام محل اصلی را وارد کنید"></div>
+            <div class="destination-field"><label for="destinationSubName">نام زیرمجموعه</label><input id="destinationSubName" name="subName" type="text" maxlength="100" placeholder="نام زیرمجموعه را وارد کنید"></div>
             <div class="destination-form-actions"><button class="stock-save-button" id="saveDestination" type="submit">＋ افزودن محل</button><button class="destination-cancel-button" id="cancelDestinationEdit" type="button" hidden>انصراف از ویرایش</button></div>
           </form>
           <div id="destinationMessage" class="management-message" role="status" aria-live="polite" hidden></div>
