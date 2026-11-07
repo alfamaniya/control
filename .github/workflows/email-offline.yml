@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       recipient:
-        description: "Email address to receive control-offline.html"
+        description: "Email address to receive the offline HTML source in the email body"
         required: true
         type: string
 
@@ -32,9 +32,9 @@ jobs:
           from email.message import EmailMessage
           from pathlib import Path
 
-          attachment = Path("dist/control-offline.html")
-          if not attachment.is_file():
-              raise SystemExit(f"Attachment not found: {attachment}")
+          html_file = Path("dist/control-offline.html")
+          if not html_file.is_file():
+              raise SystemExit(f"Offline HTML file not found: {html_file}")
 
           sender = os.environ.get("GMAIL_USERNAME", "").strip()
           password = os.environ.get("GMAIL_APP_PASSWORD", "").replace(" ", "")
