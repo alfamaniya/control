@@ -12,15 +12,14 @@
       ["کپی از جدول","sections/vorood-kala/copy-paste/index.html"],
       ["ثبت دستی کالا","sections/vorood-kala/manual/index.html"]
     ]},
-    {number:"03",label:"مشاهده کالاها و موجودی",icon:"▤",path:"sections/moshahede-kala/index.html"},
-    {number:"04",label:"ارسال کالا",icon:"⇢",path:"sections/ersal-kala/index.html"},
-    {number:"05",label:"کاردکس",icon:"≋",path:"sections/kardex/index.html"},
-    {number:"06",label:"گزارش‌ها",icon:"▥",path:"sections/gozaresh-ha/index.html",children:[
+    {number:"03",label:"ارسال کالا و موجودی",icon:"⇢",path:"sections/ersal-kala/index.html"},
+    {number:"04",label:"کاردکس",icon:"≋",path:"sections/kardex/index.html"},
+    {number:"05",label:"گزارش‌ها",icon:"▥",path:"sections/gozaresh-ha/index.html",children:[
       ["گزارش کلی","sections/gozaresh-ha/bar-asas-tarikh/index.html"],
       ["گزارش بر اساس شماره حواله مصرف","sections/gozaresh-ha/shomare-havale-masraf/index.html"],
       ["گزارش بر اساس شماره خروج","sections/gozaresh-ha/shomare-khorooj/index.html"],
     ]},
-    {number:"07",label:"تنظیمات و مدیریت",icon:"⚙",path:"sections/modiriat/index.html",children:[
+    {number:"06",label:"تنظیمات و مدیریت",icon:"⚙",path:"sections/modiriat/index.html",children:[
       ["مدیریت حذف کالا","sections/modiriat/manage-products/index.html"],
       ["مدیریت موجودی کالاها","sections/modiriat/manage-stock/index.html"]
     ]}
