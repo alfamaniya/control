@@ -2,8 +2,8 @@
   "use strict";
   const $ = id => document.getElementById(id);
   const form = $("destinationForm");
-  const nameInput = $("destinationName");
-  const parentSelect = $("destinationParent");
+  const mainNameInput = $("destinationMainName");
+  const subNameInput = $("destinationSubName");
   const list = $("destinationList");
   const message = $("destinationMessage");
   let destinations = [];
@@ -17,21 +17,6 @@
     message.hidden = !text;
   };
 
-  function refreshParentOptions(selected = 0) {
-    parentSelect.innerHTML = "";
-    const rootOption = document.createElement("option");
-    rootOption.value = "";
-    rootOption.textContent = "انتخاب محل اصلی (اختیاری)";
-    parentSelect.appendChild(rootOption);
-    destinations.filter(item => !Number(item.parentId || 0)).forEach(item => {
-      if (Number(item.id) === editingId) return;
-      const option = document.createElement("option");
-      option.value = String(item.id);
-      option.textContent = item.name;
-      parentSelect.appendChild(option);
-    });
-    parentSelect.value = selected ? String(selected) : "";
-  }
 
   function actionButton(label, action, id, extraClass = "") {
     const button = document.createElement("button");
@@ -121,7 +106,6 @@
   function resetForm() {
     editingId = 0;
     form.reset();
-    refreshParentOptions();
     $("destinationFormTitle").textContent = "افزودن محل جدید";
     $("saveDestination").textContent = "＋ افزودن محل";
     $("cancelDestinationEdit").hidden = true;
@@ -129,15 +113,47 @@
 
   form.addEventListener("submit", async event => {
     event.preventDefault();
+    const mainName = mainNameInput.value.trim();
+    const subName = subNameInput.value.trim();
     const button = $("saveDestination");
+    if (!mainName && !subName) {
+      showMessage("نام محل اصلی یا زیرمجموعه را وارد کنید.", true);
+      return;
+    }
+    if (subName && !mainName && !editingId) {
+      showMessage("برای ثبت زیرمجموعه، نام محل اصلی را هم وارد کنید.", true);
+      return;
+    }
     button.disabled = true;
     try {
-      await window.ControlDB.saveDestination({
-        id: editingId,
-        name: nameInput.value,
-        parentId: Number(parentSelect.value || 0)
-      });
-      showMessage(editingId ? "اطلاعات محل ارسال ویرایش شد." : "محل ارسال با موفقیت ذخیره شد.");
+      if (editingId) {
+        const current = destinations.find(item => Number(item.id) === editingId);
+        if (!current) throw new Error("محل موردنظر پیدا نشد.");
+        if (Number(current.parentId || 0)) {
+          const parent = destinations.find(item => Number(item.id) === Number(current.parentId));
+          if (!parent) throw new Error("محل اصلی این زیرمجموعه پیدا نشد.");
+          if (!subName) throw new Error("نام زیرمجموعه را وارد کنید.");
+          await window.ControlDB.saveDestination({ id: editingId, name: subName, parentId: Number(parent.id) });
+        } else {
+          if (!mainName) throw new Error("نام محل اصلی را وارد کنید.");
+          await window.ControlDB.saveDestination({ id: editingId, name: mainName, parentId: 0 });
+          if (subName) {
+            const refreshed = await window.ControlDB.getDestinations();
+            let parent = refreshed.find(item => !Number(item.parentId || 0) && item.name === mainName);
+            if (!parent) throw new Error("ذخیره محل اصلی انجام نشد.");
+            await window.ControlDB.saveDestination({ name: subName, parentId: Number(parent.id) });
+          }
+        }
+      } else if (mainName && subName) {
+        let parent = destinations.find(item => !Number(item.parentId || 0) && item.name === mainName);
+        if (!parent) parent = await window.ControlDB.saveDestination({ name: mainName, parentId: 0 });
+        await window.ControlDB.saveDestination({ name: subName, parentId: Number(parent.id) });
+      } else if (mainName) {
+        await window.ControlDB.saveDestination({ name: mainName, parentId: 0 });
+      } else {
+        throw new Error("برای ثبت زیرمجموعه، نام محل اصلی را هم وارد کنید.");
+      }
+      showMessage("محل ارسال با موفقیت ذخیره شد.");
       resetForm();
       await load();
     } catch (error) {
@@ -155,12 +171,12 @@
     if (!item) return;
     if (button.dataset.action === "edit") {
       editingId = id;
-      nameInput.value = item.name;
-      refreshParentOptions(Number(item.parentId || 0));
+      mainNameInput.value = Number(item.parentId || 0) ? (destinations.find(entry => Number(entry.id) === Number(item.parentId)) || {}).name || "" : item.name;
+      subNameInput.value = Number(item.parentId || 0) ? item.name : "";
       $("destinationFormTitle").textContent = "ویرایش محل ارسال";
       $("saveDestination").textContent = "ذخیره تغییرات";
       $("cancelDestinationEdit").hidden = false;
-      nameInput.focus();
+      (Number(item.parentId || 0) ? subNameInput : mainNameInput).focus();
       form.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
