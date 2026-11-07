@@ -1,0 +1,33 @@
+name: Build standalone offline HTML
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "dist/control-offline.html"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: offline-html-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build self-contained HTML
+        run: python3 tools/build_offline.py
+      - name: Commit updated offline file
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "build: refresh standalone offline HTML"
+          file_pattern: dist/control-offline.html
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
