@@ -142,16 +142,26 @@
       stockCell.className = "inventory-stock-cell";
       row.appendChild(stockCell);
       const actionCell = document.createElement("td");
+      const actionGroup = document.createElement("div");
+      actionGroup.className = "inventory-inline-actions";
+      const quantity = document.createElement("input");
+      quantity.type = "number";
+      quantity.inputMode = "numeric";
+      quantity.min = "1";
+      quantity.step = "1";
+      quantity.max = String(Math.max(0, stockOf(product) - reserved));
+      quantity.value = stockOf(product) - reserved > 0 ? "1" : "0";
+      quantity.className = "inventory-quantity-input";
+      quantity.setAttribute("aria-label", "تعداد ارسالی " + (product.description || product.procurementCode));
+      quantity.disabled = stockOf(product) - reserved < 1;
       const choose = document.createElement("button");
       choose.type = "button";
       choose.className = "inventory-choose-button";
       choose.textContent = "انتخاب برای ارسال";
       choose.disabled = stockOf(product) - reserved < 1;
-      choose.addEventListener("click", () => {
-        chooseProduct(product);
-        selectedBox.scrollIntoView({behavior:"smooth",block:"nearest"});
-      });
-      actionCell.appendChild(choose);
+      choose.addEventListener("click", () => addProductToDispatch(product, quantity));
+      actionGroup.append(quantity, choose);
+      actionCell.appendChild(actionGroup);
       row.appendChild(actionCell);
       inventoryRows.appendChild(row);
     });
@@ -184,33 +194,38 @@
     }
   });
 
-  function addCurrentProduct() {
-    if (!selectedProduct) return;
-    const alreadyAdded = dispatchItems.find(item => item.procurementCode === selectedProduct.procurementCode)?.quantity || 0;
-    const available = Math.max(0, stockOf(selectedProduct) - alreadyAdded);
-    let quantity = Math.floor(numberOf(quantityInput.value));
-    if (quantity > available) quantity = available;
-    if (quantity < 1) {
-      showMessage("تعداد ارسالی باید حداقل یک عدد باشد و از موجودی باقی‌مانده بیشتر نشود.", true);
-      quantityInput.value = available > 0 ? String(available) : "0";
-      return;
+  function addProductToDispatch(product, input) {
+    const alreadyAdded = dispatchItems.find(item => item.procurementCode === product.procurementCode)?.quantity || 0;
+    const available = Math.max(0, stockOf(product) - alreadyAdded);
+    const quantity = Math.floor(numberOf(input.value));
+    if (quantity < 1 || quantity > available) {
+      showMessage("تعداد ارسالی باید حداقل یک عدد باشد و از موجودی قابل ارسال بیشتر نشود.", true);
+      input.max = String(available);
+      input.value = available > 0 ? String(Math.min(Math.max(quantity, 1), available)) : "0";
+      return false;
     }
-    const existing = dispatchItems.find(item => item.procurementCode === selectedProduct.procurementCode);
+    const existing = dispatchItems.find(item => item.procurementCode === product.procurementCode);
     if (existing) existing.quantity += quantity;
     else dispatchItems.push({
-      procurementCode: selectedProduct.procurementCode,
-      internalCode: String(selectedProduct.procurementCode).slice(0, 8),
-      description: selectedProduct.description || "",
-      group: selectedProduct.group || "",
+      procurementCode: product.procurementCode,
+      internalCode: String(product.procurementCode).slice(0, 8),
+      description: product.description || "",
+      group: product.group || "",
       quantity
     });
     renderItems();
+    showMessage("کالا با تعداد " + fa(quantity) + " به فهرست ارسال اضافه شد.");
+    return true;
+  }
+
+  function addCurrentProduct() {
+    if (!selectedProduct) return;
+    if (!addProductToDispatch(selectedProduct, quantityInput)) return;
     selectedProduct = null;
     selectedBox.hidden = true;
     procurementSearch.value = "";
     descriptionSearch.value = "";
     quantityInput.value = "";
-    showMessage("کالا به باکس جمع‌بندی منتقل شد. کالای بعدی را جست‌وجو کنید.");
     procurementSearch.focus();
   }
   dispatchItemForm.addEventListener("submit", event => {
