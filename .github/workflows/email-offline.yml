@@ -2,6 +2,20 @@ name: Email offline HTML
 
 on:
   workflow_dispatch:
+    inputs:
+      recipient_choice:
+        description: "گیرنده ایمیل را انتخاب کنید"
+        required: true
+        type: choice
+        default: a.mamghanian@isaco.ir
+        options:
+          - a.mamghanian@isaco.ir
+          - alfamaniya93@gmail.com
+          - custom
+      custom_recipient:
+        description: "فقط اگر گزینه custom را انتخاب کردید، ایمیل دلخواه را وارد کنید"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -19,7 +33,8 @@ jobs:
         env:
           GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          RECIPIENT: a.mamghanian@isaco.ir
+          RECIPIENT_CHOICE: ${{ inputs.recipient_choice }}
+          CUSTOM_RECIPIENT: ${{ inputs.custom_recipient }}
         run: |
           python3 - <<'PY'
           import os
@@ -33,14 +48,21 @@ jobs:
 
           sender = os.environ.get("GMAIL_USERNAME", "").strip()
           password = os.environ.get("GMAIL_APP_PASSWORD", "").replace(" ", "")
-          recipient = os.environ.get("RECIPIENT", "").strip()
+          recipient_choice = os.environ.get("RECIPIENT_CHOICE", "").strip()
+          custom_recipient = os.environ.get("CUSTOM_RECIPIENT", "").strip()
+          if recipient_choice == "custom":
+              recipient = custom_recipient
+          else:
+              recipient = recipient_choice
 
           if not sender or not password:
               raise SystemExit(
                   "Missing GitHub Actions secrets: GMAIL_USERNAME and/or GMAIL_APP_PASSWORD"
               )
-          if not recipient or "@" not in recipient:
-              raise SystemExit("Please provide a valid recipient email address.")
+          if not recipient or "@" not in recipient or "." not in recipient.split("@")[-1]:
+              raise SystemExit(
+                  "گیرنده معتبر نیست؛ برای گزینه custom یک آدرس ایمیل معتبر وارد کنید."
+              )
 
           message = EmailMessage()
           message["Subject"] = "نسخه آفلاین سامانه کنترل"
