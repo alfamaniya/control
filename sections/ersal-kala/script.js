@@ -17,6 +17,7 @@
   const inventoryTableWrap = $("inventoryTableWrap");
   const inventoryCount = $("inventoryCount");
   let inventory = [];
+  let lastInventorySignature = "";
   let selectedProduct = null;
   let dispatchItems = [];
 
@@ -121,9 +122,9 @@
     const codeTerm = digits(procurementSearch.value).trim();
     const descriptionTerm = descriptionSearch.value.trim().toLocaleLowerCase("fa");
     const filtered = inventory.filter(product => {
-      const codeMatch = !codeTerm || digits(product.procurementCode).includes(codeTerm);
-      const descriptionMatch = !descriptionTerm || String(product.description || "").toLocaleLowerCase("fa").includes(descriptionTerm);
-      return codeMatch && descriptionMatch;
+      const codeMatch = codeTerm && digits(product.procurementCode).includes(codeTerm);
+      const descriptionMatch = descriptionTerm && String(product.description || "").toLocaleLowerCase("fa").includes(descriptionTerm);
+      return (!codeTerm && !descriptionTerm) || codeMatch || descriptionMatch;
     });
     inventoryRows.innerHTML = "";
     filtered.forEach((product, index) => {
@@ -259,6 +260,7 @@
     try {
       if (!window.ControlDB) throw new Error("پایگاه داده محلی بارگذاری نشده است.");
       inventory = await window.ControlDB.getAll();
+      lastInventorySignature = JSON.stringify(inventory.map(product => [product.procurementCode, product.quantity, product.description, product.group]));
       renderInventory();
     } catch (error) {
       showMessage(error.message || "دریافت موجودی ناموفق بود.", true);
@@ -271,5 +273,22 @@
   }
 
   $("refreshInventory").addEventListener("click", loadInventory);
+  window.addEventListener("focus", loadInventory);
+  window.addEventListener("pageshow", loadInventory);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) loadInventory();
+  });
+  window.setInterval(async () => {
+    if (document.hidden || !window.ControlDB) return;
+    try {
+      const latest = await window.ControlDB.getAll();
+      const signature = JSON.stringify(latest.map(product => [product.procurementCode, product.quantity, product.description, product.group]));
+      if (signature !== lastInventorySignature) {
+        inventory = latest;
+        lastInventorySignature = signature;
+        renderInventory();
+      }
+    } catch (_) { /* در نوبت بعد دوباره بررسی می‌شود */ }
+  }, 5000);
   loadInventory();
 })();
