@@ -51,3 +51,9 @@
 .inventory-choose-button:hover:not(:disabled){background:#e2f6f4;border-color:#9bd2d0}
 .inventory-choose-button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:680px){.inventory-list-card{padding:15px}}
+
+.inventory-inline-actions{display:flex;align-items:center;gap:7px;min-width:210px}
+.inventory-quantity-input{width:76px;min-width:76px;height:33px;padding:5px 7px;border:1px solid #dce5ef;border-radius:8px;background:#fff;color:#24364d;text-align:center;font:inherit;font-size:12px;font-variant-numeric:tabular-nums;outline:none}
+.inventory-quantity-input:focus{border-color:#18b8b2;box-shadow:0 0 0 3px rgba(24,184,178,.12)}
+.inventory-quantity-input:disabled{background:#f2f4f7;opacity:.55}
+.inventory-choose-button{white-space:nowrap}
