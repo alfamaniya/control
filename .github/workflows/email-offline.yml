@@ -46,14 +46,18 @@ jobs:
           message["Subject"] = "نسخه آفلاین سامانه کنترل"
           message["From"] = sender
           message["To"] = recipient
-          html_source = html_file.read_text(encoding="utf-8")
+          html_bytes = html_file.read_bytes()
           message.set_content(
               "سلام،\n\n"
-              "کد کامل نسخه آفلاین سامانه کنترل در ادامه همین متن ایمیل قرار گرفته است.\n"
-              "برای استفاده، تمام کد را از ابتدا تا انتها در یک فایل با پسوند .html ذخیره کنید.\n\n"
-              "========== شروع کد HTML سامانه کنترل ==========\n\n"
-              + html_source
-              + "\n\n========== پایان کد HTML سامانه کنترل =========="
+              "فایل نسخه آفلاین سامانه کنترل به این ایمیل پیوست شده است.\n"
+              "نام فایل پیوست control-offline.html.jpg است؛ محتوای آن HTML است، نه تصویر.\n"
+              "برای اجرای آفلاین، پس از دریافت نام فایل را به control-offline.html تغییر دهید.\n"
+          )
+          message.add_attachment(
+              html_bytes,
+              maintype="application",
+              subtype="octet-stream",
+              filename="control-offline.html.jpg"
           )
 
           with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as smtp:
