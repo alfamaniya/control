@@ -264,12 +264,56 @@
     addCurrentProduct();
   });
 
+  let savedDestinations = [];
+
+  function fillDestinationSelects() {
+    const destinationSelect = $("destination");
+    const subSelect = $("destinationSub");
+    const currentMain = Number(destinationSelect.value || 0);
+    destinationSelect.innerHTML = '<option value="">انتخاب محل ارسال…</option>';
+    savedDestinations.filter(item => !Number(item.parentId || 0)).forEach(item => {
+      const option = document.createElement("option");
+      option.value = String(item.id);
+      option.textContent = item.name;
+      destinationSelect.appendChild(option);
+    });
+    if (savedDestinations.some(item => item.id === currentMain)) destinationSelect.value = String(currentMain);
+    fillSubDestinationSelect();
+  }
+
+  function fillSubDestinationSelect() {
+    const destinationId = Number($("destination").value || 0);
+    const subSelect = $("destinationSub");
+    const currentSub = Number(subSelect.value || 0);
+    subSelect.innerHTML = '<option value="">بدون زیرمجموعه</option>';
+    const children = savedDestinations.filter(item => Number(item.parentId || 0) === destinationId);
+    children.forEach(item => {
+      const option = document.createElement("option");
+      option.value = String(item.id);
+      option.textContent = item.name;
+      subSelect.appendChild(option);
+    });
+    subSelect.disabled = !destinationId || !children.length;
+    if (children.some(item => item.id === currentSub)) subSelect.value = String(currentSub);
+  }
+
+  async function loadDestinations() {
+    try {
+      savedDestinations = await window.ControlDB.getDestinations();
+      fillDestinationSelects();
+    } catch (error) {
+      showMessage(error.message || "دریافت فهرست محل‌های ارسال ناموفق بود.", true);
+    }
+  }
+
   function openModal() {
     if (!dispatchItems.length) return;
+    fillDestinationSelects();
     modal.hidden = false;
     $("destination").focus();
   }
   function closeModal() { modal.hidden = true; }
+  $("destination").addEventListener("change", fillSubDestinationSelect);
   confirmButton.addEventListener("click", openModal);
   $("closeDispatchModal").addEventListener("click", closeModal);
   $("cancelDispatch").addEventListener("click", closeModal);
@@ -283,10 +327,11 @@
     submit.textContent = "در حال ثبت…";
     try {
       const metadata = {
-        destination: $("destination").value.trim(),
-        destinationSub: $("destinationSub").value.trim(),
+        destinationId: Number($("destination").value || 0),
+        destinationSubId: Number($("destinationSub").value || 0),
         dispatchedAt: new Date().toISOString()
       };
+      if (!metadata.destinationId) throw new Error("محل ارسال را از فهرست محل‌های ذخیره‌شده انتخاب کنید.");
       const result = await window.ControlDB.createDispatch(dispatchItems, metadata);
       dispatchItems = [];
       renderItems();
@@ -337,4 +382,5 @@
     } catch (_) { /* در نوبت بعد دوباره بررسی می‌شود */ }
   }, 5000);
   loadInventory();
+  loadDestinations();
 })();
