@@ -45,6 +45,7 @@ def page_scripts(doc, page):
         else: continue
         code=code.replace('const root = new URL("../../", script.src);','const root = new URL("./", location.href);')
         code=code.replace('const url = (path) => new URL(path, root).href;','const url = (path) => "#/" + path.replace(/^\\.\\//, "");')
+        code=code.replace('const routePath = (path) => { const pathname = new URL(path, root).pathname; return pathname.endsWith("/") ? pathname.slice(0,-1) : pathname; };','const routePath = (path) => "/" + path.split("/").filter(Boolean).join("/");')
         code=re.sub(r'window\.location\.pathname|location\.pathname','window.__CONTROL_ROUTE__',code)
         out.append(code)
     return out
