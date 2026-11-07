@@ -11,6 +11,7 @@
 
   const fa = value => String(value).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]);
   const showMessage = (text, error = false) => {
+    if (!message) return;
     message.textContent = text;
     message.className = "management-message" + (error ? " error" : "");
     message.hidden = !text;
