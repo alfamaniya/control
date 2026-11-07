@@ -286,11 +286,19 @@
       if (amount > Number(product.qty || 0)) throw new Error("موجودی کالا برای خروج کافی نیست: " + code);
       prepared.push({ product, amount });
     }
-    const destinationName = String(metadata.destination || metadata.destinationName || "").trim();
-    const destinationSub = String(metadata.destinationSub || "").trim();
-    if (!destinationName) throw new Error("محل ارسال الزامی است.");
-    const destination = await ensureDestination(tx, destinationName, "");
-    const subDestination = destinationSub ? await ensureDestination(tx, destinationSub, destinationName) : null;
+    const destinationId = Number(metadata.destinationId);
+    const subDestinationId = Number(metadata.destinationSubId || 0);
+    if (!Number.isSafeInteger(destinationId) || destinationId <= 0) throw new Error("انتخاب محل ارسال الزامی است.");
+    const destinationStore = tx.objectStore(STORES.destinations);
+    const destination = await requestResult(destinationStore.get(destinationId));
+    if (!destination || destination.active === 0 || Number(destination.parentId || 0) !== 0) throw new Error("محل ارسال انتخاب‌شده معتبر نیست یا غیرفعال شده است.");
+    let subDestination = null;
+    if (subDestinationId) {
+      subDestination = await requestResult(destinationStore.get(subDestinationId));
+      if (!subDestination || subDestination.active === 0 || Number(subDestination.parentId) !== destination.id) throw new Error("زیرمجموعه انتخاب‌شده با محل اصلی مطابقت ندارد.");
+    }
+    const destinationName = destination.name;
+    const destinationSub = subDestination ? subDestination.name : "";
     const voucherNo = await nextDocumentNumber(tx.objectStore(STORES.meta), "voucher");
     const doc = await createDocument(tx, "issue", {
       destinationId: subDestination ? subDestination.id : destination.id,
@@ -558,8 +566,73 @@
     return rows.length;
   }
 
+  async function getDestinations() {
+    const db = await ready();
+    const tx = db.transaction(STORES.destinations, "readonly");
+    const done = transactionDone(tx);
+    const rows = await requestResult(tx.objectStore(STORES.destinations).getAll());
+    await done;
+    return rows.filter(row => row.active !== 0).sort((a, b) =>
+      Number(a.parentId || 0) - Number(b.parentId || 0) || String(a.name).localeCompare(String(b.name), "fa"));
+  }
+
+  async function saveDestination(input = {}) {
+    const name = String(input.name || "").trim();
+    const id = Number(input.id || 0);
+    const parentId = Number(input.parentId || 0);
+    if (!name) throw new Error("نام محل ارسال را وارد کنید.");
+    if (name.length > 100) throw new Error("نام محل حداکثر ۱۰۰ نویسه باشد.");
+    if (!Number.isSafeInteger(parentId) || parentId < 0) throw new Error("محل اصلی انتخاب‌شده معتبر نیست.");
+    const db = await ready();
+    const tx = db.transaction(STORES.destinations, "readwrite");
+    const done = transactionDone(tx);
+    const store = tx.objectStore(STORES.destinations);
+    if (parentId) {
+      const parent = await requestResult(store.get(parentId));
+      if (!parent || parent.active === 0 || Number(parent.parentId || 0) !== 0) throw new Error("زیرمجموعه فقط می‌تواند به یک محل اصلی متصل شود.");
+    }
+    let existing = null;
+    if (id) {
+      existing = await requestResult(store.get(id));
+      if (!existing || existing.active === 0) throw new Error("محل موردنظر پیدا نشد.");
+      if (id === parentId) throw new Error("یک محل نمی‌تواند زیرمجموعه خودش باشد.");
+      if (parentId) {
+        const children = await requestResult(store.index("parentId").getAll(id));
+        if (children.some(child => child.active !== 0)) throw new Error("محلی که زیرمجموعه دارد نمی‌تواند به زیرمجموعه تبدیل شود.");
+      }
+    }
+    const duplicate = await requestResult(store.index("parent_name").get([parentId, name]));
+    if (duplicate && Number(duplicate.id) !== id) throw new Error("این نام قبلاً در همین سطح ثبت شده است.");
+    const record = { ...(existing || {}), name, parentId, active: 1, updatedAt: Date.now() };
+    if (!existing) record.createdAt = Date.now();
+    let savedId;
+    if (existing) { record.id = id; store.put(record); savedId = id; }
+    else savedId = await requestResult(store.add(record));
+    await done;
+    return { ...record, id: savedId };
+  }
+
+  async function deleteDestination(destinationId) {
+    const id = Number(destinationId);
+    if (!Number.isSafeInteger(id) || id <= 0) throw new Error("شناسه محل ارسال معتبر نیست.");
+    const db = await ready();
+    const tx = db.transaction([STORES.destinations, STORES.documents], "readwrite");
+    const done = transactionDone(tx);
+    const destinations = tx.objectStore(STORES.destinations);
+    const record = await requestResult(destinations.get(id));
+    if (!record) throw new Error("محل ارسال پیدا نشد.");
+    const children = await requestResult(destinations.index("parentId").getAll(id));
+    if (children.some(child => child.active !== 0)) throw new Error("ابتدا زیرمجموعه‌های این محل را حذف کنید.");
+    const references = await requestResult(tx.objectStore(STORES.documents).index("destinationId").getAll(id));
+    if (references.length) throw new Error("این محل در اسناد ارسال استفاده شده و برای حفظ سوابق قابل حذف نیست.");
+    destinations.delete(id);
+    await done;
+    return true;
+  }
+
   window.ControlDB = Object.freeze({
     getAll, addMany, createReceipt, createDispatch, reverseDocument, getKardex, getReportTransactions,
-    getAllTransactions, getAllDispatches, deleteProduct, deleteAllProducts, adjustStock
+    getAllTransactions, getAllDispatches, deleteProduct, deleteAllProducts, adjustStock,
+    getDestinations, saveDestination, deleteDestination
   });
 })();
