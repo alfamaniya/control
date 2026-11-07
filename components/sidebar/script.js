@@ -21,7 +21,8 @@
     ]},
     {number:"06",label:"تنظیمات و مدیریت",icon:"⚙",path:"sections/modiriat/index.html",children:[
       ["مدیریت حذف کالا","sections/modiriat/manage-products/index.html"],
-      ["مدیریت موجودی کالاها","sections/modiriat/manage-stock/index.html"]
+      ["مدیریت موجودی کالاها","sections/modiriat/manage-stock/index.html"],
+      ["مدیریت محل ارسال","sections/modiriat/manage-destinations/index.html"]
     ]}
   ];
   const current = window.location.pathname.endsWith("/") ? window.location.pathname.slice(0,-1) : window.location.pathname;
