@@ -60,3 +60,10 @@
 
 .summary-quantity-input{width:82px;min-width:82px;height:34px;padding:5px 8px;border:1px solid #cfe0e8;border-radius:8px;background:#fbfdff;color:#24364d;text-align:center;font:inherit;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;outline:none}
 .summary-quantity-input:focus{border-color:#18b8b2;box-shadow:0 0 0 3px rgba(24,184,178,.12);background:#fff}
+
+/* Highlight inventory rows already added to the dispatch list */
+.inventory-dispatch-table tbody tr.inventory-row-selected{background:#e8f7ef;box-shadow:inset 4px 0 0 #239b62}
+.inventory-dispatch-table tbody tr.inventory-row-selected td{color:#245b40}
+.inventory-dispatch-table tbody tr.inventory-row-selected .inventory-stock-cell{color:#167447}
+.inventory-dispatch-table tbody tr.inventory-row-selected:hover{background:#dcf2e6}
+.inventory-dispatch-table tbody tr.inventory-row-selected .inventory-choose-button{background:#d7f0e1;border-color:#a8d9bb;color:#176c43}
