@@ -33,3 +33,21 @@
 .document-number-info{grid-column:1/-1;display:grid;gap:5px;padding:13px 15px;border:1px solid #d8eeee;border-radius:11px;background:linear-gradient(120deg,#effaf8,#f8fcfd);color:#344b60}
 .document-number-info strong{font-size:12px;font-weight:900;color:#087f83}
 .document-number-info span{font-size:11px;line-height:1.8;color:#687b8e}
+
+
+.inventory-list-card{min-width:0;padding:22px;background:#fff;border:1px solid #e7edf3;border-radius:18px;box-shadow:0 8px 26px rgba(25,48,78,.045)}
+.inventory-list-heading{gap:14px;flex-wrap:wrap}
+.inventory-list-heading .refresh-button{min-height:36px}
+.inventory-list-message{padding:13px 15px;border-radius:10px;background:#f4f8fb;color:#687b8e;font-size:12px;line-height:1.8}
+.inventory-list-message.error{background:#fff0f0;color:#a33d3d}
+.inventory-dispatch-table{width:100%;min-width:920px;border-collapse:collapse;text-align:right;font-size:12px}
+.inventory-dispatch-table th,.inventory-dispatch-table td{padding:12px 11px;border-bottom:1px solid #edf1f5;text-align:right;white-space:nowrap}
+.inventory-dispatch-table th{background:#f5f8fb;color:#64748b;font-size:11px;font-weight:800}
+.inventory-dispatch-table td{color:#34445b}
+.inventory-dispatch-table tbody tr:hover{background:#f8fcfd}
+.inventory-dispatch-table .code-cell{direction:ltr;text-align:right;font-variant-numeric:tabular-nums;color:#087f83;font-weight:800}
+.inventory-stock-cell{font-weight:800;color:#1d3555;font-variant-numeric:tabular-nums}
+.inventory-choose-button{min-height:32px;padding:6px 11px;border:1px solid #cce7e6;border-radius:8px;background:#f0faf9;color:#087f83;font:inherit;font-size:10px;font-weight:800;cursor:pointer}
+.inventory-choose-button:hover:not(:disabled){background:#e2f6f4;border-color:#9bd2d0}
+.inventory-choose-button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:680px){.inventory-list-card{padding:15px}}
