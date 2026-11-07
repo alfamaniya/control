@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#14243d">
+  <title>مدیریت محل ارسال</title>
+  <link rel="stylesheet" href="../../../assets/css/style.css?v=20261106-3">
+  <link rel="stylesheet" href="../../../components/sidebar/style.css?v=20261106-6">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="../../../assets/js/database.js" defer></script>
+  <script src="../../../components/sidebar/script.js?v=20261106-10" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="menu-toggle" id="sidebarToggle" type="button" aria-label="باز و بسته کردن منو" aria-controls="sidebar" aria-expanded="true"><span></span><span></span><span></span></button>
+      <a class="brand" href="../../../index.html">سامانه کنترل مصرف و ارسال کالا</a>
+      <div class="topbar-spacer"></div>
+    </header>
+    <div data-control-sidebar></div>
+    <main class="main-content" id="mainContent">
+      <div class="page-content destination-management-page">
+        <section class="management-heading">
+          <div><span class="management-eyebrow">تنظیمات و مدیریت</span><h1>مدیریت محل ارسال</h1><p>محل‌های اصلی و زیرمجموعه‌ها را تعریف کنید؛ این فهرست در فرم ثبت ارسال استفاده می‌شود.</p></div>
+          <div class="management-count"><strong id="destinationCount">۰</strong><span>محل ثبت‌شده</span></div>
+        </section>
+        <section class="management-panel">
+          <div class="management-panel-heading"><div><h2 id="destinationFormTitle">افزودن محل جدید</h2><p>برای ثبت محل اصلی، گزینه «بدون محل اصلی» را انتخاب کنید.</p></div></div>
+          <form id="destinationForm" class="destination-form">
+            <div class="destination-field"><label for="destinationName">نام محل ارسال</label><input id="destinationName" name="name" type="text" maxlength="100" required placeholder="مثلاً: انبار مرکزی"></div>
+            <div class="destination-field"><label for="destinationParent">محل اصلی / زیرمجموعه</label><select id="destinationParent" name="parentId"><option value="0">بدون محل اصلی (محل اصلی)</option></select></div>
+            <div class="destination-form-actions"><button class="stock-save-button" id="saveDestination" type="submit">＋ افزودن محل</button><button class="destination-cancel-button" id="cancelDestinationEdit" type="button" hidden>انصراف از ویرایش</button></div>
+          </form>
+          <div id="destinationMessage" class="management-message" role="status" aria-live="polite" hidden></div>
+        </section>
+        <section class="management-panel">
+          <div class="management-panel-heading"><div><h2>فهرست محل‌های ثبت‌شده</h2><p>برای ویرایش یا حذف هر محل از عملیات روبه‌روی آن استفاده کنید.</p></div></div>
+          <div id="destinationList" class="destination-tree"><div class="management-empty"><strong>در حال دریافت فهرست محل‌ها…</strong></div></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
