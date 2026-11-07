@@ -67,3 +67,7 @@
 .inventory-dispatch-table tbody tr.inventory-row-selected .inventory-stock-cell{color:#167447}
 .inventory-dispatch-table tbody tr.inventory-row-selected:hover{background:#dcf2e6}
 .inventory-dispatch-table tbody tr.inventory-row-selected .inventory-choose-button{background:#d7f0e1;border-color:#a8d9bb;color:#176c43}
+
+.search-field select{width:100%;min-height:43px;padding:10px 13px;color:#24364d;background:#f9fbfd;border:1px solid #dce5ef;border-radius:10px;outline:none;font:inherit;font-size:13px;transition:border-color .18s,box-shadow .18s}
+.search-field select:focus{border-color:#18b8b2;box-shadow:0 0 0 3px rgba(24,184,178,.12)}
+.search-field select:disabled{opacity:.65;background:#f2f4f7}
