@@ -156,6 +156,11 @@
     inventoryRows.innerHTML = "";
     filtered.forEach((product, index) => {
       const row = document.createElement("tr");
+      const reserved = dispatchItems.find(item => item.procurementCode === product.procurementCode)?.quantity || 0;
+      if (reserved > 0) {
+        row.classList.add("inventory-row-selected");
+        row.setAttribute("aria-label", "این کالا به فهرست ارسال اضافه شده است");
+      }
       const values = [fa(index + 1), String(product.procurementCode || "").slice(0, 8), product.procurementCode, product.description || "—", product.group || "—"];
       values.forEach((value, cellIndex) => {
         const cell = document.createElement("td");
@@ -164,7 +169,6 @@
         row.appendChild(cell);
       });
       const stockCell = document.createElement("td");
-      const reserved = dispatchItems.find(item => item.procurementCode === product.procurementCode)?.quantity || 0;
       stockCell.textContent = fa(stockOf(product)) + (reserved ? " (قابل ارسال: " + fa(Math.max(0, stockOf(product) - reserved)) + ")" : "");
       stockCell.className = "inventory-stock-cell";
       row.appendChild(stockCell);
