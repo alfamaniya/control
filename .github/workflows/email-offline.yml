@@ -2,11 +2,6 @@ name: Email offline HTML
 
 on:
   workflow_dispatch:
-    inputs:
-      recipient:
-        description: "Email address to receive the offline HTML source in the email body"
-        required: true
-        type: string
 
 permissions:
   contents: read
@@ -24,7 +19,7 @@ jobs:
         env:
           GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          RECIPIENT: ${{ inputs.recipient }}
+          RECIPIENT: a.mamghanian@isaco.ir
         run: |
           python3 - <<'PY'
           import os
